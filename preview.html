@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Intake App Preview</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+.phone {
+  width: 390px;
+  height: 844px;
+  background: #000;
+  border-radius: 50px;
+  border: 12px solid #1a1a1a;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 20px 60px rgba(0,0,0,0.3);
+}
+.screen {
+  width: 100%;
+  height: 100%;
+  background: #f2f2f7;
+  position: relative;
+  overflow: hidden;
+  border-radius: 38px;
+}
+.notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 34px;
+  background: #000;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  z-index: 100;
+}
+.page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 84px);
+  overflow-y: auto;
+  padding: 50px 20px 20px 20px;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  scrollbar-width: none;
+}
+.page::-webkit-scrollbar { display: none; }
+.page.active { display: block; opacity: 1; }
+
+/* Glass Card */
+.glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.02);
+  margin-bottom: 16px;
+  padding: 16px;
+}
+.glass-dark {
+  background: rgba(30,30,40,0.35);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+/* Typography */
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.body-text {
+  font-size: 14px;
+  color: #8e8e93;
+  line-height: 1.4;
+}
+.value-large {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1c1c1e;
+  letter-spacing: -0.5px;
+}
+.value-medium {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c1c1e;
+}
+
+/* Tab Bar */
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 84px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 10px;
+  z-index: 50;
+  padding-bottom: 20px;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-item:active { transform: scale(0.92); }
+.tab-item svg {
+  width: 24px;
+  height: 24px;
+  transition: all 0.2s ease;
+  fill: #8e8e93;
+}
+.tab-item span {
+  font-size: 10px;
+  font-weight: 500;
+  color: #8e8e93;
+  transition: all 0.2s ease;
+}
+.tab-item.active svg { fill: #007AFF; }
+.tab-item.active span { color: #007AFF; font-weight: 600; }
+.tab-item.record svg { fill: #AF52DE; width: 44px; height: 44px; margin-top: -6px; }
+.tab-item.record.active svg { fill: #AF52DE; }
+
+/* Date Picker */
+.date-picker {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.date-picker::-webkit-scrollbar { display: none; }
+.date-card {
+  min-width: 70px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.date-card.active {
+  background: rgba(0,122,255,0.85);
+  color: white;
+  border-color: rgba(255,255,255,0.2);
+}
+.date-card.active .date-cal { color: rgba(255,255,255,0.7); }
+.date-card.active .date-value { color: white; }
+.date-card.active .date-label { color: rgba(255,255,255,0.7); }
+.date-label { font-size: 11px; font-weight: 500; color: #8e8e93; }
+.date-cal { font-size: 10px; color: #8e8e93; margin-top: 2px; }
+.date-value { font-size: 15px; font-weight: 700; color: #1c1c1e; margin-top: 2px; }
+
+/* Progress Ring */
+.ring-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  position: relative;
+}
+.ring-svg { width: 200px; height: 200px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: rgba(0,0,0,0.06); stroke-width: 14; }
+.ring-fg { fill: none; stroke: url(#ringGrad); stroke-width: 14; stroke-linecap: round; }
+.ring-center {
+  position: absolute;
+  text-align: center;
+}
+.ring-center .label { font-size: 12px; color: #8e8e93; }
+.ring-center .value { font-size: 36px; font-weight: 700; color: #1c1c1e; }
+.ring-center .unit { font-size: 12px; color: #8e8e93; }
+
+/* Progress Bar */
+.progress-item { margin-bottom: 12px; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-label { font-size: 13px; font-weight: 600; color: #1c1c1e; display: flex; align-items: center; gap: 6px; }
+.progress-track { height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+/* Meal Item */
+.meal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.meal-item:last-child { border-bottom: none; }
+.meal-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(0,0,0,0.04);
+}
+.meal-name { font-size: 15px; font-weight: 600; color: #1c1c1e; flex: 1; }
+.meal-cal { font-size: 15px; font-weight: 600; color: #1c1c1e; }
+
+/* List Row */
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.list-row:last-child { border-bottom: none; }
+.list-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.list-text { flex: 1; }
+.list-title { font-size: 15px; font-weight: 500; color: #1c1c1e; }
+.list-sub { font-size: 13px; color: #8e8e93; margin-top: 1px; }
+.list-value { font-size: 14px; color: #8e8e93; }
+
+/* Food Item */
+.food-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.35);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.food-item:active { transform: scale(0.98); }
+.food-emoji { font-size: 32px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.food-info { flex: 1; }
+.food-name { font-size: 15px; font-weight: 600; color: #1c1c1e; }
+.food-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #FF9500;
+  background: rgba(255,149,0,0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 3px;
+}
+.food-cal { font-size: 15px; font-weight: 600; color: #1c1c1e; white-space: nowrap; }
+
+/* Record Camera */
+.camera-area {
+  height: 260px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(175,82,222,0.1), rgba(255,149,0,0.1), rgba(255,204,0,0.05));
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.camera-emoji-row { display: flex; gap: 8px; }
+.camera-emoji { font-size: 40px; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
+.camera-text { font-size: 14px; color: #8e8e93; }
+.camera-actions { display: flex; gap: 40px; align-items: center; position: absolute; bottom: 20px; }
+.camera-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.camera-btn-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #1c1c1e; }
+.camera-btn.shutter .camera-btn-icon { width: 64px; height: 64px; background: white; border: 2px solid rgba(0,0,0,0.1); font-size: 24px; }
+.camera-btn-label { font-size: 11px; color: #8e8e93; font-weight: 500; }
+
+/* Quick Actions */
+.quick-actions { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.qa-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.qa-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.72); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #AF52DE; }
+.qa-label { font-size: 11px; font-weight: 500; color: #1c1c1e; }
+
+/* Search Bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.35);
+  margin-bottom: 16px;
+}
+.search-bar svg { width: 18px; height: 18px; fill: #8e8e93; flex-shrink: 0; }
+.search-bar input { border: none; background: none; font-size: 16px; color: #1c1c1e; outline: none; flex: 1; font-family: inherit; }
+.search-bar input::placeholder { color: #8e8e93; }
+
+/* Filter Chips */
+.filter-chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip { padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.2s ease; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.3); color: #1c1c1e; }
+.chip.active { background: rgba(0,122,255,0.85); color: white; border-color: rgba(255,255,255,0.2); }
+
+/* Voice Entry */
+.voice-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.35);
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+.voice-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(175,82,222,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+/* Header row */
+.header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+/* Profile header */
+.profile-header { display: flex; align-items: center; gap: 16px; }
+.profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #AF52DE, #FF2D55); display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; }
+.profile-info { flex: 1; }
+.profile-name { font-size: 22px; font-weight: 700; color: #1c1c1e; }
+.profile-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #AF52DE; background: rgba(175,82,222,0.1); padding: 2px 8px; border-radius: 12px; margin-top: 4px; }
+.profile-bio { font-size: 13px; color: #8e8e93; margin-top: 4px; }
+
+/* Goal Summary Grid */
+.goal-grid { display: flex; justify-content: space-between; gap: 4px; }
+.goal-item { text-align: center; flex: 1; }
+.goal-icon { font-size: 20px; margin-bottom: 6px; }
+.goal-label { font-size: 10px; font-weight: 500; color: #8e8e93; margin-bottom: 4px; }
+.goal-value { font-size: 18px; font-weight: 700; color: #1c1c1e; }
+.goal-unit { font-size: 10px; color: #8e8e93; }
+
+/* Health Sync */
+.health-grid { display: flex; justify-content: space-between; gap: 8px; }
+.health-item { text-align: center; flex: 1; }
+.health-icon { font-size: 22px; margin-bottom: 4px; }
+.health-title { font-size: 10px; font-weight: 500; color: #8e8e93; margin-bottom: 2px; }
+.health-value { font-size: 13px; font-weight: 700; color: #1c1c1e; }
+
+/* Top bar */
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.top-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.72); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+.meal-selector { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: rgba(255,255,255,0.72); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.35); font-size: 14px; font-weight: 600; cursor: pointer; }
+
+/* Auto-fill toggle */
+.toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px; }
+.toggle-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(175,82,222,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.toggle-text { flex: 1; }
+.toggle-title { font-size: 14px; font-weight: 600; color: #1c1c1e; }
+.toggle-sub { font-size: 12px; color: #8e8e93; margin-top: 1px; }
+.switch { width: 44px; height: 26px; border-radius: 13px; background: #34C759; position: relative; cursor: pointer; flex-shrink: 0; }
+.switch::after { content: ''; position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="screen">
+    <div class="notch"></div>
+
+    <!-- LOG PAGE -->
+    <div class="page active" id="page-log">
+      <h1 class="page-title">Log</h1>
+      <div class="date-picker">
+        <div class="date-card"><div class="date-label">Mon</div><div class="date-cal">May 19</div><div class="date-value">1,585</div><div class="date-cal">kcal</div></div>
+        <div class="date-card"><div class="date-label">Tue</div><div class="date-cal">May 20</div><div class="date-value">1,760</div><div class="date-cal">kcal</div></div>
+        <div class="date-card"><div class="date-label">Wed</div><div class="date-cal">May 21</div><div class="date-value">1,332</div><div class="date-cal">kcal</div></div>
+        <div class="date-card"><div class="date-label">Thu</div><div class="date-cal">May 22</div><div class="date-value">1,695</div><div class="date-cal">kcal</div></div>
+        <div class="date-card"><div class="date-label">Fri</div><div class="date-cal">May 23</div><div class="date-value">1,482</div><div class="date-cal">kcal</div></div>
+        <div class="date-card active"><div class="date-label">Today</div><div class="date-cal">May 24</div><div class="date-value">1,624</div><div class="date-cal">kcal</div></div>
+      </div>
+
+      <div class="voice-entry">
+        <div class="voice-icon">🎙</div>
+        <div style="flex:1;">
+          <div class="toggle-title">Log with voice</div>
+          <div class="toggle-sub">Tap to speak your meal</div>
+        </div>
+        <span style="color:#8e8e93;font-size:14px;">›</span>
+      </div>
+
+      <div class="glass">
+        <div class="header-row">
+          <div class="section-title">Energy Ring</div>
+          <div style="font-size:13px;color:#34C759;font-weight:600;">+210 Exercise</div>
+        </div>
+        <div class="ring-container">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#AF52DE"/><stop offset="50%" style="stop-color:#007AFF"/><stop offset="100%" style="stop-color:#5856D6"/></linearGradient></defs>
+            <circle class="ring-bg" cx="50" cy="50" r="40"/>
+            <circle class="ring-fg" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="80"/>
+          </svg>
+          <div class="ring-center">
+            <div class="label">Eaten</div>
+            <div class="value" style="color:#AF52DE;">1,624</div>
+            <div class="unit">kcal</div>
+            <div style="margin-top:8px;">
+              <div class="label">Deficit</div>
+              <div class="value" style="font-size:18px;">376</div>
+              <div class="label" style="margin-top:8px;">Left to eat</div>
+              <div class="value" style="font-size:18px;color:#34C759;">376</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;text-align:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.04);">
+          <div><div style="font-size:11px;color:#8e8e93;">Goal</div><div style="font-size:14px;font-weight:700;margin-top:2px;">2,000 kcal</div></div>
+          <div><div style="font-size:11px;color:#8e8e93;">Total Burn</div><div style="font-size:14px;font-weight:700;margin-top:2px;">🔥 2,210 kcal</div></div>
+          <div><div style="font-size:11px;color:#8e8e93;">Limit (bonus)</div><div style="font-size:14px;font-weight:700;margin-top:2px;">🟣 2,210 kcal</div></div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="section-title">Progress</div>
+        <div class="progress-item">
+          <div class="progress-header">
+            <div class="progress-label">💧 Protein <span style="color:#8e8e93;font-weight:400;">102 / 120g</span></div>
+            <div style="font-size:13px;font-weight:700;color:#007AFF;">85%</div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:85%;background:#007AFF;"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header">
+            <div class="progress-label">🔥 Fat <span style="color:#8e8e93;font-weight:400;">58 / 70g</span></div>
+            <div style="font-size:13px;font-weight:700;color:#FF9500;">83%</div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:83%;background:#FF9500;"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header">
+            <div class="progress-label">🌿 Carbs <span style="color:#8e8e93;font-weight:400;">179 / 250g</span></div>
+            <div style="font-size:13px;font-weight:700;color:#34C759;">72%</div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:72%;background:#34C759;"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header">
+            <div class="progress-label">🍃 Fiber <span style="color:#8e8e93;font-weight:400;">18 / 28g</span></div>
+            <div style="font-size:13px;font-weight:700;color:#AF52DE;">64%</div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:64%;background:#AF52DE;"></div></div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="header-row">
+          <div class="section-title">Health Sync</div>
+          <div style="font-size:12px;color:#8e8e93;">Last sync: Today, 7:32 AM ↻</div>
+        </div>
+        <div class="health-grid">
+          <div class="health-item"><div class="health-icon">🔥</div><div class="health-title">Active Energy</div><div class="health-value">410 kcal</div></div>
+          <div class="health-item"><div class="health-icon">💧</div><div class="health-title">Basal Energy</div><div class="health-value">1,380 kcal</div></div>
+          <div class="health-item"><div class="health-icon">👟</div><div class="health-title">Steps / Workouts</div><div class="health-value">8,642<br>1 workout</div></div>
+          <div class="health-item"><div class="health-icon">❤️</div><div class="health-title">Connected</div><div class="health-value">Apple Health</div></div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="section-title">Meals</div>
+        <div class="meal-item"><div class="meal-icon" style="background:rgba(255,149,0,0.15);">🌅</div><div class="meal-name">Breakfast</div><div class="meal-cal">412 kcal ›</div></div>
+        <div class="meal-item"><div class="meal-icon" style="background:rgba(255,204,0,0.15);">☀️</div><div class="meal-name">Lunch</div><div class="meal-cal">687 kcal ›</div></div>
+        <div class="meal-item"><div class="meal-icon" style="background:rgba(88,86,214,0.15);">🌙</div><div class="meal-name">Dinner</div><div class="meal-cal">403 kcal ›</div></div>
+        <div class="meal-item"><div class="meal-icon" style="background:rgba(48,209,88,0.15);">☕️</div><div class="meal-name">Snack</div><div class="meal-cal">122 kcal ›</div></div>
+      </div>
+    </div>
+
+    <!-- ME PAGE -->
+    <div class="page" id="page-me">
+      <h1 class="page-title">Me</h1>
+      <div class="glass">
+        <div class="profile-header">
+          <div class="profile-avatar">👩</div>
+          <div class="profile-info">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div class="profile-name">Avery Kim</div>
+              <div class="profile-tag">👑 Premium</div>
+            </div>
+            <div class="profile-bio">You've got this. One choice at a time. 💜</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="section-title">Goal Summary</div>
+        <div class="goal-grid">
+          <div class="goal-item"><div class="goal-icon">🎯</div><div class="goal-label">Goal</div><div class="goal-value">2,000</div><div class="goal-unit">kcal</div></div>
+          <div class="goal-item"><div class="goal-icon">⚖️</div><div class="goal-label">Current Weight</div><div class="goal-value">68.2</div><div class="goal-unit">kg</div></div>
+          <div class="goal-item"><div class="goal-icon">🚩</div><div class="goal-label">Target Weight</div><div class="goal-value">60.0</div><div class="goal-unit">kg</div></div>
+          <div class="goal-item"><div class="goal-icon">🔥</div><div class="goal-label">Daily Calories</div><div class="goal-value">2,100</div><div class="goal-unit">kcal</div></div>
+          <div class="goal-item"><div class="goal-icon">⚡️</div><div class="goal-label">Protein Target</div><div class="goal-value">120</div><div class="goal-unit">g</div></div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="section-title">Plan Settings</div>
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(255,149,0,0.12);color:#FF9500;">🔥</div>
+          <div class="list-text"><div class="list-title">Calorie Goal</div></div>
+          <div class="list-value">2,100 kcal ›</div>
+        </div>
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(0,122,255,0.12);color:#007AFF;">📊</div>
+          <div class="list-text"><div class="list-title">Macronutrient Targets</div></div>
+          <div class="list-value">40% / 30% / 30% ›</div>
+        </div>
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(48,209,88,0.12);color:#34C759;">🏃</div>
+          <div class="list-text"><div class="list-title">Activity Level</div></div>
+          <div class="list-value">Moderately Active ›</div>
+        </div>
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(142,142,147,0.12);color:#8e8e93;">📏</div>
+          <div class="list-text"><div class="list-title">Units</div></div>
+          <div class="list-value">kg, cm ›</div>
+        </div>
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(255,45,85,0.12);color:#FF2D55;">🍴</div>
+          <div class="list-text"><div class="list-title">Nutrition Preferences</div></div>
+          <div class="list-value">No preferences set ›</div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="section-title">Health Data</div>
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(255,45,85,0.12);color:#FF2D55;font-size:18px;">❤️</div>
+          <div class="list-text">
+            <div class="list-title">Apple Health</div>
+            <div style="font-size:12px;color:#34C759;font-weight:600;">✅ Connected</div>
+          </div>
+          <div class="list-value">Last sync<br>Today, 7:32 AM ›</div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(175,82,222,0.12);color:#AF52DE;">📊</div>
+          <div class="list-text">
+            <div class="list-title">Log & Trends</div>
+            <div class="list-sub">Track meals, workouts, and progress</div>
+          </div>
+          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;color:#AF52DE;">1,624 kcal</div><div style="font-size:11px;color:#8e8e93;">Logged today</div></div>
+          <div class="list-value">›</div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(255,204,0,0.12);color:#FFCC00;">⭐</div>
+          <div class="list-text">
+            <div class="list-title">Favorites</div>
+            <div class="list-sub">Your favorite meals and recipes</div>
+          </div>
+          <div class="list-value">›</div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="list-row">
+          <div class="list-icon" style="background:rgba(142,142,147,0.12);color:#8e8e93;">⚙️</div>
+          <div class="list-text">
+            <div class="list-title">Settings</div>
+            <div class="list-sub">App preferences and more</div>
+          </div>
+          <div class="list-value">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANK PAGE -->
+    <div class="page" id="page-bank">
+      <div class="header-row" style="margin-top:40px;">
+        <h1 class="page-title" style="margin:0;">Bank</h1>
+        <div style="display:flex;gap:16px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#1c1c1e"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#1c1c1e"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" placeholder="Search foods, meals, brands, or companies">
+      </div>
+
+      <div class="filter-chips">
+        <div class="chip active">All</div>
+        <div class="chip">Foods</div>
+        <div class="chip">Meals</div>
+        <div class="chip">Brands</div>
+        <div class="chip">Custom</div>
+        <div class="chip">Recent</div>
+      </div>
+
+      <div class="food-item">
+        <div class="food-emoji">🍗</div>
+        <div class="food-info">
+          <div class="food-name">Fried Chicken (2 pcs)</div>
+          <div class="food-brand">🍗 KFC</div>
+        </div>
+        <div class="food-cal">560 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+      </div>
+      <div class="food-item">
+        <div class="food-emoji">🍔</div>
+        <div class="food-info">
+          <div class="food-name">Big Mac</div>
+          <div class="food-brand" style="color:#FFCC00;background:rgba(255,204,0,0.1);">🍔 McDonald's</div>
+        </div>
+        <div class="food-cal">563 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+      </div>
+      <div class="food-item">
+        <div class="food-emoji">☕️</div>
+        <div class="food-info">
+          <div class="food-name">Caramel Macchiato (Grande)</div>
+          <div class="food-brand" style="color:#34C759;background:rgba(48,209,88,0.1);">☕️ Starbucks</div>
+        </div>
+        <div class="food-cal">250 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+      </div>
+      <div class="food-item">
+        <div class="food-emoji">🍚</div>
+        <div class="food-info">
+          <div class="food-name">White Rice (1 cup)</div>
+          <div style="font-size:12px;color:#8e8e93;margin-top:3px;">No Brand</div>
+        </div>
+        <div class="food-cal">205 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+      </div>
+      <div class="food-item">
+        <div class="food-emoji">🥣</div>
+        <div class="food-info">
+          <div class="food-name">Oatmeal (1 cup)</div>
+          <div style="font-size:12px;color:#8e8e93;margin-top:3px;">No Brand</div>
+        </div>
+        <div class="food-cal">150 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+      </div>
+      <div class="food-item">
+        <div class="food-emoji">🥗</div>
+        <div class="food-info">
+          <div class="food-name">Grilled Chicken Bowl</div>
+          <div class="food-brand" style="color:#AF52DE;background:rgba(175,82,222,0.1);">🏠 Homemade</div>
+        </div>
+        <div class="food-cal">420 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+      </div>
+    </div>
+
+    <!-- RECORD PAGE -->
+    <div class="page" id="page-record">
+      <div class="top-bar" style="margin-top:40px;">
+        <div class="top-btn">✕</div>
+        <div class="meal-selector">🍴 Lunch ▼</div>
+        <div class="top-btn">✨</div>
+      </div>
+
+      <div class="glass" style="padding:10px;">
+        <div class="toggle-row">
+          <div class="toggle-icon">✨</div>
+          <div class="toggle-text">
+            <div class="toggle-title">Auto-fill</div>
+            <div class="toggle-sub">Detect foods & log instantly</div>
+          </div>
+          <div class="switch"></div>
+        </div>
+      </div>
+
+      <div class="camera-area">
+        <div class="camera-emoji-row">
+          <div class="camera-emoji">🍗</div>
+          <div class="camera-emoji">🍔</div>
+          <div class="camera-emoji">🥗</div>
+          <div class="camera-emoji">🍎</div>
+          <div class="camera-emoji">🥑</div>
+        </div>
+        <div class="camera-text">Point camera at your meal</div>
+        <div class="camera-actions">
+          <div class="camera-btn">
+            <div class="camera-btn-icon">🖼</div>
+            <div class="camera-btn-label">Library</div>
+          </div>
+          <div class="camera-btn shutter">
+            <div class="camera-btn-icon">📷</div>
+          </div>
+          <div class="camera-btn">
+            <div class="camera-btn-icon">🎙</div>
+            <div class="camera-btn-label">Voice</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" placeholder="Search foods, brands, or meals">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#8e8e93"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+      </div>
+
+      <div class="quick-actions">
+        <div class="qa-item"><div class="qa-icon">📷</div><div class="qa-label">Scan</div></div>
+        <div class="qa-item"><div class="qa-icon">🎙</div><div class="qa-label">Voice</div></div>
+        <div class="qa-item"><div class="qa-icon">⭐</div><div class="qa-label">Favorites</div></div>
+        <div class="qa-item"><div class="qa-icon">🕐</div><div class="qa-label">Recent</div></div>
+        <div class="qa-item"><div class="qa-icon">➕</div><div class="qa-label">Custom</div></div>
+      </div>
+
+      <div class="glass">
+        <div class="header-row">
+          <div class="section-title">Recent Foods</div>
+          <div style="font-size:14px;font-weight:600;color:#AF52DE;">View all</div>
+        </div>
+        <div class="list-row">
+          <div class="food-emoji" style="width:48px;height:48px;">🥗</div>
+          <div class="list-text">
+            <div class="list-title">Grilled Chicken Bowl</div>
+            <div class="list-sub">Chicken, Quinoa, Avocado, Greens</div>
+          </div>
+          <div style="font-size:15px;font-weight:600;">687 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+        </div>
+        <div class="list-row">
+          <div class="food-emoji" style="width:48px;height:48px;">🥣</div>
+          <div class="list-text">
+            <div class="list-title">Greek Yogurt</div>
+            <div class="list-sub">Fage Total 2% • 1 cup</div>
+          </div>
+          <div style="font-size:15px;font-weight:600;">120 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+        </div>
+        <div class="list-row">
+          <div class="food-emoji" style="width:48px;height:48px;">🍎</div>
+          <div class="list-text">
+            <div class="list-title">Apple</div>
+            <div class="list-sub">1 medium</div>
+          </div>
+          <div style="font-size:15px;font-weight:600;">95 <span style="font-size:12px;color:#8e8e93;font-weight:400;">kcal</span> ›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <div class="tab-item" data-tab="me">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span>Me</span>
+      </div>
+      <div class="tab-item active" data-tab="log">
+        <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+        <span>Log</span>
+      </div>
+      <div class="tab-item" data-tab="bank">
+        <svg viewBox="0 0 24 24"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zm6 0v7h3v-7h-3zM2 22h20V2H2v20zm2-2V4h16v16H4z"/></svg>
+        <span>Bank</span>
+      </div>
+      <div class="tab-item record" data-tab="record">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab-item');
+const pages = document.querySelectorAll('.page');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    pages.forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + target).classList.add('active');
+  });
+});
+
+// Date card click
+const dateCards = document.querySelectorAll('.date-card');
+dateCards.forEach(card => {
+  card.addEventListener('click', () => {
+    dateCards.forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+  });
+});
+
+// Filter chip click
+const chips = document.querySelectorAll('.chip');
+chips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    chips.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
