@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Xcode
+*.xcuserstate
+*.xcuserdata/
+DerivedData/
+build/
+
+# Swift Package Manager
+.build/
+*.swiftpm/
+
+# Agent template
+agent-template/.git/
