@@ -13,3 +13,12 @@ build/
 
 # Agent template
 agent-template/.git/
+
+# Build artifacts
+*.o
+*.a
+*.dylib
+*.xcresult
+DerivedData/
+build/
+.swiftpm/
