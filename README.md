@@ -16,7 +16,7 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 
 - 4 个核心页面首页已实现：Log（默认首页）、Me、Bank、Record
 - 底栏 Tab 导航支持 4 页面来回切换
-- Liquid Glass 视觉风格应用（使用系统 Material API）
+- iOS 26 原生 Liquid Glass 视觉风格（使用 `.glassEffect()`、`.buttonStyle(.glass)`、`GlassEffectContainer` 等 API）
 - 各页面包含完整的 Mock 数据展示
 
 ## 页面结构
@@ -56,10 +56,8 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
     │   ├── MeView.swift
     │   ├── BankView.swift
     │   └── RecordView.swift
-    ├── Models/
-    │   └── DataModels.swift
-    └── Components/
-        └── SharedComponents.swift
+    └── Models/
+        └── DataModels.swift
 ```
 
 ## 文档入口
@@ -71,13 +69,13 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 
 ## 快速开始
 
-1. 在 Xcode 中打开 `Intake.xcodeproj`
-2. 选择 iOS 17+ 模拟器或真机
+1. 在 Xcode 16+ 中打开 `Intake.xcodeproj`
+2. 选择 iOS 26+ 模拟器或真机
 3. 按 Cmd+R 运行
 
 ## 运行与验证
 
-- 开发：Xcode 15.0+，iOS 17.0+ 模拟器/真机
+- 开发：Xcode 16.0+，iOS 26.0+ 模拟器/真机
 - 测试：Cmd+U（当前无测试文件，需后续补充）
 - 构建：Cmd+B
 - 发布：Xcode Archive & Distribute
@@ -88,3 +86,4 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 - 数据为 Mock 数据，未接入真实 Apple Health 和营养数据库
 - AI 拍照识别、语音输入等能力为 UI 占位
 - 未实现订阅/付费边界、数据同步、云存储等后端功能
+- 需要 iOS 26.0+ SDK（Xcode 16+）编译运行，使用 `.glassEffect()` 等原生 Liquid Glass API
