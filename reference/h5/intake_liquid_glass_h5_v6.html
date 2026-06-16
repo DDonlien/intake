@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Intake Liquid Glass H5 v6</title>
+<style>
+/* ============================================================
+   1. TOKENS — 严格基于 8pt 网格，不允许任何硬编码随机值
+   ============================================================ */
+:root {
+  --app-w: 430px;
+  --page-x: 20px;
+  --safe-top: 52px;
+  --safe-bottom: 114px;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  --r-xs: 12px;
+  --r-sm: 16px;
+  --r-md: 20px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  --card-gap: var(--s-5);
+  --card-p: 18px;
+  --sub-card-p: 16px;
+
+  --tab-h: 95px;
+  --tab-btn-h: 54px;
+  --add-size: 54px;
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", "SFMono-Regular", ui-monospace, "Courier New", monospace;
+
+  --ink-0: #11131A;
+  --ink-1: #424858;
+  --ink-2: #747B8B;
+  --ink-3: #A0A7B5;
+  --ink-4: #C7CAD2;
+  --line: rgba(22, 27, 39, .075);
+
+  --bg-top: #FFFFFF;
+  --bg-bottom: #F3F5FB;
+  --purple: #7A45FF;
+  --purple-2: #CA4DE9;
+  --purple-soft: rgba(122, 69, 255, .12);
+  --blue: #0088FF;
+  --green: #30C86D;
+  --green-soft: rgba(48, 200, 109, .12);
+  --orange: #FF8C32;
+  --red: #F85C6A;
+
+  --glass-bg: linear-gradient(0deg, rgba(247,247,247,.84), rgba(247,247,247,.84)), linear-gradient(0deg, rgba(221,221,221,.38), rgba(221,221,221,.38)), rgba(255,255,255,.72);
+  --glass-blend: darken, color-burn, normal;
+  --glass-border: rgba(255,255,255,.94);
+  --glass-filter: blur(28px) saturate(1.7) contrast(1.04);
+  --glass-soft-shadow: 0 16px 52px rgba(31, 36, 61, .10), 0 2px 12px rgba(31, 36, 61, .05);
+  --glass-inner: inset 0 1px 0 rgba(255,255,255,.96), inset 0 -12px 28px rgba(255,255,255,.48);
+
+  --trans-fast: 180ms cubic-bezier(.22, .61, .36, 1);
+  --trans-norm: 320ms cubic-bezier(.22, .61, .36, 1);
+  --trans-spring: 400ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ============================================================
+   2. RESET & BASE
+   ============================================================ */
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; font-family: var(--font); color: var(--ink-0); background: #EDEFF6;
+  display: grid; place-items: start center; overflow-x: hidden;
+}
+.app {
+  width: min(100vw, var(--app-w)); height: 100vh; min-height: 780px; max-height: 940px;
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255,255,255,.98), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(122,69,255,.12), transparent 28%),
+    radial-gradient(circle at 6% 78%, rgba(0,136,255,.10), transparent 30%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+
+/* ============================================================
+   3. STATUS BAR
+   ============================================================ */
+.statusbar {
+  position: absolute; top: 10px; left: 22px; right: 22px; height: 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 80; pointer-events: none; font-weight: 760; font-size: 17px; letter-spacing: -.02em;
+}
+.island {
+  position: absolute; top: 8px; left: 50%; width: 132px; height: 38px;
+  transform: translateX(-50%); border-radius: var(--r-pill); background: #050505; z-index: 81; pointer-events: none;
+}
+.sys { display: flex; align-items: center; gap: var(--s-2); }
+.dots { color: var(--ink-4); letter-spacing: 2px; font-size: 14px; }
+.battery { width: 27px; height: 14px; border: 2px solid #111; border-radius: 4px; position: relative; }
+.battery::before { content:""; position:absolute; left:2px; top:2px; bottom:2px; width:17px; border-radius:2px; background:#111; }
+.battery::after { content:""; position:absolute; right:-5px; top:4px; width:3px; height:5px; border-radius:1px; background:#111; }
+
+/* ============================================================
+   4. PAGES
+   ============================================================ */
+.page {
+  height: 100%; overflow-y: auto; overflow-x: hidden;
+  padding: var(--safe-top) var(--page-x) var(--safe-bottom);
+  scrollbar-width: none; opacity: 1; transform: translateY(0);
+  transition: opacity var(--trans-norm), transform var(--trans-norm);
+}
+.page::-webkit-scrollbar { display: none; }
+.page.hidden { display: none !important; opacity: 0; transform: translateY(12px); }
+
+/* ============================================================
+   5. TYPOGRAPHY
+   ============================================================ */
+.h2 { margin: 0; font-size: 22px; line-height: 1.12; font-weight: 780; letter-spacing: -.035em; }
+.h3 { margin: 0; font-size: 17px; line-height: 1.18; font-weight: 730; letter-spacing: -.025em; }
+.caption { color: var(--ink-2); font-size: 13px; line-height: 1.35; }
+.small { color: var(--ink-2); font-size: 12px; line-height: 1.3; }
+.value { font-weight: 820; letter-spacing: -.035em; }
+.mono { font-family: var(--font-mono); letter-spacing: -.02em; }
+.purple { color: var(--purple); }
+.green { color: var(--green); }
+.orange { color: var(--orange); }
+.red { color: var(--red); }
+.blue { color: var(--blue); }
+.muted { color: var(--ink-2); }
+
+/* ============================================================
+   6. LAYOUT UTILITIES
+   ============================================================ */
+.stack { display: grid; gap: var(--card-gap); }
+.row { display: flex; align-items: center; }
+.between { justify-content: space-between; }
+.gap-2 { gap: var(--s-2); }
+.gap-3 { gap: var(--s-3); }
+.gap-4 { gap: var(--s-4); }
+.center { display: grid; place-items: center; }
+.ml-auto { margin-left: auto; }
+.search-icon { font-size: 18px; }
+.spacer-sm { height: var(--s-2); }
+.spacer-md { height: var(--s-3); }
+.spacer-lg { height: var(--s-4); }
+
+/* ============================================================
+   7. GLASS MATERIAL
+   ============================================================ */
+.glass {
+  position: relative; background: var(--glass-bg); background-blend-mode: var(--glass-blend);
+  border: 1px solid var(--glass-border); box-shadow: var(--glass-soft-shadow), var(--glass-inner);
+  -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); overflow: hidden;
+}
+.glass::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255,255,255,.92), transparent 28%),
+    radial-gradient(circle at 92% 0%, rgba(122,69,255,.14), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.06) 50%, rgba(255,255,255,.28));
+  mix-blend-mode: screen; pointer-events: none;
+}
+.glass::after {
+  content: ""; position: absolute; inset: 1px; border-radius: inherit;
+  border: 1px solid rgba(255,255,255,.40); pointer-events: none;
+}
+.glass > * { position: relative; z-index: 1; }
+
+/* Card tiers */
+.card { border-radius: var(--r-lg); padding: var(--card-p); }
+.card-md { border-radius: var(--r-md); padding: var(--sub-card-p); }
+.card-sm { border-radius: var(--r-sm); padding: var(--sub-card-p); }
+.card-compact { border-radius: var(--r-md); padding: var(--s-2) var(--s-3); }
+
+/* Section headers */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-4);
+}
+.section-header-sm {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-3);
+}
+
+/* ============================================================
+   8. BUTTONS & ICONS
+   ============================================================ */
+.icon {
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
+  color: var(--purple); background: rgba(122,69,255,.10); box-shadow: inset 0 1px 0 rgba(255,255,255,.9); font-weight: 760;
+}
+.icon.small { width: 30px; height: 30px; font-size: 14px; }
+.round-btn {
+  appearance: none; border: 0; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 22px;
+  color: var(--ink-0); cursor: pointer; padding: 0; font-family: var(--font); background: transparent;
+  transition: transform var(--trans-fast), background var(--trans-fast);
+}
+.round-btn:active { transform: scale(.92); background: rgba(0,0,0,.04); }
+.chev { color: var(--ink-3); font-size: 25px; line-height: 1; }
+.edit-btn {
+  color: var(--purple); font-weight: 720; font-size: 14px; cursor: pointer; padding: var(--s-2) var(--s-3); border-radius: var(--s-2);
+  transition: background var(--trans-fast);
+}
+.edit-btn:active { background: rgba(122,69,255,.20); }
+
+/* ============================================================
+   9. TAB BAR — 严格遵循用户 CSS 参考
+   ============================================================ */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--tab-h); z-index: 90;
+  display: flex; flex-direction: row; align-items: center; padding: var(--s-4) 25px 25px; gap: var(--s-4); pointer-events: none;
+}
+.tab-buttons {
+  position: relative; display: flex; flex-direction: row; align-items: center; padding: 0 2px; isolation: isolate;
+  width: 282px; height: var(--tab-btn-h); flex: none; pointer-events: auto;
+}
+.tab-buttons-bg, .add-bg { position: absolute; left: -4px; right: -4px; top: -4px; bottom: -4px; z-index: 0; }
+.tab-buttons-bg::before, .add-bg::before {
+  content: ""; position: absolute; inset: 0; background: var(--glass-bg); background-blend-mode: var(--glass-blend);
+  box-shadow: 0 8px 40px rgba(0,0,0,.12); border-radius: 296px;
+  -webkit-backdrop-filter: blur(30px) saturate(1.75); backdrop-filter: blur(30px) saturate(1.75);
+}
+.tab-buttons-bg::after, .add-bg::after {
+  content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.004); border: 1px solid rgba(255,255,255,.88); border-radius: 296px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -12px 24px rgba(255,255,255,.40);
+}
+.tab-btn {
+  appearance: none; border: 0; background: transparent; position: relative; z-index: 1; flex: 1 1 0; height: var(--tab-btn-h);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px 8px 7px; gap: 1px; margin: 0 -8px;
+  color: #1A1A1A; mix-blend-mode: plus-darker; font-family: var(--font); cursor: pointer;
+  transition: color var(--trans-fast), transform var(--trans-fast);
+}
+.tab-btn:active { transform: scale(.95); }
+.tab-btn.active::before {
+  content: ""; position: absolute; left: -2px; right: -2px; top: 0; bottom: 0;
+  background: #EDEDED; mix-blend-mode: plus-darker; border-radius: var(--r-pill); z-index: -1;
+}
+.tab-ico { height: 28px; line-height: 28px; font-size: 22px; font-weight: 720; }
+.tab-label { height: 12px; line-height: 12px; font-size: 10px; font-weight: 660; letter-spacing: -.1px; }
+.tab-btn.active { color: var(--blue); }
+.add-tab {
+  appearance: none; border: 0; background: transparent; position: relative; display: grid; place-items: center; isolation: isolate;
+  width: var(--add-size); height: var(--add-size); flex: 0 0 var(--add-size); pointer-events: auto; cursor: pointer; padding: 0;
+  color: #1A1A1A; mix-blend-mode: plus-darker; transition: transform var(--trans-spring);
+}
+.add-tab:active { transform: scale(.92); }
+.add-tab span {
+  position: relative; z-index: 1; width: var(--add-size); height: var(--add-size); display: grid; place-items: center;
+  font-size: 38px; line-height: 28px; font-weight: 560; color: var(--purple); transition: color var(--trans-fast);
+}
+.add-tab.active span { color: var(--blue); }
+
+/* ============================================================
+   10. SEARCH & CHIPS
+   ============================================================ */
+.search-field {
+  height: 52px; border-radius: var(--r-sm); display: flex; align-items: center; gap: 10px; padding: 0 var(--s-4); color: var(--ink-2);
+  border: 1px solid rgba(255,255,255,.88); background: rgba(255,255,255,.58); box-shadow: inset 0 1px 0 rgba(255,255,255,.92);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); min-width: 0;
+  cursor: pointer; transition: box-shadow var(--trans-fast), background var(--trans-fast);
+}
+.row .search-field { flex: 1 1 auto; }
+.search-field:active { background: rgba(255,255,255,.72); }
+.chip-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto; min-height: 38px; padding: var(--s-2) var(--s-4); border-radius: var(--r-pill); background: rgba(255,255,255,.58);
+  border: 1px solid rgba(255,255,255,.88); color: var(--ink-1); font-weight: 650;
+  cursor: pointer; transition: all var(--trans-fast); user-select: none; touch-action: manipulation;
+}
+.chip:active { transform: scale(.95); }
+.chip.active { color: var(--purple); background: var(--purple-soft); border-color: rgba(122,69,255,.22); }
+
+/* ============================================================
+   11. ME PAGE
+   ============================================================ */
+.profile-hero { min-height: 130px; display: grid; grid-template-columns: 86px 1fr auto; align-items: center; gap: var(--s-4); }
+.avatar {
+  width: 86px; height: 86px; border-radius: 50%; display: grid; place-items: center; font-size: 46px;
+  background: radial-gradient(circle at 32% 20%, rgba(255,255,255,.75), transparent 32%), linear-gradient(135deg, rgba(122,69,255,.20), rgba(0,136,255,.13));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+}
+.badge { border-radius: var(--r-pill); padding: var(--s-2) var(--s-3); background: var(--purple-soft); color: var(--purple); font-weight: 720; white-space: nowrap; }
+
+.goal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+.goal-item {
+  min-height: 90px; border-radius: var(--r-sm); padding: var(--sub-card-p); display: flex; flex-direction: column; justify-content: space-between;
+  background: rgba(255,255,255,.46); border: 1px solid rgba(255,255,255,.80); cursor: pointer; transition: transform var(--trans-fast);
+}
+.goal-item:active { transform: scale(.98); }
+.goal-item .label { color: var(--ink-2); font-size: 12px; line-height: 1.2; font-weight: 620; }
+.goal-item .big { font-size: 22px; font-weight: 820; letter-spacing: -.045em; }
+.goal-item .sub { color: var(--ink-2); font-size: 12px; font-weight: 620; }
+
+.plan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); }
+.plan-item {
+  min-height: 102px; border-radius: var(--r-sm); padding: var(--sub-card-p); background: rgba(255,255,255,.46); border: 1px solid rgba(255,255,255,.80);
+  display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform var(--trans-fast);
+}
+.plan-item:active { transform: scale(.98); }
+.plan-item .label { color: var(--ink-2); font-size: 12px; line-height: 1.2; font-weight: 620; }
+.plan-item .big { font-size: 20px; font-weight: 820; letter-spacing: -.04em; }
+.plan-item .sub { color: var(--ink-2); font-size: 12px; font-weight: 620; }
+
+.list-row {
+  min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  border-top: 1px solid var(--line); cursor: pointer; transition: background var(--trans-fast);
+  padding: 0 var(--s-2); margin: 0 calc(-1 * var(--s-2)); border-radius: var(--s-2);
+}
+.list-row:first-child { border-top: 0; }
+.list-row:active { background: rgba(0,0,0,.04); }
+
+/* ============================================================
+   12. PROGRESS (LOG) PAGE
+   ============================================================ */
+.date-section { border-radius: var(--r-lg); padding: var(--s-3) var(--s-3) var(--s-2); }
+.date-scroll { display: flex; gap: var(--s-2); overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; justify-content: flex-end; flex-direction: row-reverse; }
+.date-scroll::-webkit-scrollbar { display: none; }
+.date-item {
+  flex: 0 0 72px; border-radius: var(--r-sm); padding: var(--s-3) var(--s-2); text-align: center;
+  display: grid; gap: 3px; justify-items: center; color: var(--ink-1);
+  background: rgba(255,255,255,.52); border: 1px solid rgba(255,255,255,.72);
+  cursor: pointer; transition: all var(--trans-fast); user-select: none; touch-action: manipulation;
+}
+.date-item:active { transform: scale(.95); }
+.date-item.active { background: var(--purple-soft); color: var(--purple); box-shadow: inset 0 0 0 1px rgba(122,69,255,.14), inset 0 1px 0 rgba(255,255,255,.85); }
+.date-item .kcal { font-size: 18px; font-weight: 820; letter-spacing: -.04em; color: var(--ink-0); }
+.date-item.active .kcal { color: var(--purple); }
+.balance-dot { width: 16px; height: 16px; border-radius: var(--r-pill); box-shadow: inset 0 1px 0 rgba(255,255,255,.72); transition: transform var(--trans-fast); }
+.date-item:active .balance-dot { transform: scale(1.15); }
+.balance-dot.pos { background: var(--green); }
+.balance-dot.neg { background: var(--red); }
+
+.energy-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--s-3); }
+.ring-wrap { position: relative; width: 255px; height: 255px; margin: 2px auto 0; }
+.ring-wrap svg { width: 100%; height: 100%; filter: drop-shadow(0 12px 18px rgba(122,69,255,.12)); transition: filter var(--trans-fast); }
+.ring-center { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; text-align: center; gap: 2px; }
+.ring-center .eaten { font-size: 44px; line-height: .98; font-weight: 860; letter-spacing: -.07em; }
+.ring-center .number { font-size: 24px; font-weight: 830; letter-spacing: -.04em; }
+.ring-center .mini { font-size: 13px; color: var(--ink-2); font-weight: 620; }
+.ring-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); margin-top: var(--s-3); text-align: center; }
+.ring-stat { border-right: 1px solid var(--line); padding: var(--s-2) 0; }
+.ring-stat:last-child { border-right: 0; }
+.ring-stat .label { font-size: 12px; color: var(--ink-2); font-weight: 620; }
+.ring-stat .num { font-size: 16px; font-weight: 800; letter-spacing: -.035em; }
+
+.progress-grid { display: grid; gap: var(--s-4); }
+.macro-row { display: grid; grid-template-columns: 34px 1fr 38px; align-items: center; gap: 10px; }
+.macro-row .icon { color: var(--purple); }
+.bar { height: 7px; border-radius: var(--r-pill); background: rgba(18,22,34,.08); overflow: hidden; margin-top: 6px; }
+.bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--purple), var(--purple-2)); transition: width var(--trans-spring); }
+
+.sync-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+.sync-item { border-radius: var(--r-sm); padding: var(--sub-card-p); background: rgba(255,255,255,.46); display: grid; gap: 3px; cursor: pointer; transition: transform var(--trans-fast); }
+.sync-item:active { transform: scale(.98); }
+
+.meal-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.meal-mini {
+  min-width: 0; border-radius: var(--r-sm); padding: var(--s-3); background: rgba(255,255,255,.60); border: 1px solid rgba(255,255,255,.88);
+  box-shadow: 0 8px 24px rgba(31,36,61,.06); text-align: center; cursor: pointer; transition: all var(--trans-fast); user-select: none; touch-action: manipulation;
+}
+.meal-mini:active { transform: scale(.96); }
+.meal-mini.active { box-shadow: inset 0 0 0 1px rgba(122,69,255,.16), 0 10px 26px rgba(122,69,255,.10); background: var(--purple-soft); }
+.meal-mini.active .meal-pic { background: rgba(122,69,255,.08); }
+.meal-pic { height: 45px; border-radius: var(--r-xs); display: grid; place-items: center; font-size: 26px; background: rgba(0,0,0,.04); margin-bottom: 6px; transition: background var(--trans-fast); }
+.meal-mini strong { display: block; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 720; }
+.meal-mini .caption { font-size: 11px; color: var(--ink-2); }
+
+.meal-expanded { border-radius: var(--r-lg); padding: var(--s-3) var(--s-4); max-height: 0; overflow: hidden; opacity: 0; transition: max-height var(--trans-spring), opacity var(--trans-fast), padding var(--trans-spring); }
+.meal-expanded.open { max-height: 600px; opacity: 1; padding: var(--s-3) var(--s-4); }
+.meal-meta { margin-bottom: var(--s-1); }
+.dish-row {
+  min-height: 58px; display: grid; grid-template-columns: 44px 1fr auto; gap: var(--s-3); align-items: center;
+  border-top: 1px solid var(--line); padding: var(--s-3) 0; transition: background var(--trans-fast); border-radius: var(--r-xs); margin: 0 calc(-1 * var(--s-1)); padding-left: var(--s-1); padding-right: var(--s-1);
+}
+.dish-row:first-of-type { border-top: 0; }
+.dish-row:active { background: rgba(0,0,0,.04); }
+.dish-thumb { width: 44px; height: 44px; border-radius: var(--r-xs); display: grid; place-items: center; background: rgba(0,0,0,.045); font-size: 24px; }
+
+/* ============================================================
+   13. BANK PAGE
+   ============================================================ */
+.food-list { display: grid; gap: 10px; }
+.food-row {
+  min-height: 76px; display: grid; grid-template-columns: 62px 1fr auto; align-items: center; gap: var(--s-3);
+  border-radius: var(--r-md); padding: var(--s-3) var(--s-4) var(--s-3) var(--s-3);
+  background: rgba(255,255,255,.68); border: 1px solid rgba(255,255,255,.88); box-shadow: 0 10px 30px rgba(31,36,61,.06);
+  cursor: pointer; transition: all var(--trans-fast); user-select: none; touch-action: manipulation;
+}
+.food-row:active { transform: scale(.98); }
+.food-img { width: 58px; height: 58px; border-radius: var(--r-sm); display: grid; place-items: center; font-size: 32px; background: linear-gradient(145deg, rgba(255,255,255,.86), rgba(230,233,242,.62)); }
+.brand { display: inline-flex; align-items: center; min-height: 22px; border-radius: var(--r-xs); padding: var(--s-1) var(--s-2); margin-top: 5px; background: rgba(122,69,255,.08); color: var(--ink-1); font-size: 12px; font-weight: 650; }
+.brand.empty { display: none; }
+.bank-detail { display: grid; grid-template-columns: 80px 1fr; gap: var(--s-4); }
+.bank-detail .food-img { width: 80px; height: 80px; font-size: 44px; }
+.nutri-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-2); margin-top: var(--s-4); }
+.nutri { text-align: center; border-right: 1px solid var(--line); padding: var(--s-2) 0; }
+.nutri:last-child { border-right: 0; }
+
+/* ============================================================
+   14. ADD / RECORD PAGE
+   ============================================================ */
+.add-page { padding: 0; overflow: hidden; background: #eef1f6; }
+.photo-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255,255,255,.96), transparent 20%),
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.85), transparent 22%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(243,245,251,.08)),
+    linear-gradient(140deg, #EAEFF4 0%, #F7F4EF 36%, #E8EFE8 100%);
+  overflow: hidden;
+}
+.photo-bg::before {
+  content: ""; position: absolute; left: 38px; right: 28px; top: 120px; bottom: 300px; border-radius: var(--r-xl);
+  background:
+    radial-gradient(circle at 50% 48%, #FFFFFF 0 32%, #F0E8DC 33% 39%, transparent 40%),
+    radial-gradient(circle at 42% 45%, #CE834A 0 7%, transparent 8%),
+    radial-gradient(circle at 58% 43%, #72B95D 0 6%, transparent 7%),
+    radial-gradient(circle at 62% 56%, #EFCF7C 0 6%, transparent 7%),
+    radial-gradient(circle at 48% 59%, #B7DC8B 0 8%, transparent 9%),
+    linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0));
+  box-shadow: 0 30px 80px rgba(84, 69, 54, .20); filter: saturate(1.05);
+}
+.photo-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(0,0,0,.06), transparent 24%),
+    radial-gradient(circle at 88% 18%, rgba(0,0,0,.05), transparent 24%),
+    linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,0) 52%, rgba(246,248,252,.72));
+  backdrop-filter: blur(.2px);
+}
+.add-overlays { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.add-top { position: absolute; left: var(--page-x); right: var(--page-x); top: 58px; display: flex; align-items: center; justify-content: space-between; pointer-events: auto; }
+.meal-select {
+  height: 46px; min-width: 118px; border-radius: var(--r-pill); padding: 0 var(--s-4); display: flex; align-items: center; justify-content: center; font-weight: 740; gap: var(--s-2);
+  cursor: pointer; transition: all var(--trans-fast);
+}
+.meal-select:active { transform: scale(.95); }
+.auto-switch-pill {
+  height: 46px; border-radius: var(--r-pill); padding: 0 var(--s-3) 0 var(--s-4); display: flex; align-items: center; gap: var(--s-2); font-weight: 720; color: var(--ink-0);
+  cursor: pointer; transition: all var(--trans-fast);
+}
+.auto-switch-pill:active { transform: scale(.95); }
+.switch { width: 46px; height: 28px; border-radius: var(--r-pill); background: var(--purple); position: relative; box-shadow: inset 0 1px 1px rgba(0,0,0,.10); cursor: pointer; transition: background var(--trans-fast); flex: 0 0 auto; }
+.switch.off { background: var(--ink-4); }
+.switch::after { content: ""; position: absolute; width: 24px; height: 24px; right: 2px; top: 2px; border-radius: 50%; background: white; box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: right var(--trans-spring), left var(--trans-spring); }
+.switch.off::after { right: 20px; left: 2px; }
+.capture-controls { position: absolute; left: 64px; right: 64px; top: 430px; display: flex; align-items: center; justify-content: space-between; pointer-events: auto; }
+.shutter {
+  width: 74px; height: 74px; border-radius: 50%; border: 5px solid rgba(255,255,255,.95); background: rgba(255,255,255,.78);
+  box-shadow: 0 10px 40px rgba(0,0,0,.18), inset 0 0 0 2px rgba(122,69,255,.48); cursor: pointer; transition: all var(--trans-fast); display: grid; place-items: center;
+}
+.shutter:active { transform: scale(.90); }
+.add-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; height: 438px; border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: var(--s-3) var(--page-x) 110px; overflow-y: auto; scrollbar-width: none;
+  transition: transform var(--trans-spring), height var(--trans-spring); cursor: grab;
+}
+.add-sheet:active { cursor: grabbing; }
+.add-sheet.expanded { transform: translateY(-120px); height: 560px; }
+.add-sheet::-webkit-scrollbar { display: none; }
+.handle { width: 44px; height: 5px; border-radius: var(--r-pill); background: rgba(55,60,72,.20); margin: 4px auto var(--s-4); cursor: grab; transition: background var(--trans-fast); }
+.handle:active { cursor: grabbing; }
+.detected-card { border-radius: var(--r-md); padding: var(--s-3); display: grid; gap: 10px; background: rgba(255,255,255,.50); border: 1px solid rgba(255,255,255,.72); }
+.detected-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: var(--s-2) 0; border-top: 1px solid var(--line); transition: background var(--trans-fast); border-radius: var(--r-xs); margin: 0 calc(-1 * var(--s-1)); padding-left: var(--s-1); padding-right: var(--s-1); }
+.detected-row:first-child { border-top: 0; }
+.detected-row:active { background: rgba(0,0,0,.04); }
+
+/* ============================================================
+   15. TOAST
+   ============================================================ */
+.toast {
+  position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%) translateY(20px); opacity: 0;
+  background: rgba(22, 27, 39, .82); color: white; padding: var(--s-3) var(--s-4); border-radius: var(--r-xs); font-size: 13px; font-weight: 620;
+  z-index: 100; pointer-events: none; transition: all var(--trans-norm); white-space: nowrap;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ============================================================
+   16. RESPONSIVE
+   ============================================================ */
+@media (max-width: 380px) {
+  :root { --page-x: 16px; --app-w: 100vw; }
+  .tabbar { padding-left: 18px; padding-right: 18px; }
+  .ring-wrap { width: 228px; height: 228px; }
+  .goal-grid, .plan-grid { grid-template-columns: 1fr; }
+  .meal-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sync-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="statusbar"><span id="clock">11:19</span><div class="sys"><span class="dots">••••</span><span>⌁</span><span class="battery"></span></div></div>
+<div class="island" id="island"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ==================== ME PAGE ==================== -->
+<main class="page hidden" data-page="me">
+<div class="stack">
+<section class="glass card profile-hero">
+<div class="avatar">🙂</div>
+<div><h2 class="h2">Alex</h2><p class="caption">减脂计划中，今天状态不错。</p></div>
+<div class="badge">Plus</div>
+</section>
+
+<section class="glass card">
+<div class="section-header"><h3 class="h3">目标摘要</h3><span class="edit-btn" onclick="showToast('进入目标编辑')">编辑</span></div>
+<div class="goal-grid">
+<div class="goal-item" onclick="showToast('编辑目标类型')"><div class="label">目标</div><div class="big">减脂</div><div class="sub">高蛋白</div></div>
+<div class="goal-item" onclick="showToast('编辑当前体重')"><div class="label">当前体重</div><div class="big">68.2</div><div class="sub">kg</div></div>
+<div class="goal-item" onclick="showToast('编辑目标体重')"><div class="label">目标体重</div><div class="big">60.0</div><div class="sub">kg</div></div>
+<div class="goal-item" onclick="showToast('编辑目标速度')"><div class="label">目标速度</div><div class="big">每周 0.5</div><div class="sub">kg</div></div>
+</div>
+</section>
+
+<section class="glass card">
+<div class="section-header"><h3 class="h3">计划</h3><span class="edit-btn" onclick="showToast('调整计划参数')">调整</span></div>
+<div class="plan-grid">
+<div class="plan-item" onclick="showToast('查看每日热量计算')"><div class="label">每日平均热量</div><div class="big">2,000</div><div class="sub">kcal</div></div>
+<div class="plan-item" onclick="showToast('查看缺口计算')"><div class="label">每日缺口目标</div><div class="big">500</div><div class="sub">kcal</div></div>
+<div class="plan-item" onclick="showToast('调整饮食策略')"><div class="label">饮食策略</div><div class="big">高蛋白</div><div class="sub">均衡碳脂</div></div>
+</div>
+</section>
+
+<section class="glass card list-row" onclick="showToast('管理健康数据连接')">
+<div class="row gap-3"><div class="icon">♥</div><div><h3 class="h3">健康数据</h3><p class="caption"><span class="green">已连接</span> · Apple 健康</p></div></div>
+<span class="chev">›</span>
+</section>
+</div>
+</main>
+
+<!-- ==================== PROGRESS PAGE ==================== -->
+<main class="page" data-page="progress">
+<div class="stack">
+<section class="glass date-section">
+<div class="date-scroll" id="dateScroll"></div>
+</section>
+
+<section class="glass card">
+<div class="energy-top"><h3 class="h3">能量环</h3><div class="caption"><span class="green value" id="bonusLabel">+210</span> 运动加成</div></div>
+<div class="ring-wrap">
+<svg viewBox="0 0 240 240" aria-hidden="true">
+<defs>
+<linearGradient id="eatGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7A45FF"/><stop offset="1" stop-color="#CB4EEA"/></linearGradient>
+<linearGradient id="bonusGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D8DDE9"/><stop offset="1" stop-color="#B8EBCB"/></linearGradient>
+</defs>
+<circle cx="120" cy="120" r="92" fill="none" stroke="rgba(22,27,39,.10)" stroke-width="16" />
+<circle cx="120" cy="120" r="92" fill="none" stroke="url(#eatGrad)" stroke-linecap="round" stroke-width="16" stroke-dasharray="423.96 578.05" transform="rotate(-90 120 120)" />
+<circle cx="120" cy="120" r="92" fill="none" stroke="rgba(22,27,39,.12)" stroke-linecap="butt" stroke-width="16" stroke-dasharray="98.11 578.05" stroke-dashoffset="-423.96" transform="rotate(-90 120 120)" />
+<circle cx="120" cy="120" r="92" fill="none" stroke="url(#bonusGrad)" stroke-linecap="round" stroke-width="16" stroke-dasharray="55.98 578.05" stroke-dashoffset="-522.07" transform="rotate(-90 120 120)" />
+</svg>
+<div class="ring-center">
+<div class="mini">已摄入</div><div class="eaten" id="eatenKcal">1,624</div><div class="mini">kcal</div>
+<div class="mini">剩余预算</div><div class="number purple" id="deficitKcal">376</div>
+<div class="mini">还能吃</div><div class="number green" id="leftKcal">586</div>
+</div>
+</div>
+<div class="ring-stats">
+<div class="ring-stat"><div class="label">目标</div><div class="num" id="targetKcal">2,000 kcal</div></div>
+<div class="ring-stat"><div class="label">总消耗</div><div class="num" id="totalBurn">2,210 kcal</div></div>
+<div class="ring-stat"><div class="label">运动加成</div><div class="num" id="bonusKcal">+210 kcal</div></div>
+</div>
+</section>
+
+<section class="glass card">
+<div class="section-header"><h3 class="h3">进度</h3><span class="caption">今日目标</span></div>
+<div class="progress-grid">
+<div class="macro-row"><div class="icon small">P</div><div><div class="row between"><strong>蛋白质</strong><span class="caption" id="proteinLabel">102 / 120g</span></div><div class="bar"><span id="proteinBar" style="width:85%"></span></div></div><span class="caption" id="proteinPct">85%</span></div>
+<div class="macro-row"><div class="icon small">C</div><div><div class="row between"><strong>碳水</strong><span class="caption" id="carbLabel">179 / 250g</span></div><div class="bar"><span id="carbBar" style="width:72%"></span></div></div><span class="caption" id="carbPct">72%</span></div>
+<div class="macro-row"><div class="icon small">F</div><div><div class="row between"><strong>脂肪</strong><span class="caption" id="fatLabel">58 / 70g</span></div><div class="bar"><span id="fatBar" style="width:83%"></span></div></div><span class="caption" id="fatPct">83%</span></div>
+</div>
+</section>
+
+<section class="glass card">
+<div class="section-header"><h3 class="h3">健康同步</h3><span class="caption" id="syncTime">今天 7:32</span></div>
+<div class="sync-grid">
+<div class="sync-item" onclick="showToast('查看活动详情')"><span class="caption">活动能量</span><strong id="activeEnergy">410 kcal</strong></div>
+<div class="sync-item" onclick="showToast('查看静息详情')"><span class="caption">静息能量</span><strong id="restEnergy">1,380 kcal</strong></div>
+<div class="sync-item" onclick="showToast('查看运动记录')"><span class="caption">步数 / 运动</span><strong id="steps">8,642</strong><span class="caption" id="workouts">1 次运动</span></div>
+<div class="sync-item" onclick="showToast('管理健康连接')"><span class="caption">Apple 健康</span><strong class="green">已连接</strong></div>
+</div>
+</section>
+
+<section>
+<div class="meal-strip" id="mealStrip">
+<div class="meal-mini" data-meal="breakfast" onclick="toggleMeal('breakfast')"><div class="meal-pic">🥣</div><strong>早餐</strong><p class="caption">412 kcal</p></div>
+<div class="meal-mini active" data-meal="lunch" onclick="toggleMeal('lunch')"><div class="meal-pic">🥗</div><strong>午餐</strong><p class="caption">687 kcal</p></div>
+<div class="meal-mini" data-meal="dinner" onclick="toggleMeal('dinner')"><div class="meal-pic">🍣</div><strong>晚餐</strong><p class="caption">403 kcal</p></div>
+<div class="meal-mini" data-meal="snack" onclick="toggleMeal('snack')"><div class="meal-pic">🍎</div><strong>加餐</strong><p class="caption">122 kcal</p></div>
+</div>
+<div class="glass meal-expanded open" id="mealExpanded">
+<div class="caption meal-meta">12:45 · 687 kcal</div>
+<div class="dish-row"><div class="dish-thumb">🥗</div><div><strong>烤鸡谷物碗</strong><p class="caption">1 碗 · 自制</p></div><strong>360 kcal</strong></div>
+<div class="dish-row"><div class="dish-thumb">🥬</div><div><strong>藜麦沙拉</strong><p class="caption">1 杯 · 自制</p></div><strong>180 kcal</strong></div>
+<div class="dish-row"><div class="dish-thumb">🥛</div><div><strong>希腊酸奶</strong><p class="caption">FAGE · 1 杯</p></div><strong>120 kcal</strong></div>
+</div>
+</section>
+</div>
+</main>
+
+<!-- ==================== BANK PAGE ==================== -->
+<main class="page hidden" data-page="bank">
+<div class="stack">
+<div class="row gap-2">
+<div class="search-field" onclick="showToast('打开搜索')"><span class="search-icon">⌕</span> <span>搜索食物、餐次、品牌或公司</span></div>
+<button class="round-btn glass" onclick="showToast('筛选菜单')">☰</button>
+</div>
+<div class="chip-row" id="chipRow">
+<div class="chip active" data-filter="all" onclick="setFilter('all')">全部</div>
+<div class="chip" data-filter="food" onclick="setFilter('food')">食物</div>
+<div class="chip" data-filter="meal" onclick="setFilter('meal')">餐次</div>
+<div class="chip" data-filter="brand" onclick="setFilter('brand')">品牌</div>
+<div class="chip" data-filter="custom" onclick="setFilter('custom')">自定义</div>
+<div class="chip" data-filter="recent" onclick="setFilter('recent')">最近</div>
+</div>
+<section class="food-list" id="foodList">
+<div class="food-row" onclick="showToast('查看炸鸡桶详情')"><div class="food-img">🍗</div><div><h3 class="h3">炸鸡桶 2 块</h3><span class="brand">KFC</span></div><strong>560 kcal</strong></div>
+<div class="food-row" onclick="showToast('查看巨无霸详情')"><div class="food-img">🍔</div><div><h3 class="h3">巨无霸</h3><span class="brand">McDonald's</span></div><strong>563 kcal</strong></div>
+<div class="food-row" onclick="showToast('查看焦糖玛奇朵详情')"><div class="food-img">☕</div><div><h3 class="h3">焦糖玛奇朵 大杯</h3><span class="brand">Starbucks</span></div><strong>250 kcal</strong></div>
+<div class="food-row" onclick="showToast('查看米饭详情')"><div class="food-img">🍚</div><div><h3 class="h3">米饭 1 碗</h3><span class="brand empty"></span></div><strong>205 kcal</strong></div>
+<div class="food-row" onclick="showToast('查看燕麦详情')"><div class="food-img">🥣</div><div><h3 class="h3">燕麦 1 杯</h3><span class="brand empty"></span></div><strong>150 kcal</strong></div>
+<div class="food-row" onclick="showToast('查看烤鸡沙拉详情')"><div class="food-img">🥗</div><div><h3 class="h3">烤鸡沙拉</h3><span class="brand">星巴克</span></div><strong>320 kcal</strong></div>
+</section>
+<section class="glass card bank-detail">
+<div class="food-img">🍗</div>
+<div>
+<div class="row between"><div><h3 class="h3">炸鸡桶 2 块</h3><span class="brand">KFC</span></div><strong class="purple">560 kcal</strong></div>
+<div class="nutri-row">
+<div class="nutri"><strong>32g</strong><p class="caption">蛋白质</p></div>
+<div class="nutri"><strong>28g</strong><p class="caption">碳水</p></div>
+<div class="nutri"><strong>33g</strong><p class="caption">脂肪</p></div>
+<div class="nutri"><strong>1g</strong><p class="caption">纤维</p></div>
+</div>
+</div>
+</section>
+</div>
+</main>
+
+<!-- ==================== ADD / RECORD PAGE ==================== -->
+<main class="page add-page hidden" data-page="add">
+<div class="photo-bg" id="photoBg"></div>
+<div class="add-overlays">
+<div class="add-top">
+<button class="round-btn glass" onclick="showPage('progress')">×</button>
+<div class="glass meal-select" onclick="showToast('切换餐次')">🍴 午餐 <span class="small">⌄</span></div>
+<div class="glass auto-switch-pill" onclick="toggleAutoDetect()"><span>自动识别</span><span class="switch" id="autoSwitch"></span></div>
+</div>
+<div class="capture-controls">
+<button class="round-btn glass" onclick="showToast('从相册选择')">▧</button>
+<button class="shutter" aria-label="拍照" onclick="showToast('拍照记录')"></button>
+<button class="round-btn glass purple" onclick="showToast('语音记录')">🎙</button>
+</div>
+</div>
+<section class="glass add-sheet" id="addSheet">
+<div class="handle" onclick="toggleSheet()"></div>
+<div class="section-header-sm"><h3 class="h3">检索到的食物</h3><span class="caption">可修改后入账</span></div>
+<div class="detected-card">
+<div class="detected-row" onclick="showToast('编辑烤鸡谷物碗')"><div class="dish-thumb">🥗</div><div><strong>烤鸡谷物碗</strong><p class="caption">鸡肉、藜麦、牛油果 · 1 碗</p></div><strong>360 kcal</strong></div>
+<div class="detected-row" onclick="showToast('编辑牛油果')"><div class="dish-thumb">🥑</div><div><strong>牛油果</strong><p class="caption">半个 · 估算 70g</p></div><strong>112 kcal</strong></div>
+</div>
+<div class="spacer-md"></div>
+<div class="search-field" onclick="showToast('搜索食物')"><span class="search-icon">⌕</span> <span>搜索食物、品牌或餐次</span><span class="ml-auto">▢</span></div>
+<div class="spacer-md"></div>
+<div class="section-header-sm"><h3 class="h3">最近食物</h3><span class="purple small value" onclick="showToast('查看全部最近食物')">查看全部</span></div>
+<div class="glass card-compact">
+<div class="dish-row"><div class="dish-thumb">🥛</div><div><strong>希腊酸奶</strong><p class="caption">FAGE · 1 杯</p></div><strong>120 kcal</strong></div>
+<div class="dish-row"><div class="dish-thumb">🍎</div><div><strong>苹果</strong><p class="caption">1 个</p></div><strong>95 kcal</strong></div>
+</div>
+</section>
+</main>
+
+<!-- ==================== TAB BAR ==================== -->
+<nav class="tabbar" aria-label="主导航">
+<div class="tab-buttons">
+<div class="tab-buttons-bg"></div>
+<button class="tab-btn" data-nav="bank" onclick="showPage('bank')"><span class="tab-ico">▥</span><span class="tab-label">食物库</span></button>
+<button class="tab-btn" data-nav="me" onclick="showPage('me')"><span class="tab-ico">♙</span><span class="tab-label">我</span></button>
+<button class="tab-btn active" data-nav="progress" onclick="showPage('progress')"><span class="tab-ico">▮</span><span class="tab-label">进度</span></button>
+</div>
+<button class="add-tab" data-nav="add" onclick="showPage('add')" aria-label="添加">
+<div class="add-bg"></div><span>＋</span>
+</button>
+</nav>
+</div>
+
+<script>
+const pages = [...document.querySelectorAll('[data-page]')];
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const addTab = document.querySelector('.add-tab');
+const island = document.getElementById('island');
+
+function showPage(name) {
+  pages.forEach(page => {
+    const isTarget = page.dataset.page === name;
+    if (isTarget) {
+      page.classList.remove('hidden');
+      page.classList.add('page-enter');
+      requestAnimationFrame(() => { page.classList.add('page-enter-active'); page.classList.remove('page-enter'); });
+      setTimeout(() => page.classList.remove('page-enter-active'), 320);
+    } else { page.classList.add('hidden'); }
+  });
+  tabBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.nav === name));
+  addTab.classList.toggle('active', name === 'add');
+  if (name === 'add') { island.style.transform = 'translateX(-50%) scaleX(0.4) scaleY(0.6)'; island.style.opacity = '0.3'; }
+  else { island.style.transform = 'translateX(-50%) scaleX(1) scaleY(1)'; island.style.opacity = '1'; }
+}
+
+let toastTimer;
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text; toast.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2, '0');
+  const m = now.getMinutes().toString().padStart(2, '0');
+  document.getElementById('clock').textContent = h + ':' + m;
+}
+updateClock(); setInterval(updateClock, 30000);
+
+const dateData = [
+  { day: '周日', date: '5月18', kcal: 1585, deficit: 'pos', eaten: 1585, target: 2000, left: 415, active: 320, rest: 1380, steps: '7,230', workouts: '0', protein: '112/120', carb: '195/250', fat: '55/70', proteinPct: 93, carbPct: 78, fatPct: 79 },
+  { day: '周一', date: '5月19', kcal: 1760, deficit: 'neg', eaten: 1760, target: 2000, left: 240, active: 380, rest: 1380, steps: '8,102', workouts: '1', protein: '98/120', carb: '210/250', fat: '62/70', proteinPct: 82, carbPct: 84, fatPct: 89 },
+  { day: '周二', date: '5月20', kcal: 1332, deficit: 'pos', eaten: 1332, target: 2000, left: 668, active: 290, rest: 1380, steps: '6,540', workouts: '0', protein: '85/120', carb: '160/250', fat: '48/70', proteinPct: 71, carbPct: 64, fatPct: 69 },
+  { day: '周三', date: '5月21', kcal: 1695, deficit: 'neg', eaten: 1695, target: 2000, left: 305, active: 350, rest: 1380, steps: '7,890', workouts: '1', protein: '105/120', carb: '200/250', fat: '60/70', proteinPct: 88, carbPct: 80, fatPct: 86 },
+  { day: '周四', date: '5月22', kcal: 1482, deficit: 'pos', eaten: 1482, target: 2000, left: 518, active: 280, rest: 1380, steps: '6,210', workouts: '0', protein: '95/120', carb: '175/250', fat: '52/70', proteinPct: 79, carbPct: 70, fatPct: 74 },
+  { day: '今天', date: '5月24', kcal: 1624, deficit: 'pos', eaten: 1624, target: 2000, left: 376, active: 410, rest: 1380, steps: '8,642', workouts: '1', protein: '102/120', carb: '179/250', fat: '58/70', proteinPct: 85, carbPct: 72, fatPct: 83 },
+];
+let selectedDateIndex = dateData.length - 1;
+
+function renderDateScroll() {
+  const scroll = document.getElementById('dateScroll');
+  scroll.innerHTML = '';
+  for (let i = dateData.length - 1; i >= 0; i--) {
+    const d = dateData[i];
+    const active = i === selectedDateIndex ? 'active' : '';
+    const dotClass = d.deficit === 'pos' ? 'pos' : 'neg';
+    const el = document.createElement('div');
+    el.className = `date-item ${active}`;
+    el.innerHTML = `<strong>${d.day}</strong><span class="caption">${d.date}</span><span class="kcal">${d.kcal.toLocaleString()}</span><div class="balance-dot ${dotClass}"></div>`;
+    el.onclick = () => selectDate(i);
+    scroll.appendChild(el);
+  }
+  if (!scroll.dataset.initialized) { scroll.dataset.initialized = 'true'; scroll.scrollLeft = scroll.scrollWidth; }
+}
+
+function selectDate(index) {
+  selectedDateIndex = index; renderDateScroll();
+  const d = dateData[index];
+  document.getElementById('eatenKcal').textContent = d.eaten.toLocaleString();
+  document.getElementById('deficitKcal').textContent = d.target - d.eaten > 0 ? (d.target - d.eaten).toLocaleString() : (d.eaten - d.target).toLocaleString();
+  document.getElementById('leftKcal').textContent = d.left.toLocaleString();
+  document.getElementById('targetKcal').textContent = d.target.toLocaleString() + ' kcal';
+  document.getElementById('totalBurn').textContent = (d.active + d.rest).toLocaleString() + ' kcal';
+  document.getElementById('bonusKcal').textContent = '+' + d.active + ' kcal';
+  document.getElementById('bonusLabel').textContent = '+' + d.active;
+  document.getElementById('proteinLabel').textContent = d.protein + 'g';
+  document.getElementById('proteinBar').style.width = d.proteinPct + '%';
+  document.getElementById('proteinPct').textContent = d.proteinPct + '%';
+  document.getElementById('carbLabel').textContent = d.carb + 'g';
+  document.getElementById('carbBar').style.width = d.carbPct + '%';
+  document.getElementById('carbPct').textContent = d.carbPct + '%';
+  document.getElementById('fatLabel').textContent = d.fat + 'g';
+  document.getElementById('fatBar').style.width = d.fatPct + '%';
+  document.getElementById('fatPct').textContent = d.fatPct + '%';
+  document.getElementById('activeEnergy').textContent = d.active + ' kcal';
+  document.getElementById('restEnergy').textContent = d.rest + ' kcal';
+  document.getElementById('steps').textContent = d.steps;
+  document.getElementById('workouts').textContent = d.workouts + ' 次运动';
+  const ring = document.querySelector('.ring-wrap svg');
+  ring.style.filter = 'drop-shadow(0 18px 28px rgba(122,69,255,.20))';
+  setTimeout(() => ring.style.filter = 'drop-shadow(0 12px 18px rgba(122,69,255,.12))', 400);
+}
+
+const mealData = {
+  breakfast: { time: '8:30', kcal: 412, items: [
+    { thumb: '🥣', name: '燕麦牛奶', desc: '1 碗 · 自制', kcal: 280 },
+    { thumb: '🫐', name: '蓝莓', desc: '50g', kcal: 85 },
+    { thumb: '☕', name: '黑咖啡', desc: '1 杯', kcal: 5 },
+  ]},
+  lunch: { time: '12:45', kcal: 687, items: [
+    { thumb: '🥗', name: '烤鸡谷物碗', desc: '1 碗 · 自制', kcal: 360 },
+    { thumb: '🥬', name: '藜麦沙拉', desc: '1 杯 · 自制', kcal: 180 },
+    { thumb: '🥛', name: '希腊酸奶', desc: 'FAGE · 1 杯', kcal: 120 },
+  ]},
+  dinner: { time: '19:00', kcal: 403, items: [
+    { thumb: '🍣', name: '三文鱼刺身', desc: '5 片 · 日料店', kcal: 250 },
+    { thumb: '🍚', name: '米饭', desc: '1 小碗', kcal: 120 },
+    { thumb: '🍵', name: '味噌汤', desc: '1 碗', kcal: 33 },
+  ]},
+  snack: { time: '15:30', kcal: 122, items: [
+    { thumb: '🍎', name: '苹果', desc: '1 个', kcal: 95 },
+    { thumb: '🥜', name: '杏仁', desc: '10g', kcal: 27 },
+  ]},
+};
+let activeMeal = 'lunch';
+
+function toggleMeal(meal) {
+  const strip = document.getElementById('mealStrip');
+  const expanded = document.getElementById('mealExpanded');
+  const minis = strip.querySelectorAll('.meal-mini');
+  minis.forEach(m => m.classList.remove('active'));
+  if (activeMeal === meal) { expanded.classList.remove('open'); activeMeal = null; return; }
+  activeMeal = meal;
+  const mEl = strip.querySelector(`[data-meal="${meal}"]`);
+  if (mEl) mEl.classList.add('active');
+  const data = mealData[meal];
+  expanded.innerHTML = `<div class="caption meal-meta">${data.time} · ${data.kcal} kcal</div>` +
+    data.items.map(item =>
+      `<div class="dish-row" onclick="showToast('编辑 ${item.name}')">` +
+      `<div class="dish-thumb">${item.thumb}</div>` +
+      `<div><strong>${item.name}</strong><p class="caption">${item.desc}</p></div>` +
+      `<strong>${item.kcal} kcal</strong>` +
+      `</div>`
+    ).join('');
+  expanded.classList.add('open');
+}
+
+function setFilter(filter) {
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(c => c.classList.toggle('active', c.dataset.filter === filter));
+  const list = document.getElementById('foodList');
+  const rows = list.querySelectorAll('.food-row');
+  rows.forEach(row => {
+    if (filter === 'all' || filter === 'recent' || filter === 'food') { row.style.display = ''; }
+    else if (filter === 'brand') { row.style.display = row.querySelector('.brand:not(.empty)') ? '' : 'none'; }
+    else { row.style.display = 'none'; }
+  });
+}
+
+let autoDetect = true;
+function toggleAutoDetect() {
+  autoDetect = !autoDetect;
+  document.getElementById('autoSwitch').classList.toggle('off', !autoDetect);
+  showToast(autoDetect ? '自动识别已开启' : '自动识别已关闭');
+}
+
+let sheetExpanded = false;
+function toggleSheet() {
+  sheetExpanded = !sheetExpanded;
+  document.getElementById('addSheet').classList.toggle('expanded', sheetExpanded);
+}
+
+let sheetStartY = 0, sheetStartExpanded = false;
+const addSheet = document.getElementById('addSheet');
+addSheet.addEventListener('touchstart', e => { sheetStartY = e.touches[0].clientY; sheetStartExpanded = sheetExpanded; });
+addSheet.addEventListener('touchmove', e => {
+  const dy = sheetStartY - e.touches[0].clientY;
+  if (dy > 40 && !sheetStartExpanded) { sheetExpanded = true; addSheet.classList.add('expanded'); }
+  else if (dy < -40 && sheetStartExpanded) { sheetExpanded = false; addSheet.classList.remove('expanded'); }
+});
+
+renderDateScroll(); selectDate(selectedDateIndex);
+</script>
+</body>
+</html>
