@@ -2,7 +2,6 @@ import SwiftUI
 
 struct LogView: View {
     @State private var selectedDayIndex = 5
-    @State private var selectedMealIndex: Int? = nil
     
     let eaten: Double = 1624
     let goal: Double = 2000
@@ -26,11 +25,11 @@ struct LogView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 
-                // Date Switcher
+                // Date Switcher - Glass cards
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(Array(DayLog.mockWeek.enumerated()), id: \.element.id) { index, day in
-                            DateCard(
+                            DateGlassCard(
                                 dayLog: day,
                                 isSelected: selectedDayIndex == index
                             ) {
@@ -41,49 +40,67 @@ struct LogView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Voice Log Entry
+                // Voice Log Entry - Glass button
                 Button(action: {}) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "waveform")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(.purple)
-                            .frame(width: 40, height: 40)
-                            .background(
-                                Circle()
-                                    .fill(.ultraThinMaterial)
-                            )
+                    HStack(spacing: 14) {
+                        GlassIconContainer(icon: "waveform", color: .purple, size: 44)
                         
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 3) {
                             Text("Log with voice")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.primary)
                             Text("Tap to speak your meal")
                                 .font(.system(size: 13, weight: .regular))
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(14)
                     .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(.thinMaterial)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .fill(.thinMaterial)
+                            
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(
+                                    .white.opacity(0.3),
+                                    lineWidth: 1
+                                )
+                            
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.4), .white.opacity(0.05), .white.opacity(0.0)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottom
+                                    ),
+                                    lineWidth: 1.2
+                                )
+                        }
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.12), .white.opacity(0.0)],
+                                    startPoint: .top,
+                                    endPoint: .center
+                                )
                             )
+                            .allowsHitTesting(false)
                     )
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.plain)
                 .padding(.horizontal, 20)
                 
-                // Energy Ring Card
-                GlassCard {
-                    VStack(spacing: 16) {
+                // Energy Ring Card - Thick glass
+                LiquidGlassCard(cornerRadius: 28, thickness: .thick, hasDepth: true) {
+                    VStack(spacing: 20) {
                         HStack {
                             Text("Energy Ring")
                                 .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -91,124 +108,80 @@ struct LogView: View {
                             HStack(spacing: 4) {
                                 Text("+\(Int(exerciseBonus))")
                                     .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.green)
                                 Text("Exercise")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                             }
                             Image(systemName: "info.circle")
                                 .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                         
                         ZStack {
-                            // Outer ring for exercise bonus
-                            CircularProgressRing(
-                                progress: limitWithBonus / (goal * 1.2),
-                                lineWidth: 8,
-                                color: .green.opacity(0.4),
-                                size: 220
-                            )
+                            // Outer exercise ring
+                            GlassEnergyRing(progress: limitWithBonus / (goal * 1.2), size: 230, lineWidth: 10, color: .green.opacity(0.5))
                             
                             // Main ring
-                            CircularProgressRing(
-                                progress: progress,
-                                lineWidth: 18,
-                                color: .purple,
-                                size: 200
-                            )
+                            GlassEnergyRing(progress: progress, size: 205, lineWidth: 22, color: .purple)
                             
                             // Center content
-                            VStack(spacing: 6) {
+                            VStack(spacing: 5) {
                                 Text("Eaten")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.secondary)
                                 
                                 Text("\(Int(eaten))")
                                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primary)
+                                    .foregroundStyle(.primary)
                                 
                                 Text("kcal")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.secondary)
                                 
                                 VStack(spacing: 2) {
                                     Text("Deficit")
                                         .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.secondary)
+                                        .foregroundStyle(.secondary)
                                     Text("\(Int(deficit))")
-                                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(.purple)
+                                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.purple)
                                 }
                                 .padding(.top, 4)
                                 
                                 Text("Left to eat")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                                     .padding(.top, 2)
                                 Text("\(Int(leftToEat))")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundColor(.green)
+                                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.green)
                             }
                         }
-                        .frame(height: 220)
+                        .frame(height: 230)
                         
-                        // Bottom stats
+                        // Bottom stats - Glass divider
                         HStack(spacing: 0) {
-                            VStack(spacing: 4) {
-                                Text("Goal")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                Text("\(Int(goal)) kcal")
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primary)
-                            }
-                            .frame(maxWidth: .infinity)
+                            StatColumn(title: "Goal", value: "\(Int(goal))", unit: "kcal")
                             
                             Divider()
-                                .background(Color.white.opacity(0.1))
+                                .background(.white.opacity(0.15))
                             
-                            VStack(spacing: 4) {
-                                Text("Total Burn")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                HStack(spacing: 4) {
-                                    Image(systemName: "flame.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundColor(.orange)
-                                    Text("\(Int(totalBurn)) kcal")
-                                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
+                            StatColumn(title: "Total Burn", value: "\(Int(totalBurn))", unit: "kcal", icon: "flame.fill", iconColor: .orange)
                             
                             Divider()
-                                .background(Color.white.opacity(0.1))
+                                .background(.white.opacity(0.15))
                             
-                            VStack(spacing: 4) {
-                                Text("Limit (with bonus)")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                HStack(spacing: 4) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundColor(.green)
-                                    Text("\(Int(limitWithBonus)) kcal")
-                                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
+                            StatColumn(title: "Limit (bonus)", value: "\(Int(limitWithBonus))", unit: "kcal", icon: "plus.circle.fill", iconColor: .green)
                         }
                     }
                 }
                 .padding(.horizontal, 20)
                 
-                // Progress Section
-                GlassCard {
+                // Progress Section - Glass grid
+                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
                     VStack(spacing: 16) {
-                        SectionHeader(title: "Progress", icon: nil, action: {})
+                        GlassSectionHeader(title: "Progress", icon: nil, action: {})
                         
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
@@ -217,27 +190,25 @@ struct LogView: View {
                             ForEach(MacroProgress.mockData) { macro in
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
-                                        Image(systemName: macro.icon)
-                                            .font(.system(size: 14))
-                                            .foregroundColor(macro.color)
-                                        Text(macro.name)
-                                            .font(.system(size: 13, weight: .semibold))
-                                            .foregroundColor(.primary)
+                                        HStack(spacing: 5) {
+                                            Image(systemName: macro.icon)
+                                                .font(.system(size: 13))
+                                                .foregroundStyle(macro.color)
+                                            Text(macro.name)
+                                                .font(.system(size: 13, weight: .semibold))
+                                                .foregroundStyle(.primary)
+                                        }
                                         Spacer()
                                         Text(macro.displayText)
                                             .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                     }
                                     
-                                    LinearProgressBar(
-                                        progress: macro.percentage,
-                                        color: macro.color,
-                                        height: 6
-                                    )
+                                    GlassProgressBar(progress: macro.percentage, color: macro.color, height: 7)
                                     
                                     Text("\(Int(macro.percentage * 100))%")
                                         .font(.system(size: 12, weight: .bold, design: .rounded))
-                                        .foregroundColor(macro.color)
+                                        .foregroundStyle(macro.color)
                                 }
                             }
                         }
@@ -246,18 +217,18 @@ struct LogView: View {
                 .padding(.horizontal, 20)
                 
                 // Health Sync Section
-                GlassCard {
+                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
                     VStack(spacing: 16) {
                         HStack {
-                            SectionHeader(title: "Health Sync", icon: nil, action: nil)
+                            GlassSectionHeader(title: "Health Sync", icon: nil, action: nil)
                             Spacer()
                             HStack(spacing: 4) {
                                 Text("Last sync: Today, 7:32 AM")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                                 Image(systemName: "arrow.clockwise")
                                     .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                         
@@ -265,18 +236,18 @@ struct LogView: View {
                             ForEach(HealthData.mockData) { health in
                                 VStack(spacing: 6) {
                                     Image(systemName: health.icon)
-                                        .font(.system(size: 20))
-                                        .foregroundColor(health.color)
+                                        .font(.system(size: 22))
+                                        .foregroundStyle(health.color)
                                     
                                     Text(health.title)
                                         .font(.system(size: 10, weight: .medium))
-                                        .foregroundColor(.secondary)
+                                        .foregroundStyle(.secondary)
                                         .multilineTextAlignment(.center)
                                         .lineLimit(1)
                                     
                                     Text(health.value)
                                         .font(.system(size: 13, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primary)
+                                        .foregroundStyle(.primary)
                                         .multilineTextAlignment(.center)
                                         .lineLimit(2)
                                 }
@@ -287,44 +258,37 @@ struct LogView: View {
                 }
                 .padding(.horizontal, 20)
                 
-                // Meals Section
-                GlassCard {
+                // Meals Section - Glass cards
+                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
                     VStack(spacing: 14) {
-                        SectionHeader(title: "Meals", icon: nil, action: nil)
+                        GlassSectionHeader(title: "Meals", icon: nil, action: nil)
                         
                         ForEach(MealEntry.mockData) { meal in
                             Button(action: {}) {
                                 HStack(spacing: 14) {
-                                    Image(systemName: meal.icon)
-                                        .font(.system(size: 20))
-                                        .foregroundColor(meal.color)
-                                        .frame(width: 36, height: 36)
-                                        .background(
-                                            Circle()
-                                                .fill(meal.color.opacity(0.15))
-                                        )
+                                    GlassIconContainer(icon: meal.icon, color: meal.color, size: 40)
                                     
                                     Text(meal.type.rawValue)
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundColor(.primary)
+                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(.primary)
                                     
                                     Spacer()
                                     
                                     Text("\(meal.calories) kcal")
-                                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primary)
+                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(.primary)
                                     
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.secondary)
+                                        .foregroundStyle(.secondary)
                                 }
                                 .padding(.vertical, 8)
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .buttonStyle(.plain)
                             
                             if meal.id != MealEntry.mockData.last?.id {
                                 Divider()
-                                    .background(Color.white.opacity(0.08))
+                                    .background(.white.opacity(0.1))
                             }
                         }
                     }
@@ -335,6 +299,97 @@ struct LogView: View {
             }
         }
         .background(Color(.systemBackground))
+    }
+}
+
+struct StatColumn: View {
+    let title: String
+    let value: String
+    let unit: String
+    var icon: String? = nil
+    var iconColor: Color? = nil
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.secondary)
+            
+            if let icon = icon, let color = iconColor {
+                HStack(spacing: 3) {
+                    Image(systemName: icon)
+                        .font(.system(size: 10))
+                        .foregroundStyle(color)
+                    Text(value + " " + unit)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.primary)
+                }
+            } else {
+                Text(value + " " + unit)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.primary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct DateGlassCard: View {
+    let dayLog: DayLog
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 5) {
+                Text(dayLog.weekday)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(isSelected ? .white : .secondary)
+                
+                Text(dayLog.date)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
+                
+                Text("\(dayLog.calories)")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(isSelected ? .white : .primary)
+                
+                Text("kcal")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(isSelected ? .white.opacity(0.7) : .secondary)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
+            .background(
+                ZStack {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.purple.opacity(0.85))
+                    } else {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                        
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(
+                                .white.opacity(0.2),
+                                lineWidth: 1
+                            )
+                    }
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [.white.opacity(isSelected ? 0.2 : 0.1), .white.opacity(0.0)],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
+                    )
+                    .allowsHitTesting(false)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

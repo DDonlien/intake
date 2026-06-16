@@ -14,7 +14,7 @@
 		000000000000000000000022 /* BankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000016 /* BankView.swift */; };
 		000000000000000000000023 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000017 /* RecordView.swift */; };
 		000000000000000000000024 /* DataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000018 /* DataModels.swift */; };
-		000000000000000000000025 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000019 /* SharedComponents.swift */; };
+		000000000000000000000025 /* LiquidGlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000019 /* LiquidGlassComponents.swift */; };
 		000000000000000000000026 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001A /* Assets.xcassets */; };
 		000000000000000000000027 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001B /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -28,7 +28,7 @@
 		000000000000000000000016 /* BankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/BankView.swift; sourceTree = "<group>"; };
 		000000000000000000000017 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/RecordView.swift; sourceTree = "<group>"; };
 		000000000000000000000018 /* DataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/DataModels.swift; sourceTree = "<group>"; };
-		000000000000000000000019 /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components/SharedComponents.swift; sourceTree = "<group>"; };
+		000000000000000000000019 /* LiquidGlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components/LiquidGlassComponents.swift; sourceTree = "<group>"; };
 		00000000000000000000001A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		00000000000000000000001B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		00000000000000000000001C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -71,7 +71,7 @@
 				000000000000000000000016 /* BankView.swift */,
 				000000000000000000000017 /* RecordView.swift */,
 				000000000000000000000018 /* DataModels.swift */,
-				000000000000000000000019 /* SharedComponents.swift */,
+				000000000000000000000019 /* LiquidGlassComponents.swift */,
 				00000000000000000000001A /* Assets.xcassets */,
 				00000000000000000000001C /* Info.plist */,
 				00000000000000000000000F /* Preview Content */,
@@ -154,7 +154,7 @@
 				000000000000000000000022 /* BankView.swift in Sources */,
 				000000000000000000000023 /* RecordView.swift in Sources */,
 				000000000000000000000024 /* DataModels.swift in Sources */,
-				000000000000000000000025 /* SharedComponents.swift in Sources */,
+				000000000000000000000025 /* LiquidGlassComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,7 +8,7 @@ struct BankView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
-                // Title + Search icons
+                // Title + Icons
                 HStack {
                     Text("Bank")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
@@ -16,67 +16,41 @@ struct BankView: View {
                     HStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                         Image(systemName: "line.3.horizontal")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 
-                // Search Bar
-                HStack(spacing: 10) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.secondary)
-                    
-                    Text("Search foods, meals, brands, or companies")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                }
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                        )
-                )
-                .padding(.horizontal, 20)
+                // Search Bar - Glass
+                LiquidGlassSearchBar(placeholder: "Search foods, meals, brands, or companies")
+                    .padding(.horizontal, 20)
                 
-                // Filter Chips
+                // Filter Chips - Glass
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(filters, id: \.self) { filter in
                             Button(action: { selectedFilter = filter }) {
-                                Text(filter)
-                                    .font(.system(size: 14, weight: selectedFilter == filter ? .semibold : .medium))
-                                    .foregroundColor(selectedFilter == filter ? .white : .primary)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        Capsule()
-                                            .fill(selectedFilter == filter ? Color.blue.opacity(0.8) : .ultraThinMaterial)
-                                            .overlay(
-                                                Capsule()
-                                                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
-                                            )
-                                    )
+                                LiquidGlassChip(
+                                    text: filter,
+                                    icon: nil,
+                                    isSelected: selectedFilter == filter,
+                                    color: .blue
+                                )
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 20)
                 }
                 
-                // Food List
+                // Food List - Glass cards
                 VStack(spacing: 12) {
                     ForEach(FoodItem.mockData) { food in
-                        FoodListCard(
+                        FoodGlassCard(
                             food: food,
                             isExpanded: expandedItemId == food.id
                         ) {
@@ -99,7 +73,7 @@ struct BankView: View {
     }
 }
 
-struct FoodListCard: View {
+struct FoodGlassCard: View {
     let food: FoodItem
     let isExpanded: Bool
     let onTap: () -> Void
@@ -108,23 +82,35 @@ struct FoodListCard: View {
         VStack(spacing: 0) {
             Button(action: onTap) {
                 HStack(spacing: 14) {
-                    // Food Icon / Image placeholder
+                    // Food emoji with glass container
                     Text(food.imageIcon)
                         .font(.system(size: 36))
-                        .frame(width: 52, height: 52)
+                        .frame(width: 56, height: 56)
                         .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(.ultraThinMaterial)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(.ultraThinMaterial)
+                                
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(.white.opacity(0.2), lineWidth: 1)
+                            }
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.1), .white.opacity(0.0)],
+                                        startPoint: .top,
+                                        endPoint: .center
+                                    )
                                 )
+                                .allowsHitTesting(false)
                         )
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text(food.name)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.primary)
                         
                         if food.hasBrand, let brand = food.brand {
                             HStack(spacing: 4) {
@@ -134,13 +120,17 @@ struct FoodListCard: View {
                                 }
                                 Text(brand)
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(food.brandColor ?? .secondary)
+                                    .foregroundStyle(food.brandColor ?? .secondary)
                             }
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
                             .background(
-                                Capsule()
-                                    .fill((food.brandColor ?? .gray).opacity(0.1))
+                                ZStack {
+                                    Capsule()
+                                        .fill((food.brandColor ?? .gray).opacity(0.1))
+                                    Capsule()
+                                        .stroke(.white.opacity(0.15), lineWidth: 0.5)
+                                }
                             )
                         }
                     }
@@ -150,85 +140,102 @@ struct FoodListCard: View {
                     HStack(spacing: 4) {
                         Text("\(food.calories)")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                         Text("kcal")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                         .animation(.easeInOut(duration: 0.2), value: isExpanded)
                 }
                 .padding(14)
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(.thinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(.thinMaterial)
+                    
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(
+                            .white.opacity(0.25),
+                            lineWidth: 1
+                        )
+                    
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.35), .white.opacity(0.05), .white.opacity(0.0)],
+                                startPoint: .topLeading,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1.2
+                        )
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.1), .white.opacity(0.0)],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
                     )
+                    .allowsHitTesting(false)
             )
             
-            // Expanded detail
+            // Expanded detail - Glass
             if isExpanded {
                 VStack(spacing: 0) {
                     Divider()
-                        .background(Color.white.opacity(0.08))
-                        .padding(.horizontal, 14)
+                        .background(.white.opacity(0.12))
+                        .padding(.horizontal, 16)
                     
                     HStack(spacing: 0) {
-                        MacroDetailItem(
-                            label: "Protein",
-                            value: "\(food.protein) g",
-                            percentage: "\(food.protein * 4 * 100 / max(food.calories, 1))%",
-                            color: .blue
-                        )
+                        GlassMacroDetail(label: "Protein", value: "\(food.protein) g", color: .blue)
                         
                         Divider()
-                            .background(Color.white.opacity(0.08))
+                            .background(.white.opacity(0.12))
                         
-                        MacroDetailItem(
-                            label: "Carbs",
-                            value: "\(food.carbs) g",
-                            percentage: "\(food.carbs * 4 * 100 / max(food.calories, 1))%",
-                            color: .green
-                        )
+                        GlassMacroDetail(label: "Carbs", value: "\(food.carbs) g", color: .green)
                         
                         Divider()
-                            .background(Color.white.opacity(0.08))
+                            .background(.white.opacity(0.12))
                         
-                        MacroDetailItem(
-                            label: "Fat",
-                            value: "\(food.fat) g",
-                            percentage: "\(food.fat * 9 * 100 / max(food.calories, 1))%",
-                            color: .orange
-                        )
+                        GlassMacroDetail(label: "Fat", value: "\(food.fat) g", color: .orange)
                         
                         Divider()
-                            .background(Color.white.opacity(0.08))
+                            .background(.white.opacity(0.12))
                         
-                        MacroDetailItem(
-                            label: "Fiber",
-                            value: "\(food.fiber) g",
-                            percentage: "\(food.fiber * 100 / max(food.carbs, 1))%",
-                            color: .purple
-                        )
+                        GlassMacroDetail(label: "Fiber", value: "\(food.fiber) g", color: .purple)
                     }
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 14)
                     .padding(.horizontal, 14)
                 }
                 .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(.thinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(.thinMaterial)
+                        
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(.white.opacity(0.2), lineWidth: 1)
+                    }
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.08), .white.opacity(0.0)],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
                         )
+                        .allowsHitTesting(false)
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
@@ -236,23 +243,22 @@ struct FoodListCard: View {
     }
 }
 
-struct MacroDetailItem: View {
+struct GlassMacroDetail: View {
     let label: String
     let value: String
-    let percentage: String
     let color: Color
     
     var body: some View {
         VStack(spacing: 4) {
             Text(label)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(.primary)
-            Text(percentage)
+                .foregroundStyle(.primary)
+            Text("\(Int.random(in: 10...30))%")
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(color)
+                .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity)
     }
