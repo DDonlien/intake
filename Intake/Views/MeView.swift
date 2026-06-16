@@ -13,8 +13,8 @@ struct MeView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 
-                // Profile Header - Thick glass
-                LiquidGlassCard(cornerRadius: 28, thickness: .thick) {
+                // Profile Header - Glass card
+                GlassEffectContainer(spacing: 0) {
                     HStack(spacing: 16) {
                         ZStack {
                             Circle()
@@ -39,7 +39,6 @@ struct MeView: View {
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 
-                                // Premium badge - glass chip
                                 HStack(spacing: 4) {
                                     Image(systemName: "crown.fill")
                                         .font(.system(size: 10))
@@ -50,14 +49,7 @@ struct MeView: View {
                                 }
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
-                                .background(
-                                    ZStack {
-                                        Capsule()
-                                            .fill(.purple.opacity(0.15))
-                                        Capsule()
-                                            .stroke(.white.opacity(0.2), lineWidth: 1)
-                                    }
-                                )
+                                .glassEffect(.regular.tint(.purple.opacity(0.15)), in: .capsule(style: .continuous))
                             }
                             
                             Text("You've got this. One choice at a time.")
@@ -66,13 +58,19 @@ struct MeView: View {
                                 .lineLimit(2)
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 28, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
                 // Goal Summary - Glass grid
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 16) {
-                        GlassSectionHeader(title: "Goal Summary", icon: nil, action: nil)
+                        HStack {
+                            Text("Goal Summary")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                            Spacer()
+                        }
                         
                         HStack(spacing: 0) {
                             GoalItem(icon: "target", title: "Goal", value: "2,000", unit: "kcal", color: .purple)
@@ -98,19 +96,29 @@ struct MeView: View {
                             GoalItem(icon: "bolt.fill", title: "Protein", value: "120", unit: "g", color: .blue)
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
                 // Plan Settings - Glass list
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 0) {
-                        GlassSectionHeader(title: "Plan Settings", icon: nil, action: nil)
-                            .padding(.bottom, 12)
+                        HStack {
+                            Text("Plan Settings")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                            Spacer()
+                        }
+                        .padding(.bottom, 12)
                         
                         ForEach(PlanSetting.mockData) { setting in
                             Button(action: {}) {
                                 HStack(spacing: 14) {
-                                    GlassIconContainer(icon: setting.icon, color: setting.color, size: 36)
+                                    Image(systemName: setting.icon)
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(setting.color)
+                                        .frame(width: 36, height: 36)
+                                        .glassEffect(.clear, in: .rect(cornerRadius: 10, style: .continuous))
                                     
                                     Text(setting.title)
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -128,7 +136,7 @@ struct MeView: View {
                                 }
                                 .padding(.vertical, 12)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.glass)
                             
                             if setting.id != PlanSetting.mockData.last?.id {
                                 Divider()
@@ -137,15 +145,21 @@ struct MeView: View {
                             }
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
                 // Health Data - Glass card
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 0) {
                         Button(action: {}) {
                             HStack(spacing: 14) {
-                                GlassIconContainer(icon: "heart.fill", color: .red, size: 36)
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundStyle(.red)
+                                    .frame(width: 36, height: 36)
+                                    .glassEffect(.clear, in: .rect(cornerRadius: 10, style: .continuous))
                                 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Apple Health")
@@ -178,16 +192,22 @@ struct MeView: View {
                             }
                             .padding(.vertical, 12)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.glass)
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
                 // Log & Trends - Glass
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     Button(action: {}) {
                         HStack(spacing: 14) {
-                            GlassIconContainer(icon: "chart.bar.fill", color: .purple, size: 36)
+                            Image(systemName: "chart.bar.fill")
+                                .font(.system(size: 18))
+                                .foregroundStyle(.purple)
+                                .frame(width: 36, height: 36)
+                                .glassEffect(.clear, in: .rect(cornerRadius: 10, style: .continuous))
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Log & Trends")
@@ -215,15 +235,21 @@ struct MeView: View {
                         }
                         .padding(.vertical, 12)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
                 // Favorites - Glass
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     Button(action: {}) {
                         HStack(spacing: 14) {
-                            GlassIconContainer(icon: "star.fill", color: .yellow, size: 36)
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 18))
+                                .foregroundStyle(.yellow)
+                                .frame(width: 36, height: 36)
+                                .glassEffect(.clear, in: .rect(cornerRadius: 10, style: .continuous))
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Favorites")
@@ -242,15 +268,21 @@ struct MeView: View {
                         }
                         .padding(.vertical, 12)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
                 // Settings - Glass
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     Button(action: {}) {
                         HStack(spacing: 14) {
-                            GlassIconContainer(icon: "gearshape.fill", color: .gray, size: 36)
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 18))
+                                .foregroundStyle(.gray)
+                                .frame(width: 36, height: 36)
+                                .glassEffect(.clear, in: .rect(cornerRadius: 10, style: .continuous))
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Settings")
@@ -269,7 +301,9 @@ struct MeView: View {
                         }
                         .padding(.vertical, 12)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 

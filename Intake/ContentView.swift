@@ -5,33 +5,23 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            MeView()
-                .tabItem {
-                    Image(systemName: "person.fill")
-                    Text("Me")
-                }
-                .tag(0)
+            Tab("Me", systemImage: "person.fill", value: 0) {
+                MeView()
+            }
             
-            LogView()
-                .tabItem {
-                    Image(systemName: "chart.bar.fill")
-                    Text("Log")
-                }
-                .tag(1)
+            Tab("Log", systemImage: "chart.bar.fill", value: 1) {
+                LogView()
+            }
             
-            BankView()
-                .tabItem {
-                    Image(systemName: "building.columns.fill")
-                    Text("Bank")
-                }
-                .tag(2)
+            Tab("Bank", systemImage: "building.columns.fill", value: 2) {
+                BankView()
+            }
             
-            RecordView()
-                .tabItem {
-                    Image(systemName: "plus.circle.fill")
-                }
-                .tag(3)
+            Tab("", systemImage: "plus.circle.fill", value: 3) {
+                RecordView()
+            }
         }
+        .tint(.primary)
     }
 }
 

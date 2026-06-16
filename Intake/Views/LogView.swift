@@ -25,11 +25,11 @@ struct LogView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 
-                // Date Switcher - Glass cards
+                // Date Switcher - Glass cards with edge-to-edge scroll
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(Array(DayLog.mockWeek.enumerated()), id: \.element.id) { index, day in
-                            DateGlassCard(
+                            DateCard(
                                 dayLog: day,
                                 isSelected: selectedDayIndex == index
                             ) {
@@ -43,7 +43,11 @@ struct LogView: View {
                 // Voice Log Entry - Glass button
                 Button(action: {}) {
                     HStack(spacing: 14) {
-                        GlassIconContainer(icon: "waveform", color: .purple, size: 44)
+                        Image(systemName: "waveform")
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundStyle(.purple)
+                            .padding(10)
+                            .glassEffect(.clear, in: .circle)
                         
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Log with voice")
@@ -61,45 +65,13 @@ struct LogView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding(14)
-                    .background(
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(.thinMaterial)
-                            
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(
-                                    .white.opacity(0.3),
-                                    lineWidth: 1
-                                )
-                            
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [.white.opacity(0.4), .white.opacity(0.05), .white.opacity(0.0)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottom
-                                    ),
-                                    lineWidth: 1.2
-                                )
-                        }
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.12), .white.opacity(0.0)],
-                                    startPoint: .top,
-                                    endPoint: .center
-                                )
-                            )
-                            .allowsHitTesting(false)
-                    )
+                    .glassEffect(.regular, in: .rect(cornerRadius: 20))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.glass)
                 .padding(.horizontal, 20)
                 
-                // Energy Ring Card - Thick glass
-                LiquidGlassCard(cornerRadius: 28, thickness: .thick, hasDepth: true) {
+                // Energy Ring Card - Thick glass with GlassEffectContainer
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 20) {
                         HStack {
                             Text("Energy Ring")
@@ -160,7 +132,7 @@ struct LogView: View {
                         }
                         .frame(height: 230)
                         
-                        // Bottom stats - Glass divider
+                        // Bottom stats - Glass dividers
                         HStack(spacing: 0) {
                             StatColumn(title: "Goal", value: "\(Int(goal))", unit: "kcal")
                             
@@ -175,13 +147,22 @@ struct LogView: View {
                             StatColumn(title: "Limit (bonus)", value: "\(Int(limitWithBonus))", unit: "kcal", icon: "plus.circle.fill", iconColor: .green)
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 28))
                 }
                 .padding(.horizontal, 20)
                 
                 // Progress Section - Glass grid
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 16) {
-                        GlassSectionHeader(title: "Progress", icon: nil, action: {})
+                        HStack {
+                            Text("Progress")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                        }
                         
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
@@ -213,14 +194,17 @@ struct LogView: View {
                             }
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24))
                 }
                 .padding(.horizontal, 20)
                 
-                // Health Sync Section
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                // Health Sync Section - Glass
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 16) {
                         HStack {
-                            GlassSectionHeader(title: "Health Sync", icon: nil, action: nil)
+                            Text("Health Sync")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
                             Spacer()
                             HStack(spacing: 4) {
                                 Text("Last sync: Today, 7:32 AM")
@@ -255,18 +239,28 @@ struct LogView: View {
                             }
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24))
                 }
                 .padding(.horizontal, 20)
                 
                 // Meals Section - Glass cards
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 14) {
-                        GlassSectionHeader(title: "Meals", icon: nil, action: nil)
+                        HStack {
+                            Text("Meals")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                            Spacer()
+                        }
                         
                         ForEach(MealEntry.mockData) { meal in
                             Button(action: {}) {
                                 HStack(spacing: 14) {
-                                    GlassIconContainer(icon: meal.icon, color: meal.color, size: 40)
+                                    Image(systemName: meal.icon)
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(meal.color)
+                                        .frame(width: 36, height: 36)
+                                        .glassEffect(.clear, in: .circle)
                                     
                                     Text(meal.type.rawValue)
                                         .font(.system(size: 16, weight: .semibold, design: .rounded))
@@ -284,14 +278,16 @@ struct LogView: View {
                                 }
                                 .padding(.vertical, 8)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.glass)
                             
                             if meal.id != MealEntry.mockData.last?.id {
                                 Divider()
-                                    .background(.white.opacity(0.1))
+                                    .background(.white.opacity(0.08))
                             }
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24))
                 }
                 .padding(.horizontal, 20)
                 
@@ -334,7 +330,7 @@ struct StatColumn: View {
     }
 }
 
-struct DateGlassCard: View {
+struct DateCard: View {
     let dayLog: DayLog
     let isSelected: Bool
     let onTap: () -> Void
@@ -360,36 +356,75 @@ struct DateGlassCard: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 14)
-            .background(
-                ZStack {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(.purple.opacity(0.85))
-                    } else {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                        
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(
-                                .white.opacity(0.2),
-                                lineWidth: 1
-                            )
-                    }
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [.white.opacity(isSelected ? 0.2 : 0.1), .white.opacity(0.0)],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
-                    )
-                    .allowsHitTesting(false)
+            .glassEffect(
+                isSelected ? .regular.tint(.purple) : .clear,
+                in: .rect(cornerRadius: 16, style: .continuous)
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+struct GlassEnergyRing: View {
+    let progress: Double
+    let size: CGFloat
+    let lineWidth: CGFloat
+    let color: Color
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(.ultraThinMaterial, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+            
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AngularGradient(
+                        colors: [color.opacity(0.6), color, color.opacity(0.8), color.opacity(0.5)],
+                        center: .center,
+                        startAngle: .degrees(0),
+                        endAngle: .degrees(360)
+                    ),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 1.2), value: progress)
+            
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(.white.opacity(0.3), style: StrokeStyle(lineWidth: lineWidth * 0.3, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 1.2), value: progress)
+                .blur(radius: 2)
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+struct GlassProgressBar: View {
+    let progress: Double
+    let color: Color
+    let height: CGFloat
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: height / 2, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                
+                RoundedRectangle(cornerRadius: height / 2, style: .continuous)
+                    .fill(color.gradient)
+                    .frame(width: max(0, geo.size.width * progress), height: height)
+                    .animation(.easeInOut(duration: 0.8), value: progress)
+                
+                RoundedRectangle(cornerRadius: height / 2, style: .continuous)
+                    .fill(.white.opacity(0.2))
+                    .frame(width: max(0, geo.size.width * progress), height: height * 0.4)
+                    .animation(.easeInOut(duration: 0.8), value: progress)
+                    .allowsHitTesting(false)
+            }
+        }
+        .frame(height: height)
     }
 }
 

@@ -14,32 +14,54 @@ struct BankView: View {
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                     Spacer()
                     HStack(spacing: 16) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.primary)
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.primary)
+                        Button(action: {}) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.primary)
+                        }
+                        .buttonStyle(.glass)
+                        
+                        Button(action: {}) {
+                            Image(systemName: "line.3.horizontal")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.primary)
+                        }
+                        .buttonStyle(.glass)
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 
                 // Search Bar - Glass
-                LiquidGlassSearchBar(placeholder: "Search foods, meals, brands, or companies")
-                    .padding(.horizontal, 20)
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("Search foods, meals, brands, or companies")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.secondary)
+                    
+                    Spacer()
+                }
+                .padding(14)
+                .glassEffect(.regular, in: .rect(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal, 20)
                 
                 // Filter Chips - Glass
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(filters, id: \.self) { filter in
                             Button(action: { selectedFilter = filter }) {
-                                LiquidGlassChip(
-                                    text: filter,
-                                    icon: nil,
-                                    isSelected: selectedFilter == filter,
-                                    color: .blue
-                                )
+                                Text(filter)
+                                    .font(.system(size: 14, weight: selectedFilter == filter ? .semibold : .medium, design: .rounded))
+                                    .foregroundStyle(selectedFilter == filter ? .white : .primary)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .glassEffect(
+                                        selectedFilter == filter ? .regular.tint(.blue) : .clear,
+                                        in: .capsule(style: .continuous)
+                                    )
                             }
                             .buttonStyle(.plain)
                         }
@@ -82,30 +104,10 @@ struct FoodGlassCard: View {
         VStack(spacing: 0) {
             Button(action: onTap) {
                 HStack(spacing: 14) {
-                    // Food emoji with glass container
                     Text(food.imageIcon)
                         .font(.system(size: 36))
                         .frame(width: 56, height: 56)
-                        .background(
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(.ultraThinMaterial)
-                                
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(.white.opacity(0.2), lineWidth: 1)
-                            }
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.white.opacity(0.1), .white.opacity(0.0)],
-                                        startPoint: .top,
-                                        endPoint: .center
-                                    )
-                                )
-                                .allowsHitTesting(false)
-                        )
+                        .glassEffect(.clear, in: .rect(cornerRadius: 16, style: .continuous))
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text(food.name)
@@ -124,13 +126,9 @@ struct FoodGlassCard: View {
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(
-                                ZStack {
-                                    Capsule()
-                                        .fill((food.brandColor ?? .gray).opacity(0.1))
-                                    Capsule()
-                                        .stroke(.white.opacity(0.15), lineWidth: 0.5)
-                                }
+                            .glassEffect(
+                                .regular.tint((food.brandColor ?? .gray).opacity(0.1)),
+                                in: .capsule(style: .continuous)
                             )
                         }
                     }
@@ -154,40 +152,8 @@ struct FoodGlassCard: View {
                 }
                 .padding(14)
             }
-            .buttonStyle(.plain)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(.thinMaterial)
-                    
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(
-                            .white.opacity(0.25),
-                            lineWidth: 1
-                        )
-                    
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.35), .white.opacity(0.05), .white.opacity(0.0)],
-                                startPoint: .topLeading,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1.2
-                        )
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [.white.opacity(0.1), .white.opacity(0.0)],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
-                    )
-                    .allowsHitTesting(false)
-            )
+            .buttonStyle(.glass)
+            .glassEffect(.regular, in: .rect(cornerRadius: 20, style: .continuous))
             
             // Expanded detail - Glass
             if isExpanded {
@@ -217,26 +183,7 @@ struct FoodGlassCard: View {
                     .padding(.vertical, 14)
                     .padding(.horizontal, 14)
                 }
-                .background(
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(.thinMaterial)
-                        
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(.white.opacity(0.2), lineWidth: 1)
-                    }
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [.white.opacity(0.08), .white.opacity(0.0)],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-                        .allowsHitTesting(false)
-                )
+                .glassEffect(.regular, in: .rect(cornerRadius: 20, style: .continuous))
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }

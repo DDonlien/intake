@@ -14,29 +14,8 @@ struct RecordView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(.primary)
-                            .frame(width: 40, height: 40)
-                            .background(
-                                ZStack {
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                    Circle()
-                                        .stroke(.white.opacity(0.25), lineWidth: 1)
-                                }
-                            )
-                            .overlay(
-                                Circle()
-                                    .fill(
-                                        RadialGradient(
-                                            colors: [.white.opacity(0.15), .white.opacity(0.0)],
-                                            center: .topLeading,
-                                            startRadius: 0,
-                                            endRadius: 25
-                                        )
-                                    )
-                                    .allowsHitTesting(false)
-                            )
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
                     
                     Spacer()
                     
@@ -59,34 +38,7 @@ struct RecordView: View {
                         .foregroundStyle(.primary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
-                        .background(
-                            ZStack {
-                                Capsule()
-                                    .fill(.ultraThinMaterial)
-                                Capsule()
-                                    .stroke(.white.opacity(0.25), lineWidth: 1)
-                                Capsule()
-                                    .stroke(
-                                        LinearGradient(
-                                            colors: [.white.opacity(0.35), .white.opacity(0.05)],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottom
-                                        ),
-                                        lineWidth: 1.2
-                                    )
-                            }
-                        )
-                        .overlay(
-                            Capsule()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.white.opacity(0.12), .white.opacity(0.0)],
-                                        startPoint: .top,
-                                        endPoint: .center
-                                    )
-                                )
-                                .allowsHitTesting(false)
-                        )
+                        .glassEffect(.regular, in: .capsule(style: .continuous))
                     }
                     
                     Spacer()
@@ -95,36 +47,19 @@ struct RecordView: View {
                         Image(systemName: "sparkles")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(.primary)
-                            .frame(width: 40, height: 40)
-                            .background(
-                                ZStack {
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                    Circle()
-                                        .stroke(.white.opacity(0.25), lineWidth: 1)
-                                }
-                            )
-                            .overlay(
-                                Circle()
-                                    .fill(
-                                        RadialGradient(
-                                            colors: [.white.opacity(0.15), .white.opacity(0.0)],
-                                            center: .topLeading,
-                                            startRadius: 0,
-                                            endRadius: 25
-                                        )
-                                    )
-                                    .allowsHitTesting(false)
-                            )
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 
                 // Auto-fill Toggle - Glass
                 HStack(spacing: 12) {
-                    GlassIconContainer(icon: "sparkles", color: .purple, size: 40)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.purple)
+                        .padding(10)
+                        .glassEffect(.clear, in: .rect(cornerRadius: 10, style: .continuous))
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Auto-fill")
@@ -142,112 +77,33 @@ struct RecordView: View {
                         .frame(width: 52)
                 }
                 .padding(14)
-                .background(
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(.white.opacity(0.25), lineWidth: 1)
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.35), .white.opacity(0.05)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottom
-                                ),
-                                lineWidth: 1.2
-                            )
-                    }
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [.white.opacity(0.1), .white.opacity(0.0)],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-                        .allowsHitTesting(false)
-                )
+                .glassEffect(.regular, in: .rect(cornerRadius: 20, style: .continuous))
                 .padding(.horizontal, 20)
                 
-                // Camera Area - Glass container with depth
+                // Camera Area - Deep glass container with content
                 ZStack {
-                    // Deep glass background with refraction colors
+                    // Background gradient content that glass will refract
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    .purple.opacity(0.08),
-                                    .orange.opacity(0.06),
-                                    .yellow.opacity(0.04)
+                                    .purple.opacity(0.12),
+                                    .orange.opacity(0.08),
+                                    .yellow.opacity(0.05)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                                .stroke(
-                                    .white.opacity(0.2),
-                                    lineWidth: 1.5
-                                )
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [
-                                            .white.opacity(0.4),
-                                            .white.opacity(0.1),
-                                            .white.opacity(0.0),
-                                            .white.opacity(0.05),
-                                            .white.opacity(0.3)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 2
-                                )
-                        )
                     
                     VStack(spacing: 20) {
                         // Food emoji row with glass orbs
-                        HStack(spacing: -8) {
+                        HStack(spacing: 8) {
                             ForEach(["🍗", "🍔", "🥗", "🍎", "🥑"], id: \.self) { emoji in
                                 Text(emoji)
                                     .font(.system(size: 36))
-                                    .frame(width: 60, height: 60)
-                                    .background(
-                                        ZStack {
-                                            Circle()
-                                                .fill(.ultraThinMaterial)
-                                            Circle()
-                                                .stroke(.white.opacity(0.25), lineWidth: 1)
-                                            Circle()
-                                                .stroke(
-                                                    AngularGradient(
-                                                        colors: [.white.opacity(0.4), .white.opacity(0.1), .white.opacity(0.0)],
-                                                        center: .center,
-                                                        angle: .degrees(45)
-                                                    ),
-                                                    lineWidth: 1.5
-                                                )
-                                        }
-                                    )
-                                    .overlay(
-                                        Circle()
-                                            .fill(
-                                                RadialGradient(
-                                                    colors: [.white.opacity(0.2), .white.opacity(0.0)],
-                                                    center: .topLeading,
-                                                    startRadius: 0,
-                                                    endRadius: 35
-                                                )
-                                            )
-                                            .allowsHitTesting(false)
-                                    )
+                                    .frame(width: 56, height: 56)
+                                    .glassEffect(.clear, in: .circle)
                             }
                         }
                         
@@ -258,104 +114,42 @@ struct RecordView: View {
                         // Camera actions - Glass buttons
                         HStack(spacing: 40) {
                             VStack(spacing: 6) {
-                                ZStack {
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                        .frame(width: 60, height: 60)
-                                    Circle()
-                                        .stroke(.white.opacity(0.25), lineWidth: 1)
-                                        .frame(width: 60, height: 60)
-                                    Image(systemName: "photo.on.rectangle")
-                                        .font(.system(size: 22))
-                                        .foregroundStyle(.primary)
-                                }
-                                .overlay(
-                                    Circle()
-                                        .fill(
-                                            RadialGradient(
-                                                colors: [.white.opacity(0.15), .white.opacity(0.0)],
-                                                center: .topLeading,
-                                                startRadius: 0,
-                                                endRadius: 30
-                                            )
-                                        )
-                                        .allowsHitTesting(false)
-                                )
+                                Image(systemName: "photo.on.rectangle")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(.primary)
+                                    .frame(width: 56, height: 56)
+                                    .glassEffect(.regular, in: .circle)
                                 Text("Library")
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
                             
-                            // Shutter button - prominent glass
                             Button(action: {}) {
                                 ZStack {
                                     Circle()
                                         .fill(.regularMaterial)
-                                        .frame(width: 72, height: 72)
-                                    Circle()
-                                        .stroke(.white.opacity(0.3), lineWidth: 2)
-                                        .frame(width: 72, height: 72)
-                                    Circle()
-                                        .stroke(
-                                            AngularGradient(
-                                                colors: [.white.opacity(0.5), .white.opacity(0.1), .white.opacity(0.2)],
-                                                center: .center,
-                                                angle: .degrees(45)
-                                            ),
-                                            lineWidth: 2.5
-                                        )
-                                        .frame(width: 72, height: 72)
+                                        .frame(width: 64, height: 64)
                                     
                                     Circle()
                                         .fill(.white)
-                                        .frame(width: 58, height: 58)
+                                        .frame(width: 56, height: 56)
                                         .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
                                     
                                     Image(systemName: "camera.fill")
                                         .font(.system(size: 24, weight: .medium))
                                         .foregroundStyle(.primary)
                                 }
-                                .overlay(
-                                    Circle()
-                                        .fill(
-                                            RadialGradient(
-                                                colors: [.white.opacity(0.3), .white.opacity(0.0)],
-                                                center: .topLeading,
-                                                startRadius: 0,
-                                                endRadius: 40
-                                            )
-                                        )
-                                        .allowsHitTesting(false)
-                                )
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.glassProminent)
                             
                             VStack(spacing: 6) {
-                                ZStack {
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                        .frame(width: 60, height: 60)
-                                    Circle()
-                                        .stroke(.white.opacity(0.25), lineWidth: 1)
-                                        .frame(width: 60, height: 60)
-                                    Image(systemName: "mic.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundStyle(.primary)
-                                }
-                                .overlay(
-                                    Circle()
-                                        .fill(
-                                            RadialGradient(
-                                                colors: [.white.opacity(0.15), .white.opacity(0.0)],
-                                                center: .topLeading,
-                                                startRadius: 0,
-                                                endRadius: 30
-                                            )
-                                        )
-                                        .allowsHitTesting(false)
-                                )
+                                Image(systemName: "mic.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(.primary)
+                                    .frame(width: 56, height: 56)
+                                    .glassEffect(.regular, in: .circle)
                                 Text("Voice")
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -363,42 +157,41 @@ struct RecordView: View {
                     .padding(.vertical, 30)
                 }
                 .frame(height: 300)
+                .glassEffect(.regular, in: .rect(cornerRadius: 28, style: .continuous))
                 .padding(.horizontal, 20)
                 
                 // Search Bar - Glass
-                LiquidGlassSearchBar(placeholder: "Search foods, brands, or meals")
-                    .padding(.horizontal, 20)
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("Search foods, brands, or meals")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.secondary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "barcode.viewfinder")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(14)
+                .glassEffect(.regular, in: .rect(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal, 20)
                 
                 // Quick Actions - Glass icons
                 HStack(spacing: 0) {
                     ForEach(QuickAction.mockData) { action in
                         VStack(spacing: 8) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(.ultraThinMaterial)
-                                    .frame(width: 52, height: 52)
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(.white.opacity(0.25), lineWidth: 1)
-                                    .frame(width: 52, height: 52)
-                                Image(systemName: action.icon)
-                                    .font(.system(size: 22))
-                                    .foregroundStyle(action.color)
-                            }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(
-                                        RadialGradient(
-                                            colors: [.white.opacity(0.15), .white.opacity(0.0)],
-                                            center: .topLeading,
-                                            startRadius: 0,
-                                            endRadius: 30
-                                        )
-                                    )
-                                    .allowsHitTesting(false)
-                            )
+                            Image(systemName: action.icon)
+                                .font(.system(size: 22))
+                                .foregroundStyle(action.color)
+                                .frame(width: 48, height: 48)
+                                .glassEffect(.clear, in: .rect(cornerRadius: 14, style: .continuous))
                             
                             Text(action.name)
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(.primary)
                         }
                         .frame(maxWidth: .infinity)
@@ -407,7 +200,7 @@ struct RecordView: View {
                 .padding(.horizontal, 20)
                 
                 // Recent Foods - Glass card
-                LiquidGlassCard(cornerRadius: 24, thickness: .standard) {
+                GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 14) {
                         HStack {
                             Text("Recent Foods")
@@ -419,7 +212,7 @@ struct RecordView: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundStyle(.purple)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.glass)
                         }
                         
                         ForEach(RecentFood.mockData) { food in
@@ -428,14 +221,7 @@ struct RecordView: View {
                                     Text(food.icon)
                                         .font(.system(size: 32))
                                         .frame(width: 48, height: 48)
-                                        .background(
-                                            ZStack {
-                                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                                    .fill(.ultraThinMaterial)
-                                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                                    .stroke(.white.opacity(0.2), lineWidth: 1)
-                                            }
-                                        )
+                                        .glassEffect(.clear, in: .rect(cornerRadius: 14, style: .continuous))
                                     
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(food.name)
@@ -464,7 +250,7 @@ struct RecordView: View {
                                 }
                                 .padding(.vertical, 8)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.glass)
                             
                             if food.id != RecentFood.mockData.last?.id {
                                 Divider()
@@ -472,6 +258,8 @@ struct RecordView: View {
                             }
                         }
                     }
+                    .padding(18)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
                 }
                 .padding(.horizontal, 20)
                 
