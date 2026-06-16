@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedTab = 1
+    @State private var selectedTab = 1 // Log as default home
     
     var body: some View {
         TabView(selection: $selectedTab) {
