@@ -91,7 +91,11 @@ struct BankView: View {
                 Spacer().frame(height: 40)
             }
         }
+        #if os(iOS)
         .background(Color(.systemBackground))
+        #else
+        .background(Color(.windowBackgroundColor))
+        #endif
     }
 }
 
