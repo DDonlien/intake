@@ -2,21 +2,21 @@
   "name": "Intake",
   "short_name": "Intake",
   "description": "Local-first nutrition budget prototype.",
-  "start_url": "/?source=pwa#log",
-  "scope": "/",
+  "start_url": "./?source=pwa#log",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f6f7fa",
   "theme_color": "#f6f7fa",
   "icons": [
     {
-      "src": "/apple-touch-icon.svg",
+      "src": "./apple-touch-icon.svg",
       "sizes": "180x180",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon.svg",
+      "src": "./icon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

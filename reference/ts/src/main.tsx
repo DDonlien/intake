@@ -231,7 +231,7 @@ function normalizeData(raw: AppData): AppData {
   const planGoals = goalsForPlan(plan, profile);
   const goals = goalsSource === "edited" && raw.goals ? { ...planGoals, ...raw.goals, plan } : planGoals;
   const entries = Object.fromEntries(Object.entries(raw.entries ?? {}).map(([key, meals]) => [key, normalizeMealNames(meals)]));
-  const expandedMeals = (raw.expandedMeals ?? []).map((name) => (name === "Snack" ? "Snack 1" : name));
+  const expandedMeals = (raw.expandedMeals ?? []).map((name) => (name === "Snack" ? "Snack 1" : name)).slice(-1);
   return {
     profile,
     goals,
@@ -384,7 +384,7 @@ function App() {
       }
       meal.foods.push(foodToLog(food, quantity, source));
       next.recentFoodIds = [food.id, ...next.recentFoodIds.filter((id) => id !== food.id)].slice(0, 8);
-      if (!next.expandedMeals.includes(targetMealName)) next.expandedMeals.push(targetMealName);
+      next.expandedMeals = [targetMealName];
       return next;
     });
     setSelectedMealName(targetMealName);
@@ -427,7 +427,7 @@ function App() {
     const insertIndex = beforeItemId ? toMeal.foods.findIndex((food) => food.id === beforeItemId) : -1;
     if (insertIndex >= 0) toMeal.foods.splice(insertIndex, 0, movingFood);
     else toMeal.foods.push(movingFood);
-    next.expandedMeals = [...new Set([...next.expandedMeals, fromMeal.name, targetMealName])];
+    next.expandedMeals = [targetMealName];
     return next;
   });
 
@@ -446,7 +446,9 @@ function App() {
 
   const deleteMeal = (mealId: string) => updateData((current) => {
     const next = structuredClone(current) as AppData;
+    const deletedMeal = next.entries[selectedDate]?.find((meal) => meal.id === mealId);
     next.entries[selectedDate] = (next.entries[selectedDate] ?? []).filter((meal) => meal.id !== mealId);
+    if (deletedMeal) next.expandedMeals = next.expandedMeals.filter((name) => name !== deletedMeal.name);
     return next;
   });
 
@@ -455,7 +457,7 @@ function App() {
     const meals = ensureDayMeals(next, selectedDate);
     const available = primaryMealNames.find((name) => !meals.some((meal) => meal.name === name)) ?? nextSnackName(meals);
     meals.push({ id: uid("meal"), name: available, time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }), foods: [] });
-    next.expandedMeals = [...new Set([...next.expandedMeals, available])];
+    next.expandedMeals = [available];
     setSelectedMealName(available);
     return next;
   });
@@ -546,8 +548,8 @@ function App() {
                 updateData((current) => {
                   const next = structuredClone(current) as AppData;
                   next.expandedMeals = next.expandedMeals.includes(mealName)
-                    ? next.expandedMeals.filter((name) => name !== mealName)
-                    : [...next.expandedMeals, mealName];
+                    ? []
+                    : [mealName];
                   return next;
                 })
               }
@@ -728,20 +730,9 @@ function LogPage({
 }
 
 function DateRail({ data, selectedDate, onSelect }: { data: AppData; selectedDate: string; onSelect: (date: string) => void }) {
-  const [pageEndOffset, setPageEndOffset] = useState(0);
-  const dragX = useRef<number | null>(null);
-  const goPrevious = () => {
-    const nextOffset = pageEndOffset - 5;
-    setPageEndOffset(nextOffset);
-    onSelect(addDays(todayKey(), nextOffset));
-  };
-  const goNext = () => {
-    const nextOffset = Math.min(0, pageEndOffset + 5);
-    setPageEndOffset(nextOffset);
-    onSelect(addDays(todayKey(), nextOffset));
-  };
-  const days = [-4, -3, -2, -1, 0].map((offset) => {
-    const key = addDays(todayKey(), pageEndOffset + offset);
+  const railRef = useRef<HTMLElement | null>(null);
+  const days = Array.from({ length: 21 }, (_, index) => index - 20).map((offset) => {
+    const key = addDays(todayKey(), offset);
     const totals = dayTotals(data.entries[key] ?? []);
     const health = data.health[key] ?? { active: 0, exercise: 0, steps: 0 };
     const budget = data.goals.dailyKcal + health.active;
@@ -751,30 +742,18 @@ function DateRail({ data, selectedDate, onSelect }: { data: AppData; selectedDat
     const labels = dayLabel(key);
     return { key, delta: delta === 0 ? "0" : delta > 0 ? `+${delta}` : `${delta}`, fill: delta > 0 ? "100%" : `${Math.round(eatenRatio * 100)}%`, state, ...labels };
   });
+
+  useEffect(() => {
+    railRef.current?.querySelector<HTMLButtonElement>(`[data-date="${selectedDate}"]`)?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [selectedDate]);
+
   return (
-    <section
-      className="glass-card date-rail"
-      onPointerDown={(event) => { dragX.current = event.clientX; }}
-      onPointerUp={(event) => {
-        if (dragX.current === null) return;
-        const delta = event.clientX - dragX.current;
-        dragX.current = null;
-        if (delta > 32) goPrevious();
-        if (delta < -32 && pageEndOffset < 0) goNext();
-      }}
-      onWheel={(event) => {
-        if (Math.abs(event.deltaX) + Math.abs(event.deltaY) < 20) return;
-        if (event.deltaX > 0 || event.deltaY > 0) goPrevious();
-        if ((event.deltaX < 0 || event.deltaY < 0) && pageEndOffset < 0) goNext();
-      }}
-    >
-      <button className="date-page-control prev" aria-label="Previous 5 days" onClick={goPrevious} type="button" />
+    <section className="glass-card date-rail" ref={railRef} aria-label="Date rail">
       {days.map((day) => (
-        <button className={`date-chip ${day.state}${day.key === selectedDate ? " active" : ""}`} key={day.key} onClick={() => onSelect(day.key)} style={{ "--fill": day.fill } as React.CSSProperties}>
+        <button className={`date-chip ${day.state}${day.key === selectedDate ? " active" : ""}`} data-date={day.key} key={day.key} onClick={() => onSelect(day.key)} style={{ "--fill": day.fill } as React.CSSProperties}>
           <strong>{day.delta}</strong><small>kcal</small><span>{day.weekday}</span><em>{day.date}</em>
         </button>
       ))}
-      {pageEndOffset < 0 ? <button className="date-page-control next" aria-label="Next 5 days" onClick={goNext} type="button" /> : null}
     </section>
   );
 }

@@ -94,6 +94,15 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 - TS 原型本地静态预览：构建后可执行 `python3 -m http.server 5173 --bind 127.0.0.1 --directory dist`
 - TS 原型支持 hash 直达页面：`#log`、`#me`、`#bank`、`#add`
 
+## TS 原型部署
+
+- TS Web 原型通过 GitHub Actions 自动部署到 GitHub Pages。
+- 发布 workflow：`.github/workflows/deploy-pages.yml`
+- 构建目录：`reference/ts/`
+- 发布产物：`reference/ts/dist/`
+- 自定义域名：`intake.ddonlien.com`
+- 每次 push 到 `main` 会自动执行 `npm ci`、`npm run build` 并发布 Pages；也可在 GitHub Actions 页面手动触发 `workflow_dispatch`。
+
 ## 边界与限制
 
 - SwiftUI 主应用当前为 UI 首页实现，点击和跳转功能暂未实现（按需求要求）；`reference/ts/` 用于先验证可操作的 Web 功能闭环
