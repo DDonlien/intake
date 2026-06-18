@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="402" height="874" viewBox="0 0 402 874">
+  <defs>
+    <linearGradient id="table" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eef4ec"/>
+      <stop offset="0.46" stop-color="#f6f3ea"/>
+      <stop offset="1" stop-color="#dfe9f3"/>
+    </linearGradient>
+    <radialGradient id="plate" cx="50%" cy="50%" r="55%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.56" stop-color="#f9fbfd"/>
+      <stop offset="1" stop-color="#d7dee6"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#202838" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect width="402" height="874" fill="url(#table)"/>
+  <rect width="402" height="874" fill="#ffffff" opacity="0.16"/>
+  <g filter="url(#soft)" opacity="0.72">
+    <circle cx="92" cy="170" r="112" fill="#c7e7b5"/>
+    <circle cx="324" cy="224" r="132" fill="#cfe2f7"/>
+    <circle cx="184" cy="650" r="170" fill="#f1dbc2"/>
+  </g>
+  <g filter="url(#shadow)">
+    <ellipse cx="201" cy="468" rx="154" ry="122" fill="#c4ccd5" opacity="0.28"/>
+    <circle cx="201" cy="432" r="132" fill="url(#plate)"/>
+    <circle cx="201" cy="432" r="104" fill="#ffffff" opacity="0.72"/>
+  </g>
+  <g opacity="0.92">
+    <ellipse cx="184" cy="398" rx="74" ry="47" fill="#7ecf57"/>
+    <ellipse cx="219" cy="420" rx="78" ry="52" fill="#7abf4c"/>
+    <ellipse cx="166" cy="430" rx="54" ry="34" fill="#3e9c4b"/>
+    <path d="M122 393c48-25 108-22 155 1-21 22-49 34-84 34-34 0-58-12-71-35Z" fill="#f6b667"/>
+    <path d="M138 454c30 21 85 23 124 1-15 36-47 54-88 49-26-3-41-19-36-50Z" fill="#f2a349"/>
+    <ellipse cx="242" cy="386" rx="31" ry="18" fill="#e96e52"/>
+    <ellipse cx="249" cy="388" rx="16" ry="9" fill="#ffffff" opacity="0.44"/>
+    <circle cx="161" cy="389" r="14" fill="#d7352f"/>
+    <circle cx="178" cy="373" r="12" fill="#f0453d"/>
+    <circle cx="216" cy="376" r="12" fill="#d7352f"/>
+    <circle cx="240" cy="438" r="16" fill="#f8d258"/>
+    <circle cx="147" cy="441" r="13" fill="#f8d258"/>
+  </g>
+  <g opacity="0.52">
+    <rect x="40" y="94" width="92" height="32" rx="16" fill="#ffffff"/>
+    <rect x="254" y="112" width="88" height="32" rx="16" fill="#ffffff"/>
+    <rect x="64" y="724" width="104" height="26" rx="13" fill="#ffffff"/>
+  </g>
+  <rect width="402" height="874" fill="#f9fbff" opacity="0.18"/>
+</svg>

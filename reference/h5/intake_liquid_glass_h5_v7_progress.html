@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Intake Progress H5 v7</title>
+<style>
+:root {
+  --app-w: 402px;
+  --app-h: 873px;
+  --page-x: 16px;
+  --safe-top: 72px;
+  --safe-bottom: 104px;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+
+  --r-sm: 16px;
+  --r-md: 22px;
+  --r-lg: 28px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  --ink-0: #11131a;
+  --ink-1: #3f424b;
+  --ink-2: #747783;
+  --ink-3: #a6a9b3;
+  --surface: rgba(255, 255, 255, .82);
+  --surface-solid: #fbfbfc;
+  --line: rgba(20, 24, 32, .055);
+  --orange: #ff861f;
+  --orange-soft: rgba(255, 134, 31, .12);
+  --teal: #00cdb8;
+  --blue: #0088ff;
+  --shadow: 0 22px 48px rgba(20, 25, 36, .10), 0 8px 18px rgba(20, 25, 36, .045);
+  --shadow-soft: 0 16px 34px rgba(20, 25, 36, .075), 0 2px 8px rgba(20, 25, 36, .035);
+  --inner: inset 0 1px 0 rgba(255, 255, 255, .96), inset 0 -16px 30px rgba(245, 246, 249, .46);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", "SFMono-Regular", ui-monospace, "Courier New", monospace;
+  --spring: 420ms cubic-bezier(.34, 1.56, .64, 1);
+  --ease: 260ms cubic-bezier(.22, .61, .36, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink-0);
+  background: #eceef2;
+  display: grid;
+  place-items: start center;
+  overflow-x: hidden;
+}
+
+.app {
+  width: min(100vw, var(--app-w));
+  height: 100vh;
+  min-height: 760px;
+  max-height: var(--app-h);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% -12%, rgba(255, 255, 255, 1), transparent 30%),
+    radial-gradient(circle at 8% 76%, rgba(255, 255, 255, .92), transparent 24%),
+    radial-gradient(circle at 94% 28%, rgba(255, 255, 255, .86), transparent 26%),
+    linear-gradient(180deg, #ffffff 0%, #f6f7f9 55%, #f2f3f5 100%);
+}
+
+.app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, .72), transparent 22%),
+    radial-gradient(circle at 88% 82%, rgba(255, 255, 255, .78), transparent 28%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.statusbar {
+  position: absolute;
+  z-index: 30;
+  top: 17px;
+  left: 55px;
+  right: 37px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 760;
+  letter-spacing: -.02em;
+  pointer-events: none;
+}
+
+.sys {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bars {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 2px;
+  align-items: end;
+  width: 19px;
+  height: 14px;
+}
+.bars i { display: block; width: 3px; background: #111; border-radius: 2px; }
+.bars i:nth-child(1) { height: 5px; }
+.bars i:nth-child(2) { height: 8px; }
+.bars i:nth-child(3) { height: 11px; }
+.bars i:nth-child(4) { height: 14px; }
+.wifi { font-size: 13px; transform: translateY(-1px); }
+.battery {
+  width: 24px;
+  height: 12px;
+  border: 1.8px solid #111;
+  border-radius: 4px;
+  position: relative;
+}
+.battery::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  bottom: 2px;
+  width: 15px;
+  border-radius: 2px;
+  background: #111;
+}
+.battery::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 3px;
+  width: 2px;
+  height: 5px;
+  border-radius: 1px;
+  background: #111;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: var(--safe-top) var(--page-x) var(--safe-bottom);
+}
+.page::-webkit-scrollbar { display: none; }
+.stack { display: grid; gap: 18px; }
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(250, 251, 253, .84));
+  border: 1px solid rgba(255, 255, 255, .94);
+  box-shadow: var(--shadow), var(--inner);
+  -webkit-backdrop-filter: blur(30px) saturate(1.45);
+  backdrop-filter: blur(30px) saturate(1.45);
+  position: relative;
+  overflow: hidden;
+}
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, .92), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, .58), rgba(255, 255, 255, .12) 45%, rgba(255, 255, 255, .32));
+  pointer-events: none;
+}
+.glass-card > * { position: relative; z-index: 1; }
+
+.date-dock {
+  height: 100px;
+  border-radius: var(--r-lg);
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.date-pill {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 22px;
+  min-width: 0;
+  padding: 10px 6px;
+  color: var(--ink-0);
+  font-family: var(--font);
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform var(--ease), background var(--ease), color var(--ease);
+}
+.date-pill:active { transform: scale(.96); }
+.date-pill.active {
+  background: #ececec;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+.date-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 860;
+  line-height: 1;
+}
+.date-label {
+  font-size: 11px;
+  font-weight: 640;
+  color: var(--ink-1);
+}
+
+.card {
+  border-radius: var(--r-xl);
+  padding: 19px 22px 22px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.title {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.1;
+  font-weight: 820;
+  letter-spacing: -.04em;
+}
+.shortcut {
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 680;
+  letter-spacing: .01em;
+}
+
+.ring-card { min-height: 402px; }
+.ring-area {
+  position: relative;
+  width: 272px;
+  height: 272px;
+  margin: 6px auto 0;
+}
+.energy-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+  filter: drop-shadow(0 13px 14px rgba(255, 134, 31, .14));
+}
+.ring-track {
+  stroke: #b7b7b8;
+  opacity: .98;
+}
+.ring-progress {
+  stroke: var(--orange);
+  stroke-linecap: butt;
+  transition: stroke-dasharray var(--spring);
+}
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 1px;
+}
+.tiny {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+.kcal-main {
+  font-family: var(--font-mono);
+  color: var(--orange);
+  font-size: 33px;
+  line-height: .98;
+  font-weight: 850;
+  letter-spacing: -.07em;
+}
+.hot-gap {
+  color: #5b5b60;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 820;
+  letter-spacing: -.055em;
+}
+.burn-value {
+  color: var(--teal);
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: -.055em;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+  text-align: center;
+}
+.stat {
+  display: grid;
+  gap: 7px;
+}
+.stat-label {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 610;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 780;
+}
+
+.meal-card {
+  min-height: 136px;
+}
+.meal-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.macro-card {
+  display: grid;
+  gap: 14px;
+}
+.macro-row {
+  display: grid;
+  grid-template-columns: 42px 1fr 48px;
+  align-items: center;
+  gap: 10px;
+}
+.macro-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f0f0f2;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 840;
+}
+.macro-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+.macro-name {
+  font-size: 14px;
+  font-weight: 760;
+}
+.macro-amount {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 610;
+}
+.bar {
+  height: 7px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: rgba(17, 19, 26, .08);
+}
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff8b23, #ffb15a);
+  transition: width var(--spring);
+}
+.macro-pct {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 680;
+  text-align: right;
+}
+
+.sync-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sync-tile {
+  min-height: 70px;
+  border-radius: 22px;
+  background: rgba(245, 245, 246, .7);
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .88);
+}
+.sync-tile span {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 610;
+}
+.sync-tile strong {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.1;
+}
+.sync-tile .ok { color: var(--teal); }
+
+.tabbar {
+  position: absolute;
+  z-index: 20;
+  left: 22px;
+  right: 20px;
+  bottom: 20px;
+  height: 62px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+}
+.tab-cluster {
+  width: 289px;
+  height: 60px;
+  border-radius: 30px;
+  padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(245,245,246,.70));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,.95);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  backdrop-filter: blur(28px) saturate(1.5);
+  pointer-events: auto;
+}
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 26px;
+  font-family: var(--font);
+  color: #0e0f12;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  cursor: pointer;
+}
+.tab.active {
+  background: #e9e9ea;
+  color: var(--blue);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86);
+}
+.tab-icon {
+  height: 25px;
+  line-height: 25px;
+  font-size: 22px;
+  font-weight: 820;
+}
+.tab-label {
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 690;
+}
+.add-btn {
+  appearance: none;
+  border: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,.84), rgba(247,247,248,.72));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,.96);
+  color: #111;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 690;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%) translateY(16px);
+  opacity: 0;
+  z-index: 40;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(18, 20, 26, .82);
+  color: white;
+  font-size: 13px;
+  font-weight: 650;
+  transition: opacity var(--ease), transform var(--ease);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 380px) {
+  :root { --page-x: 14px; }
+  .ring-area { width: 244px; height: 244px; }
+  .tabbar { left: 16px; right: 16px; }
+  .tab-cluster { width: calc(100% - 66px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="statusbar" aria-hidden="true">
+    <span id="clock">9:41</span>
+    <div class="sys">
+      <span class="bars"><i></i><i></i><i></i><i></i></span>
+      <span class="wifi">⌁</span>
+      <span class="battery"></span>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="stack">
+      <section class="glass-card date-dock" aria-label="日期切换">
+        <button class="date-pill" data-day="0">
+          <span class="date-value">+123</span>
+          <span class="date-label">星期二</span>
+        </button>
+        <button class="date-pill" data-day="1">
+          <span class="date-value">+123</span>
+          <span class="date-label">星期三</span>
+        </button>
+        <button class="date-pill" data-day="2">
+          <span class="date-value">+123</span>
+          <span class="date-label">星期四</span>
+        </button>
+        <button class="date-pill" data-day="3">
+          <span class="date-value">+123</span>
+          <span class="date-label">星期五</span>
+        </button>
+        <button class="date-pill active" data-day="4">
+          <span class="date-value">+123</span>
+          <span class="date-label">今天</span>
+        </button>
+      </section>
+
+      <section class="glass-card card ring-card">
+        <div class="card-header">
+          <h1 class="title">今日进度</h1>
+          <span class="shortcut">⌘ A</span>
+        </div>
+
+        <div class="ring-area">
+          <svg class="energy-ring" viewBox="0 0 240 240" aria-hidden="true">
+            <circle class="ring-track" cx="120" cy="120" r="96" fill="none" stroke-width="16" />
+            <circle id="ringProgress" class="ring-progress" cx="120" cy="120" r="96" fill="none" stroke-width="16" />
+          </svg>
+          <div class="ring-center">
+            <span class="tiny">已摄入</span>
+            <strong class="kcal-main" id="eatenValue">1,624</strong>
+            <span class="tiny">kcal</span>
+            <span class="tiny">热量缺口</span>
+            <strong class="hot-gap" id="gapValue">376 / 200</strong>
+            <span class="tiny">kcal</span>
+            <span class="tiny">消耗</span>
+            <strong class="burn-value" id="burnValue">1,203</strong>
+            <span class="tiny">kcal</span>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat">
+            <span class="stat-label">目标缺口</span>
+            <strong class="stat-value" id="goalGap">200</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">运动消耗</span>
+            <strong class="stat-value" id="activeBurn">200</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">蛋白质摄入</span>
+            <strong class="stat-value" id="proteinIntake">200</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="glass-card card meal-card">
+        <div class="card-header">
+          <h2 class="title">早餐</h2>
+          <span class="shortcut">⌘ A</span>
+        </div>
+        <div class="meal-summary">
+          <div class="stat">
+            <span class="stat-label">目标缺口</span>
+            <strong class="stat-value">200</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">运动消耗</span>
+            <strong class="stat-value">200</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">蛋白质摄入</span>
+            <strong class="stat-value">200</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="glass-card card macro-card">
+        <div class="card-header">
+          <h2 class="title">营养进度</h2>
+          <span class="shortcut">今日</span>
+        </div>
+        <div class="macro-row">
+          <div class="macro-icon">P</div>
+          <div>
+            <div class="macro-top">
+              <span class="macro-name">蛋白质</span>
+              <span class="macro-amount" id="proteinLabel">102 / 120g</span>
+            </div>
+            <div class="bar"><span id="proteinBar" style="width: 85%"></span></div>
+          </div>
+          <span class="macro-pct" id="proteinPct">85%</span>
+        </div>
+        <div class="macro-row">
+          <div class="macro-icon">C</div>
+          <div>
+            <div class="macro-top">
+              <span class="macro-name">碳水</span>
+              <span class="macro-amount" id="carbLabel">179 / 250g</span>
+            </div>
+            <div class="bar"><span id="carbBar" style="width: 72%"></span></div>
+          </div>
+          <span class="macro-pct" id="carbPct">72%</span>
+        </div>
+        <div class="macro-row">
+          <div class="macro-icon">F</div>
+          <div>
+            <div class="macro-top">
+              <span class="macro-name">脂肪</span>
+              <span class="macro-amount" id="fatLabel">58 / 70g</span>
+            </div>
+            <div class="bar"><span id="fatBar" style="width: 83%"></span></div>
+          </div>
+          <span class="macro-pct" id="fatPct">83%</span>
+        </div>
+      </section>
+
+      <section class="glass-card card">
+        <div class="card-header">
+          <h2 class="title">健康同步</h2>
+          <span class="shortcut" id="syncTime">今天 7:32</span>
+        </div>
+        <div class="sync-grid">
+          <div class="sync-tile">
+            <span>活动能量</span>
+            <strong id="activeEnergy">410 kcal</strong>
+          </div>
+          <div class="sync-tile">
+            <span>静息能量</span>
+            <strong id="restEnergy">1,380 kcal</strong>
+          </div>
+          <div class="sync-tile">
+            <span>步数 / 运动</span>
+            <strong id="steps">8,642</strong>
+          </div>
+          <div class="sync-tile">
+            <span>Apple 健康</span>
+            <strong class="ok">已连接</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="tabbar" aria-label="主导航">
+    <div class="tab-cluster">
+      <button class="tab active" data-tab="bank">
+        <span class="tab-icon">◆</span>
+        <span class="tab-label">食谱</span>
+      </button>
+      <button class="tab" data-tab="me">
+        <span class="tab-icon">●</span>
+        <span class="tab-label">个人</span>
+      </button>
+      <button class="tab" data-tab="log">
+        <span class="tab-icon">▲</span>
+        <span class="tab-label">记录</span>
+      </button>
+    </div>
+    <button class="add-btn" aria-label="添加">+</button>
+  </nav>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const days = [
+  { eaten: 1510, gap: '490 / 200', burn: 1110, active: 188, protein: 86, carbs: 160, fat: 50, steps: '6,520' },
+  { eaten: 1768, gap: '232 / 200', burn: 1195, active: 224, protein: 94, carbs: 205, fat: 61, steps: '7,810' },
+  { eaten: 1390, gap: '610 / 200', burn: 1084, active: 156, protein: 80, carbs: 142, fat: 44, steps: '5,940' },
+  { eaten: 1696, gap: '304 / 200', burn: 1266, active: 278, protein: 104, carbs: 186, fat: 57, steps: '8,120' },
+  { eaten: 1624, gap: '376 / 200', burn: 1203, active: 200, protein: 102, carbs: 179, fat: 58, steps: '8,642' }
+];
+
+const targets = { protein: 120, carbs: 250, fat: 70 };
+const circumference = 2 * Math.PI * 96;
+const ring = document.getElementById('ringProgress');
+ring.style.strokeDasharray = `0 ${circumference}`;
+
+function number(value) {
+  return value.toLocaleString('en-US');
+}
+
+function setText(id, value) {
+  document.getElementById(id).textContent = value;
+}
+
+function setProgress(id, pct) {
+  document.getElementById(id).style.width = `${Math.max(0, Math.min(100, pct))}%`;
+}
+
+function selectDay(index) {
+  const data = days[index];
+  document.querySelectorAll('.date-pill').forEach((pill, i) => pill.classList.toggle('active', i === index));
+
+  setText('eatenValue', number(data.eaten));
+  setText('gapValue', data.gap);
+  setText('burnValue', number(data.burn));
+  setText('activeBurn', data.active);
+  setText('activeEnergy', `${data.active + 210} kcal`);
+  setText('steps', data.steps);
+
+  const proteinPct = Math.round(data.protein / targets.protein * 100);
+  const carbPct = Math.round(data.carbs / targets.carbs * 100);
+  const fatPct = Math.round(data.fat / targets.fat * 100);
+
+  setText('proteinLabel', `${data.protein} / ${targets.protein}g`);
+  setText('proteinPct', `${proteinPct}%`);
+  setProgress('proteinBar', proteinPct);
+  setText('carbLabel', `${data.carbs} / ${targets.carbs}g`);
+  setText('carbPct', `${carbPct}%`);
+  setProgress('carbBar', carbPct);
+  setText('fatLabel', `${data.fat} / ${targets.fat}g`);
+  setText('fatPct', `${fatPct}%`);
+  setProgress('fatBar', fatPct);
+
+  const progress = Math.min(data.eaten / 2000, 1);
+  const filled = circumference * progress;
+  ring.style.strokeDasharray = `${filled} ${circumference - filled}`;
+}
+
+document.querySelectorAll('.date-pill').forEach((pill, index) => {
+  pill.addEventListener('click', () => selectDay(index));
+});
+
+let toastTimer;
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+    tab.classList.add('active');
+    showToast(`${tab.textContent.trim()}还在原型中`);
+  });
+});
+
+document.querySelector('.add-btn').addEventListener('click', () => showToast('添加饮食记录'));
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}`;
+}
+
+updateClock();
+setInterval(updateClock, 30000);
+selectDay(4);
+</script>
+</body>
+</html>
