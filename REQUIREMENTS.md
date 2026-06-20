@@ -966,6 +966,13 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
     - [ ] [0.3.0-UI-E-012] 支持搜索公司或品牌（原 ID：0.5.0-UI-E-012）
     - [ ] [0.3.0-UI-E-013] 支持搜索自定义食物（原 ID：0.5.0-UI-E-013）
     - [ ] [0.3.0-UI-E-014] 搜索框支持 Liquid Glass 质感（原 ID：0.5.0-UI-E-014）
+    - [x] [0.3.0-UI-E-064] Bank 搜索框在 iOS 上不触发页面自动缩放 #phase-3
+      - 解决用户反馈：聚焦 TextField 时整个 Bank 列表被 iOS 自动放大，焦点离开后偶发不还原
+      - 修法：TextField 字体 ≥ 16pt、关闭自动纠正、关闭自动大写、滚动时交互式收起键盘
+      - [x] [0.3.0-UI-E-065] TextField 字体 ≥ 16pt 避免 iOS 自动放大 #phase-3
+      - [x] [0.3.0-UI-E-066] TextField 关闭自动纠正避免相关缩放行为 #phase-3
+      - [x] [0.3.0-UI-E-067] TextField 关闭自动大写避免相关缩放行为 #phase-3
+      - [x] [0.3.0-UI-E-068] 滚动时交互式收起键盘避免 inset 残留 #phase-3
   - [ ] [0.3.0-UI-E-015] 实现 Bank Filter Block #phase-3（原 ID：UI-E-003）（原 ID：0.5.0-UI-E-015）
     - [ ] [0.3.0-UI-E-016] 支持筛选全部（原 ID：0.5.0-UI-E-016）
     - [ ] [0.3.0-UI-E-017] 支持筛选 Foods（原 ID：0.5.0-UI-E-017）

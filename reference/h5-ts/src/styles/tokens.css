@@ -1,0 +1,61 @@
+:root {
+  --app-w: 430px;
+  --page-x: 20px;
+  --safe-top: 52px;
+  --safe-bottom: 114px;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  --r-xs: 12px;
+  --r-sm: 16px;
+  --r-md: 20px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  --card-gap: var(--s-5);
+  --card-p: 18px;
+  --sub-card-p: 16px;
+
+  --tab-h: 95px;
+  --tab-btn-h: 54px;
+  --add-size: 54px;
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", "SFMono-Regular", ui-monospace, "Courier New", monospace;
+
+  --ink-0: #11131A;
+  --ink-1: #424858;
+  --ink-2: #747B8B;
+  --ink-3: #A0A7B5;
+  --ink-4: #C7CAD2;
+  --line: rgba(22, 27, 39, .075);
+
+  --bg-top: #FFFFFF;
+  --bg-bottom: #F3F5FB;
+  --purple: #7A45FF;
+  --purple-2: #CA4DE9;
+  --purple-soft: rgba(122, 69, 255, .12);
+  --blue: #0088FF;
+  --green: #30C86D;
+  --green-soft: rgba(48, 200, 109, .12);
+  --orange: #FF8C32;
+  --red: #F85C6A;
+
+  --glass-bg: linear-gradient(0deg, rgba(247,247,247,.84), rgba(247,247,247,.84)), linear-gradient(0deg, rgba(221,221,221,.38), rgba(221,221,221,.38)), rgba(255,255,255,.72);
+  --glass-blend: darken, color-burn, normal;
+  --glass-border: rgba(255,255,255,.94);
+  --glass-filter: blur(28px) saturate(1.7) contrast(1.04);
+  --glass-soft-shadow: 0 16px 52px rgba(31, 36, 61, .10), 0 2px 12px rgba(31, 36, 61, .05);
+  --glass-inner: inset 0 1px 0 rgba(255,255,255,.96), inset 0 -12px 28px rgba(255,255,255,.48);
+
+  --trans-fast: 180ms cubic-bezier(.22, .61, .36, 1);
+  --trans-norm: 320ms cubic-bezier(.22, .61, .36, 1);
+  --trans-spring: 400ms cubic-bezier(.34, 1.56, .64, 1);
+}
