@@ -152,6 +152,13 @@ struct LogView: View {
                 }
                 .padding(.horizontal, 20)
                 
+                // Long-term perspective note
+                Text("Weekly average matters more than one day.")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal, 20)
+                
                 // Progress Section - Glass grid
                 GlassEffectContainer(spacing: 0) {
                     VStack(spacing: 16) {

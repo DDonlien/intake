@@ -1,0 +1,15 @@
+{
+  "project_id": "168243dd-565f-4098-a4c4-49617b1bb208",
+  "project_title": "Intake",
+  "resources": [
+    {
+      "id": "ac29bc6e-fb58-40c2-8a34-6e67939fb366",
+      "resource_type": "local_directory",
+      "resource_ref": {
+        "label": "intake",
+        "daemon_id": "019ed43e-93de-7b81-b93c-42a691f03d2e",
+        "local_path": "/Users/taobe/Projects/GitHub/Personal/intake"
+      }
+    }
+  ]
+}

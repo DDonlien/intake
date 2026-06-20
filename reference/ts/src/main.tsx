@@ -26,6 +26,7 @@ import {
   Utensils,
 } from "lucide-react";
 import "./styles.css";
+import * as authApi from "./auth-api";
 
 type TabKey = "me" | "log" | "bank" | "add";
 type AuthMode = "login" | "register";
@@ -305,11 +306,8 @@ function dayTotals(meals: MealEntry[]) {
 }
 
 function App() {
-  const [account, setAccount] = useState<Account | null>(() => {
-    const session = readJson<{ userId?: string }>(SESSION_KEY, {});
-    const accounts = readJson<Account[]>(ACCOUNTS_KEY, []);
-    return accounts.find((item) => item.id === session.userId) ?? null;
-  });
+  const [account, setAccount] = useState<Account | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const hashTab = window.location.hash.replace("#", "") as TabKey;
     return ["me", "log", "bank", "add"].includes(hashTab) ? hashTab : "log";
@@ -319,9 +317,24 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(todayKey());
   const [selectedMealName, setSelectedMealName] = useState<MealName>("Lunch");
   const [notice, setNotice] = useState("");
+  const [pageScrolled, setPageScrolled] = useState(false);
   const [data, setData] = useState<AppData | null>(() => (account ? normalizeData(readJson(dataKey(account.id), makeDefaultData())) : null));
   const activeTabRef = useRef<TabKey>(activeTab);
   const returnTabRef = useRef<TabKey>("log");
+
+  useEffect(() => {
+    (async () => {
+      const serverAccount = authApi.usesServerAuth() ? await authApi.authVerify() : null;
+      if (serverAccount) {
+        setAccount(serverAccount);
+      } else {
+        const session = authApi.getStoredSession();
+        const accounts = readJson<Account[]>(ACCOUNTS_KEY, []);
+        setAccount(accounts.find((item) => item.id === session.userId) ?? null);
+      }
+      setAuthLoading(false);
+    })();
+  }, []);
 
   useEffect(() => {
     if (!account) return;
@@ -334,6 +347,10 @@ function App() {
   useEffect(() => {
     if (account && data) writeJson(dataKey(account.id), data);
   }, [account, data]);
+
+  useEffect(() => {
+    setPageScrolled(false);
+  }, [activeTab]);
 
   useEffect(() => {
     const syncHashTab = () => {
@@ -468,17 +485,31 @@ function App() {
     return next;
   });
 
-  const authSubmit = (mode: AuthMode, email: string, password: string, confirmPassword: string) => {
+  const authSubmit = async (mode: AuthMode, email: string, password: string, confirmPassword: string): Promise<string> => {
     const normalizedEmail = email.trim().toLowerCase();
-    const accounts = readJson<Account[]>(ACCOUNTS_KEY, []);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return "Use a valid email.";
     if (password.length < 6) return "Password needs at least 6 characters.";
     if (mode === "register") {
       if (password !== confirmPassword) return "Passwords do not match.";
+    }
+    if (authApi.usesServerAuth()) {
+      const result = await (mode === "register" ? authApi.authRegister(email, password) : authApi.authLogin(email, password));
+      if (!result.success) return result.error;
+      authApi.saveSession(result.user.id, result.token);
+      const accounts = readJson<Account[]>(ACCOUNTS_KEY, []);
+      if (!accounts.some((item) => item.id === result.user.id)) {
+        writeJson(ACCOUNTS_KEY, [...accounts, { id: result.user.id, email: result.user.email, password: "" }]);
+      }
+      setAccount(result.user);
+      showNotice(mode === "register" ? "Registered. Your data stays on this device." : "Welcome back.");
+      return "";
+    }
+    const accounts = readJson<Account[]>(ACCOUNTS_KEY, []);
+    if (mode === "register") {
       if (accounts.some((item) => item.email === normalizedEmail)) return "This email is already registered.";
       const nextAccount = { id: uid("user"), email: normalizedEmail, password };
       writeJson(ACCOUNTS_KEY, [...accounts, nextAccount]);
-      writeJson(SESSION_KEY, { userId: nextAccount.id });
+      authApi.saveSession(nextAccount.id);
       setAccount(nextAccount);
       showNotice("Registered. Your data stays on this device.");
       return "";
@@ -486,14 +517,14 @@ function App() {
     const found = accounts.find((item) => item.email === normalizedEmail);
     if (!found) return "Email not found. Register first.";
     if (found.password !== password) return "Wrong password.";
-    writeJson(SESSION_KEY, { userId: found.id });
+    authApi.saveSession(found.id);
     setAccount(found);
     showNotice("Welcome back.");
     return "";
   };
 
-  const logout = () => {
-    localStorage.removeItem(SESSION_KEY);
+  const logout = async () => {
+    await authApi.authLogout(account);
     setAccount(null);
     setData(null);
     window.history.replaceState(null, "", "#log");
@@ -512,8 +543,7 @@ function App() {
     return (
       <main className="stage">
         <section className="phone" aria-label="Intake sign in">
-          <StatusBar />
-          <AuthScreen onSubmit={authSubmit} />
+          {authLoading ? <AuthLoading /> : <AuthScreen onSubmit={authSubmit} />}
           {notice ? <Toast message={notice} /> : null}
         </section>
       </main>
@@ -522,12 +552,19 @@ function App() {
 
   const mealsForDay = data.entries[selectedDate] ?? [];
   const healthForDay = data.health[selectedDate] ?? { active: 0, exercise: 0, steps: 0 };
+  const scrollPageClassName = activeTab === "add" ? "scroll-page add-page-shell" : activeTab === "bank" ? "scroll-page bank-page" : "scroll-page";
 
   return (
     <main className="stage">
-      <section className="phone" aria-label="Intake app">
-        <StatusBar />
-        <div className={activeTab === "add" ? "scroll-page add-page-shell" : activeTab === "bank" ? "scroll-page bank-page" : "scroll-page"} key={activeTab}>
+      <section className={pageScrolled ? "phone page-scrolled" : "phone"} aria-label="Intake app">
+        <div
+          className={scrollPageClassName}
+          key={activeTab}
+          onScroll={(event) => {
+            const nextScrolled = event.currentTarget.scrollTop > 8;
+            setPageScrolled((current) => (current === nextScrolled ? current : nextScrolled));
+          }}
+        >
           {activeTab === "me" ? (
             <MePage account={account} data={data} onLogout={logout} onReset={resetDemoData} onUpdate={updateData} />
           ) : null}
@@ -600,12 +637,13 @@ function App() {
   );
 }
 
-function AuthScreen({ onSubmit }: { onSubmit: (mode: AuthMode, email: string, password: string, confirmPassword: string) => string }) {
+function AuthScreen({ onSubmit }: { onSubmit: (mode: AuthMode, email: string, password: string, confirmPassword: string) => Promise<string> }) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("tao@example.com");
   const [password, setPassword] = useState("intake1");
   const [confirmPassword, setConfirmPassword] = useState("intake1");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   return (
     <div className="auth-screen">
       <section className="glass-card auth-card">
@@ -616,30 +654,34 @@ function AuthScreen({ onSubmit }: { onSubmit: (mode: AuthMode, email: string, pa
         </div>
         <label className="form-field">
           <span>Email</span>
-          <input autoComplete="email" inputMode="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+          <input autoComplete="email" disabled={submitting} inputMode="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         </label>
         <label className="form-field">
           <span>Password</span>
-          <input autoComplete={mode === "login" ? "current-password" : "new-password"} type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+          <input autoComplete={mode === "login" ? "current-password" : "new-password"} disabled={submitting} type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
         </label>
         {mode === "register" ? (
           <label className="form-field">
             <span>Confirm</span>
-            <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+            <input disabled={submitting} type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
           </label>
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
         <button
           className="primary-action"
+          disabled={submitting}
           type="button"
-          onClick={() => {
-            const nextError = onSubmit(mode, email, password, confirmPassword);
+          onClick={async () => {
+            setSubmitting(true);
+            setError("");
+            const nextError = await onSubmit(mode, email, password, confirmPassword);
             setError(nextError);
+            setSubmitting(false);
           }}
         >
-          {mode === "login" ? "Log in" : "Register"}
+          {submitting ? "..." : mode === "login" ? "Log in" : "Register"}
         </button>
-        <button className="link-button center" type="button" onClick={() => setMode(mode === "login" ? "register" : "login")}>
+        <button className="link-button center" disabled={submitting} type="button" onClick={() => setMode(mode === "login" ? "register" : "login")}>
           {mode === "login" ? "Need an account? Register" : "Have an account? Log in"}
         </button>
       </section>
@@ -647,11 +689,12 @@ function AuthScreen({ onSubmit }: { onSubmit: (mode: AuthMode, email: string, pa
   );
 }
 
-function StatusBar() {
+function AuthLoading() {
   return (
-    <div className="statusbar" aria-hidden="true">
-      <span>9:41</span>
-      <span className="system-icons">5G  ▰</span>
+    <div className="auth-screen">
+      <section className="glass-card auth-card">
+        <div className="auth-brand"><span>Intake</span><h1>Checking session...</h1></div>
+      </section>
     </div>
   );
 }
@@ -709,7 +752,7 @@ function LogPage({
         <div className="card-title-row">
           <div>
             <p className="eyebrow">Energy Budget</p>
-            <h2>{Math.abs(remaining).toLocaleString()} kcal {remaining >= 0 ? "left" : "over"}</h2>
+            <h2>{Math.abs(remaining).toLocaleString()} kcal {remaining >= 0 ? "left" : "over budget"}</h2>
           </div>
           <span className="sync-pill"><HeartPulse size={14} />Live</span>
         </div>
@@ -721,6 +764,7 @@ function LogPage({
             <Metric label="Target" value={budget.toLocaleString()} icon={<Activity size={15} />} />
           </div>
         </div>
+        <p className="weekly-note">Weekly average matters more than one day.</p>
       </section>
       <MacroCard rows={macroRows} />
       <FitnessCard health={health} />
@@ -731,6 +775,8 @@ function LogPage({
 
 function DateRail({ data, selectedDate, onSelect }: { data: AppData; selectedDate: string; onSelect: (date: string) => void }) {
   const railRef = useRef<HTMLElement | null>(null);
+  const dragRef = useRef<{ pointerId: number; startX: number; lastX: number; lastTime: number; velocity: number; didDrag: boolean } | null>(null);
+  const suppressClickRef = useRef(false);
   const days = Array.from({ length: 21 }, (_, index) => index - 20).map((offset) => {
     const key = addDays(todayKey(), offset);
     const totals = dayTotals(data.entries[key] ?? []);
@@ -747,10 +793,77 @@ function DateRail({ data, selectedDate, onSelect }: { data: AppData; selectedDat
     railRef.current?.querySelector<HTMLButtonElement>(`[data-date="${selectedDate}"]`)?.scrollIntoView({ inline: "center", block: "nearest" });
   }, [selectedDate]);
 
+  const snapRail = () => {
+    const rail = railRef.current;
+    const first = rail?.querySelector<HTMLElement>(".date-chip");
+    if (!rail || !first) return;
+    const gap = Number.parseFloat(getComputedStyle(rail).columnGap || "0");
+    const step = first.offsetWidth + gap;
+    const drag = dragRef.current;
+    const projectedLeft = rail.scrollLeft - (drag?.velocity ?? 0) * 190;
+    const maxLeft = rail.scrollWidth - rail.clientWidth;
+    const snappedLeft = Math.max(0, Math.min(maxLeft, Math.round(projectedLeft / step) * step));
+    rail.scrollTo({ left: snappedLeft, behavior: "smooth" });
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (drag.didDrag) {
+      suppressClickRef.current = true;
+      window.setTimeout(() => { suppressClickRef.current = false; }, 80);
+    }
+    event.currentTarget.classList.remove("dragging");
+    snapRail();
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    dragRef.current = null;
+  };
+
   return (
-    <section className="glass-card date-rail" ref={railRef} aria-label="Date rail">
+    <section
+      className="glass-card date-rail"
+      ref={railRef}
+      aria-label="Date rail"
+      onPointerCancel={endDrag}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        event.currentTarget.classList.add("dragging");
+        dragRef.current = { pointerId: event.pointerId, startX: event.clientX, lastX: event.clientX, lastTime: event.timeStamp, velocity: 0, didDrag: false };
+      }}
+      onPointerMove={(event) => {
+        const drag = dragRef.current;
+        const rail = railRef.current;
+        if (!drag || drag.pointerId !== event.pointerId || !rail) return;
+        const dx = event.clientX - drag.lastX;
+        const totalDx = event.clientX - drag.startX;
+        const dt = Math.max(1, event.timeStamp - drag.lastTime);
+        if (Math.abs(totalDx) > 3) drag.didDrag = true;
+        if (drag.didDrag) {
+          rail.scrollLeft -= dx;
+          drag.velocity = dx / dt;
+          event.preventDefault();
+        }
+        drag.lastX = event.clientX;
+        drag.lastTime = event.timeStamp;
+      }}
+      onPointerUp={endDrag}
+    >
       {days.map((day) => (
-        <button className={`date-chip ${day.state}${day.key === selectedDate ? " active" : ""}`} data-date={day.key} key={day.key} onClick={() => onSelect(day.key)} style={{ "--fill": day.fill } as React.CSSProperties}>
+        <button
+          className={`date-chip ${day.state}${day.key === selectedDate ? " active" : ""}`}
+          data-date={day.key}
+          key={day.key}
+          onClick={(event) => {
+            if (suppressClickRef.current) {
+              event.preventDefault();
+              return;
+            }
+            onSelect(day.key);
+          }}
+          onDragStart={(event) => event.preventDefault()}
+          style={{ "--fill": day.fill } as React.CSSProperties}
+        >
           <strong>{day.delta}</strong><small>kcal</small><span>{day.weekday}</span><em>{day.date}</em>
         </button>
       ))}
@@ -769,7 +882,7 @@ function EnergyRing({ remaining, budget, burned }: { remaining: number; budget: 
         <circle className="ring-progress" cx="140" cy="140" r={radius} strokeDasharray={`${progress} ${circumference - progress}`} />
       </svg>
       <div className="ring-center">
-        <RingStat label={remaining >= 0 ? "Remaining" : "Over"} value={Math.abs(remaining).toLocaleString()} unit="kcal" />
+        <RingStat label={remaining >= 0 ? "Remaining" : "Over budget"} value={Math.abs(remaining).toLocaleString()} unit="kcal" />
         <RingStat label="Burned" value={burned.toLocaleString()} unit="kcal" />
       </div>
     </div>

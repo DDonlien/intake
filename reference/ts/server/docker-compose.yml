@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  auth:
+    build: .
+    container_name: intake-auth
+    restart: unless-stopped
+    ports:
+      - "3699:3699"
+    environment:
+      - PORT=3699
+      - ALLOWED_ORIGINS=https://intake.ddonlien.com,http://localhost:5173
+    volumes:
+      - ./data:/app/data

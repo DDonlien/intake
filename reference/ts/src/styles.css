@@ -3,8 +3,13 @@
   --phone-w: 402px;
   --phone-h: 874px;
   --page-x: 16px;
-  --safe-top: 72px;
-  --safe-bottom: 106px;
+  --card-gap: 16px;
+  --tabbar-bottom: 20px;
+  --tabbar-h: 64px;
+  --bank-controls-h: 97px;
+  --bank-controls-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + var(--card-gap));
+  --safe-top: var(--card-gap);
+  --safe-bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--card-gap));
   --ink: #11131a;
   --ink-muted: #767983;
   --ink-soft: #a4a7b0;
@@ -75,26 +80,6 @@ button {
   z-index: 0;
 }
 
-.statusbar {
-  position: absolute;
-  z-index: 5;
-  top: 16px;
-  left: 44px;
-  right: 35px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 16px;
-  font-weight: 760;
-  pointer-events: none;
-}
-
-.system-icons {
-  font-size: 13px;
-  letter-spacing: 0;
-}
-
 .scroll-page {
   position: relative;
   z-index: 1;
@@ -108,13 +93,17 @@ button {
   display: none;
 }
 
+.scroll-page > :last-child {
+  margin-bottom: 0;
+}
+
 .scroll-page.add-page-shell {
   padding: 0;
   overflow: hidden;
 }
 
 .scroll-page.bank-page {
-  padding-bottom: 238px;
+  padding-bottom: calc(var(--bank-controls-bottom) + var(--bank-controls-h) + var(--card-gap));
 }
 
 .eyebrow {
@@ -188,14 +177,17 @@ h2 {
   padding: 10px;
   display: flex;
   gap: 5px;
-  margin-bottom: 16px;
+  margin-bottom: var(--card-gap);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-padding-inline: 10px;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  touch-action: pan-x;
+  cursor: grab;
+  user-select: none;
 }
 
 .date-rail::-webkit-scrollbar {
@@ -216,8 +208,17 @@ h2 {
   padding: 9px 3px 8px;
   color: var(--ink);
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.date-rail:active {
+  cursor: grabbing;
+}
+
+.date-rail.dragging {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
 }
 
 .date-chip::before {
@@ -244,7 +245,7 @@ h2 {
   inset: 0 0 auto;
   height: 42%;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 59, 48, 0.5), rgba(255, 59, 48, 0.2) 48%, transparent 100%);
+  background: linear-gradient(180deg, rgba(255, 159, 10, 0.45), rgba(255, 179, 20, 0.18) 48%, transparent 100%);
 }
 
 .date-chip > * {
@@ -295,11 +296,19 @@ h2 {
 .hero-card,
 .content-card {
   border-radius: 32px;
-  margin-bottom: 16px;
+  margin-bottom: var(--card-gap);
 }
 
 .hero-card {
   padding: 20px 20px 22px;
+}
+
+.weekly-note {
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  opacity: 0.75;
 }
 
 .card-title-row {
@@ -1214,19 +1223,25 @@ h2 {
   z-index: 3;
   left: var(--page-x);
   right: var(--page-x);
-  bottom: 98px;
+  bottom: var(--bank-controls-bottom);
   display: grid;
   gap: 9px;
   pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
 .bank-controls-dock .search-card {
   min-height: 52px;
   margin-bottom: 0;
   padding: 0 15px;
-  background: rgba(255, 255, 255, 0.58);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 12px 26px rgba(20, 25, 36, 0.06);
+  -webkit-backdrop-filter: blur(28px) saturate(1.55);
+  backdrop-filter: blur(28px) saturate(1.55);
   pointer-events: auto;
+  transition: background 180ms ease, box-shadow 180ms ease;
 }
 
 .filter-row {
@@ -1244,13 +1259,34 @@ h2 {
 }
 
 .bank-controls-dock .filter-chip {
-  background: rgba(255, 255, 255, 0.48);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(22px) saturate(1.45);
+  backdrop-filter: blur(22px) saturate(1.45);
+  transition: background 180ms ease, box-shadow 180ms ease;
 }
 
 .bank-controls-dock .filter-chip.active {
-  background: linear-gradient(180deg, #caff68, #a9ed2d);
-  box-shadow: 0 8px 18px rgba(128, 206, 18, 0.12);
+  background: linear-gradient(180deg, rgba(202, 255, 104, 0.72), rgba(169, 237, 45, 0.58));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 8px 18px rgba(128, 206, 18, 0.1);
+}
+
+.phone.page-scrolled .bank-controls-dock .search-card {
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.66),
+    0 16px 34px rgba(20, 25, 36, 0.08);
+}
+
+.phone.page-scrolled .bank-controls-dock .filter-chip {
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.46);
+}
+
+.phone.page-scrolled .bank-controls-dock .filter-chip.active {
+  background: linear-gradient(180deg, rgba(202, 255, 104, 0.58), rgba(169, 237, 45, 0.44));
 }
 
 .filter-row::-webkit-scrollbar {
@@ -2228,8 +2264,8 @@ h2 {
   z-index: 4;
   left: var(--page-x);
   right: var(--page-x);
-  bottom: 20px;
-  height: 64px;
+  bottom: var(--tabbar-bottom);
+  height: var(--tabbar-h);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2249,11 +2285,12 @@ h2 {
   padding: 4px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.66);
   box-shadow: var(--shadow-soft);
   -webkit-backdrop-filter: blur(28px) saturate(1.5);
   backdrop-filter: blur(28px) saturate(1.5);
   pointer-events: auto;
+  transition: background 180ms ease, box-shadow 180ms ease;
 }
 
 .tab {
@@ -2274,7 +2311,7 @@ h2 {
 
 .tab.active {
   color: var(--blue);
-  background: rgba(235, 237, 241, 0.96);
+  background: rgba(235, 237, 241, 0.76);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
@@ -2285,11 +2322,24 @@ h2 {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.66);
   box-shadow: var(--shadow-soft);
   -webkit-backdrop-filter: blur(28px) saturate(1.5);
   backdrop-filter: blur(28px) saturate(1.5);
   pointer-events: auto;
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+.phone.page-scrolled .tab-cluster,
+.phone.page-scrolled .add-tab {
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 18px 42px rgba(22, 27, 37, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.phone.page-scrolled .tab.active {
+  background: rgba(235, 237, 241, 0.58);
 }
 
 .add-tab.active {
