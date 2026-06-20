@@ -18,7 +18,8 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 - 底栏 Tab 导航支持 4 页面来回切换
 - iOS 26 原生 Liquid Glass 视觉风格（使用 `.glassEffect()`、`.buttonStyle(.glass)`、`GlassEffectContainer` 等 API）
 - 各页面包含完整的 Mock 数据展示
-- `reference/ts/` 已升级为 React + TypeScript 本地优先 Web App 原型，包含邮箱注册/登录、本机分用户数据、Log/Me/Bank/Add 功能闭环和 iOS 主屏幕 PWA 元信息，用于先在 Web 中验证 P0.1 体验
+- `reference/ts/` 已升级为 React + TypeScript 本地优先 Web App 原型，包含邮箱注册/登录、本机分用户数据、Log/Me/Bank/Add 功能闭环和 iOS 主屏幕 PWA 元信息，用于先在 Web 中验证 P0.1/P0.2 体验
+- `reference/ts/server/` 提供真实邮箱注册与登录认证服务：密码使用 scrypt + salt 哈希，session token 服务端持久化并过期失效，认证服务只保存身份验证所需数据
 
 ## 页面结构
 
@@ -40,6 +41,10 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 │   ├── ts/
 │   │   ├── package.json
 │   │   ├── index.html
+│   │   ├── server/
+│   │   │   ├── src/
+│   │   │   ├── test/
+│   │   │   └── DEPLOY.md
 │   │   └── src/
 │   │       ├── main.tsx
 │   │       ├── styles.css
@@ -93,6 +98,8 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 - TS 原型生产构建：进入 `reference/ts/` 后执行 `npm run build`
 - TS 原型本地静态预览：构建后可执行 `python3 -m http.server 5173 --bind 127.0.0.1 --directory dist`
 - TS 原型支持 hash 直达页面：`#log`、`#me`、`#bank`、`#add`
+- TS 认证服务开发：进入 `reference/ts/server/` 后执行 `cp .env.example .env`、`npm install`、`npm run dev`
+- TS 认证服务测试：进入 `reference/ts/server/` 后执行 `npm test`
 
 ## TS 原型部署
 
@@ -102,11 +109,12 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 - 发布产物：`reference/ts/dist/`
 - 自定义域名：`intake.ddonlien.com`
 - 每次 push 到 `main` 会自动执行 `npm ci`、`npm run build` 并发布 Pages；也可在 GitHub Actions 页面手动触发 `workflow_dispatch`。
+- 如需让 GitHub Pages 使用真实认证服务，在仓库 Variables 中设置 `INTAKE_AUTH_API_URL`，workflow 会在构建时注入 `VITE_AUTH_API_URL`。
 
 ## 边界与限制
 
 - SwiftUI 主应用当前为 UI 首页实现，点击和跳转功能暂未实现（按需求要求）；`reference/ts/` 用于先验证可操作的 Web 功能闭环
 - 数据为 Mock 数据，未接入真实 Apple Health 和营养数据库
 - AI 拍照识别、语音输入等能力为 UI 占位
-- 未实现订阅/付费边界、数据同步、云存储等后端功能
+- 未实现订阅/付费边界、业务数据同步、云存储等后端功能；当前后端范围仅限邮箱认证
 - 需要 iOS 26.0+ SDK（Xcode 16+）编译运行，使用 `.glassEffect()` 等原生 Liquid Glass API

@@ -8,7 +8,7 @@
   --tabbar-h: 64px;
   --bank-controls-h: 97px;
   --bank-controls-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + var(--card-gap));
-  --safe-top: var(--card-gap);
+  --safe-top: max(var(--card-gap), calc(env(safe-area-inset-top, 0px) + var(--card-gap)));
   --safe-bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--card-gap));
   --ink: #11131a;
   --ink-muted: #767983;

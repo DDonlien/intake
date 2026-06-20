@@ -36,6 +36,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_AUTH_API_URL: ${{ vars.INTAKE_AUTH_API_URL }}
         run: npm run build
 
       - name: Setup Pages

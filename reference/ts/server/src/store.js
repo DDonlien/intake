@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from "node:fs";
+import { join } from "node:path";
 
 const DATA_DIR = process.env.INTAKE_DATA_DIR || "./data";
 const USERS_FILE = join(DATA_DIR, "users.json");
@@ -22,7 +22,9 @@ function readJson(path, fallback) {
 
 function writeJson(path, data) {
   ensureDataDir();
-  writeFileSync(path, JSON.stringify(data, null, 2), "utf-8");
+  const tmpPath = `${path}.${process.pid}.tmp`;
+  writeFileSync(tmpPath, JSON.stringify(data, null, 2), "utf-8");
+  renameSync(tmpPath, path);
 }
 
 export function loadUsers() {

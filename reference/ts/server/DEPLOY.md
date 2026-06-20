@@ -2,11 +2,12 @@
 
 ## Overview
 
-A lightweight Node.js auth server for the Intake P0.1 prototype. Handles only register, login, session verify, and logout.
+A lightweight Node.js auth server for the Intake P0.2 TS Web app. Handles only register, login, session verify, and logout.
 
 - **Purpose**: Verify email/password identity. No business data (meals, goals, health) touches this server.
 - **Data stored**: User ID, normalized email, password hash (scrypt), session tokens.
 - **Port**: `3699` (configurable)
+- **Session expiry**: 7 days by default, configurable with `SESSION_MAX_AGE_MS`.
 
 ## Build & Run
 
@@ -36,6 +37,8 @@ docker compose up --build
 2. Configure environment:
    - `ALLOWED_ORIGINS`: comma-separated list of allowed frontend origins (e.g. your GitHub Pages domain, local dev).
    - `PORT`: optional, defaults to `3699`.
+   - `SESSION_MAX_AGE_MS`: optional session lifetime in milliseconds.
+   - `AUTH_RATE_LIMIT_WINDOW_MS` and `AUTH_RATE_LIMIT_MAX`: optional in-memory auth rate limit settings.
 3. Run with docker-compose:
 
 ```bash
@@ -81,7 +84,7 @@ cd reference/ts
 VITE_AUTH_API_URL=https://intake-auth.yourdomain.com npm run build
 ```
 
-Or add it to your CI workflow. When `VITE_AUTH_API_URL` is unset, the frontend uses the existing localStorage-based auth (backward compatible).
+For GitHub Pages, set repository variable `INTAKE_AUTH_API_URL`; `.github/workflows/deploy-pages.yml` passes it to Vite as `VITE_AUTH_API_URL`. When `VITE_AUTH_API_URL` is unset, the frontend uses the existing localStorage-based auth (backward compatible).
 
 ## API Reference
 
@@ -139,21 +142,23 @@ Response 200:
 
 - Passwords hashed with Node.js `crypto.scrypt` + random salt.
 - Session tokens are 64-char hex strings from `crypto.randomBytes(32)`.
-- Tokens expire after 7 days (hard-coded in `auth.js`).
+- Tokens expire after 7 days by default and can be configured with `SESSION_MAX_AGE_MS`.
 - CORS restricted to `ALLOWED_ORIGINS` env var.
+- Auth register/login routes have a small in-memory rate limit to reduce accidental brute-force attempts.
 - No business data accepted or stored. Only auth fields.
 
-## What This Validates (P0.1 Scope)
+## What This Validates (P0.2 Scope)
 
 - [x] Email registration and login via a server (not just localStorage)
 - [x] Session token management
 - [x] NAS-deployable with Docker
 - [x] Business data never sent to server
-- [ ] **Not validated**: multi-device sync, password reset, email verification, rate limiting, HTTPS certificate auto-renewal
+- [x] Basic in-memory register/login rate limiting
+- [ ] **Not validated**: multi-device business data sync, password reset, email verification, HTTPS certificate auto-renewal
 
 ## Next Iteration Suggestions
 
 1. Add HTTPS (Let's Encrypt via reverse proxy or Caddy)
-2. Add rate limiting per IP (express-rate-limit)
+2. Replace in-memory rate limiting with persistent/proxy-aware rate limiting if traffic grows
 3. Add email verification flow (sendgrid, resend, etc.)
 4. Consider SQLite for better concurrent access

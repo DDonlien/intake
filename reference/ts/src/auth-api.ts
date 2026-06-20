@@ -1,6 +1,6 @@
 import type { Account } from "./data";
 
-const AUTH_API = import.meta.env.VITE_AUTH_API_URL as string | undefined;
+const AUTH_API = (import.meta.env.VITE_AUTH_API_URL as string | undefined)?.replace(/\/+$/, "");
 
 type AuthResult = { success: true; user: Account; token: string } | { success: false; error: string };
 
@@ -10,7 +10,7 @@ function authUrl(path: string) {
 
 function apiError(error: unknown): string {
   if (error instanceof TypeError && error.message === "Failed to fetch") {
-    return "Auth server unreachable. Check your connection or NAS status.";
+    return "Auth server unreachable. Check your connection or auth service status.";
   }
   return `Server error: ${error instanceof Error ? error.message : String(error)}`;
 }
