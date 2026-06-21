@@ -1403,10 +1403,10 @@ function AdminPage({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (isLoggedIn) {
-      const s = authApi.adminStats();
-      const u = authApi.adminUsers();
-      setStats(s);
-      setUsers(u);
+      Promise.all([authApi.adminStats(), authApi.adminUsers()]).then(([s, u]) => {
+        setStats(s);
+        setUsers(u);
+      });
     }
   }, [isLoggedIn]);
 
@@ -1428,12 +1428,11 @@ function AdminPage({ onClose }: { onClose: () => void }) {
     setIsLoggedIn(false);
   };
 
-  const handleDelete = (userId: string) => {
+  const handleDelete = async (userId: string) => {
     if (!window.confirm("Delete this user and all their local data? This cannot be undone.")) return;
-    const ok = authApi.adminDeleteUser(userId);
+    const ok = await authApi.adminDeleteUser(userId);
     if (ok) {
-      const s = authApi.adminStats();
-      const u = authApi.adminUsers();
+      const [s, u] = await Promise.all([authApi.adminStats(), authApi.adminUsers()]);
       setStats(s);
       setUsers(u);
     } else {

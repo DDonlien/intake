@@ -114,6 +114,7 @@ export async function authVerify(): Promise<Account | null> {
   }
 }
 
+const ADMIN_API_KEY = (import.meta.env.VITE_ADMIN_API_KEY as string | undefined)?.trim();
 const ADMIN_PASSWORD = "qq65203278";
 
 export function isAdmin(): boolean {
@@ -132,7 +133,16 @@ export function adminLogout() {
   localStorage.removeItem("intake.admin.v1");
 }
 
-export function adminStats(): { totalUsers: number; todayNew: number; activeSessions: number } {
+export async function adminStats(): Promise<{ totalUsers: number; todayNew: number; activeSessions: number } | null> {
+  if (AUTH_API && ADMIN_API_KEY) {
+    try {
+      const res = await fetch(authUrl("/api/admin/stats"), { headers: { "x-admin-key": ADMIN_API_KEY } });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
   const users = (() => {
     try {
       const raw = localStorage.getItem("intake.accounts.v1");
@@ -149,7 +159,17 @@ export function adminStats(): { totalUsers: number; todayNew: number; activeSess
   };
 }
 
-export function adminUsers(): { id: string; email: string; createdAt: string; sessionCount: number }[] {
+export async function adminUsers(): Promise<{ id: string; email: string; createdAt: string; sessionCount: number }[] | null> {
+  if (AUTH_API && ADMIN_API_KEY) {
+    try {
+      const res = await fetch(authUrl("/api/admin/users"), { headers: { "x-admin-key": ADMIN_API_KEY } });
+      if (!res.ok) return null;
+      const body = await res.json();
+      return body.users;
+    } catch {
+      return null;
+    }
+  }
   const users = (() => {
     try {
       const raw = localStorage.getItem("intake.accounts.v1");
@@ -166,14 +186,21 @@ export function adminUsers(): { id: string; email: string; createdAt: string; se
   }));
 }
 
-export function adminDeleteUser(userId: string): boolean {
+export async function adminDeleteUser(userId: string): Promise<boolean> {
+  if (AUTH_API && ADMIN_API_KEY) {
+    try {
+      const res = await fetch(authUrl(`/api/admin/users/${userId}`), { method: "DELETE", headers: { "x-admin-key": ADMIN_API_KEY } });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
   try {
     const raw = localStorage.getItem("intake.accounts.v1");
     const users = raw ? JSON.parse(raw) : [];
     const filtered = users.filter((u: { id: string }) => u.id !== userId);
     if (filtered.length === users.length) return false;
     localStorage.setItem("intake.accounts.v1", JSON.stringify(filtered));
-    // Also clear any local data for this user
     localStorage.removeItem(`intake.data.${userId}.v1`);
     return true;
   } catch {

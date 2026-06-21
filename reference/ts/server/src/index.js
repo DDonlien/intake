@@ -162,10 +162,11 @@ app.use((err, _req, res, _next) => {
   return res.status(500).json({ error: "Unexpected server error." });
 });
 
-cleanupExpiredSessions();
-
-app.listen(PORT, () => {
-  console.log(`[intake-auth] server running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  cleanupExpiredSessions();
+  app.listen(PORT, () => {
+    console.log(`[intake-auth] server running on port ${PORT}`);
+  });
+}
 
 export default app;
