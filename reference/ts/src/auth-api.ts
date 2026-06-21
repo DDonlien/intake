@@ -114,6 +114,41 @@ export async function authVerify(): Promise<Account | null> {
   }
 }
 
+const ADMIN_API_KEY = (import.meta.env.VITE_ADMIN_API_KEY as string | undefined)?.trim();
+
+export async function adminStats(): Promise<{ totalUsers: number; todayNew: number; activeSessions: number } | null> {
+  if (!AUTH_API || !ADMIN_API_KEY) return null;
+  try {
+    const res = await fetch(authUrl("/api/admin/stats"), { headers: { "x-admin-key": ADMIN_API_KEY } });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function adminUsers(): Promise<{ id: string; email: string; createdAt: string; sessionCount: number }[] | null> {
+  if (!AUTH_API || !ADMIN_API_KEY) return null;
+  try {
+    const res = await fetch(authUrl("/api/admin/users"), { headers: { "x-admin-key": ADMIN_API_KEY } });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body.users;
+  } catch {
+    return null;
+  }
+}
+
+export async function adminDeleteUser(userId: string): Promise<boolean> {
+  if (!AUTH_API || !ADMIN_API_KEY) return false;
+  try {
+    const res = await fetch(authUrl(`/api/admin/users/${userId}`), { method: "DELETE", headers: { "x-admin-key": ADMIN_API_KEY } });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function authLogout(account: Account | null) {
   const session = getStoredSession();
   if (session.serverToken) {
@@ -121,3 +156,4 @@ export async function authLogout(account: Account | null) {
   }
   clearSession();
 }
+

@@ -38,6 +38,7 @@ jobs:
       - name: Build
         env:
           VITE_AUTH_API_URL: ${{ vars.INTAKE_AUTH_API_URL }}
+          VITE_ADMIN_API_KEY: ${{ secrets.INTAKE_ADMIN_API_KEY }}
         run: npm run build
 
       - name: Setup Pages

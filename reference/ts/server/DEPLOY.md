@@ -39,6 +39,7 @@ docker compose up --build
    - `PORT`: optional, defaults to `3699`.
    - `SESSION_MAX_AGE_MS`: optional session lifetime in milliseconds.
    - `AUTH_RATE_LIMIT_WINDOW_MS` and `AUTH_RATE_LIMIT_MAX`: optional in-memory auth rate limit settings.
+   - `ADMIN_API_KEY`: optional. Set a long random string to enable the admin dashboard. The frontend passes it via `VITE_ADMIN_API_KEY` at build time.
 3. Run with docker-compose:
 
 ```bash
@@ -86,7 +87,46 @@ VITE_AUTH_API_URL=https://intake-auth.yourdomain.com npm run build
 
 For GitHub Pages, set repository variable `INTAKE_AUTH_API_URL`; `.github/workflows/deploy-pages.yml` passes it to Vite as `VITE_AUTH_API_URL`. When `VITE_AUTH_API_URL` is unset, the frontend uses the existing localStorage-based auth (backward compatible).
 
+To enable the admin dashboard on the frontend, also set repository secret `INTAKE_ADMIN_API_KEY` (same value as the server's `ADMIN_API_KEY`). The workflow passes it as `VITE_ADMIN_API_KEY` at build time. If unset, the "Admin dashboard" entry is hidden from the Me page.
+
 ## API Reference
+
+### Admin (requires `x-admin-key` header)
+
+The admin endpoints are protected by `ADMIN_API_KEY`. The frontend passes it via `VITE_ADMIN_API_KEY` at build time.
+
+#### `GET /api/admin/stats`
+
+Response 200:
+```json
+{ "totalUsers": 12, "todayNew": 2, "activeSessions": 5 }
+```
+
+#### `GET /api/admin/users`
+
+Response 200:
+```json
+{
+  "users": [
+    { "id": "uuid", "email": "user@example.com", "createdAt": "2026-06-20T12:00:00.000Z", "sessionCount": 1 }
+  ],
+  "total": 1
+}
+```
+
+#### `DELETE /api/admin/users/:id`
+
+Response 200:
+```json
+{ "success": true }
+```
+
+Response 404:
+```json
+{ "error": "User not found." }
+```
+
+### Auth
 
 ### `POST /api/auth/register`
 

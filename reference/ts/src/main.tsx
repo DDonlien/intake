@@ -248,8 +248,6 @@ function normalizeData(raw: AppData): AppData {
 }
 
 function makeDefaultData(): AppData {
-  const today = todayKey();
-  const yesterday = addDays(today, -1);
   const profile: Profile = { name: "Tao", weight: 78.4, height: 178, age: 34, activity: "Moderate" };
   return {
     profile,
@@ -257,11 +255,11 @@ function makeDefaultData(): AppData {
     profileSource: "synced",
     goalsSource: "synced",
     foods: seedFoods,
-    entries: { [today]: defaultMeals(), [yesterday]: [{ id: uid("meal"), name: "Dinner", time: "19:10", foods: [foodToLog(seedFoods[6]), foodToLog(seedFoods[4])] }] },
-    health: { [today]: { active: 642, exercise: 38, steps: 8400 }, [yesterday]: { active: 510, exercise: 28, steps: 7200 } },
-    favorites: ["greek-yogurt"],
-    recentFoodIds: ["chicken-bowl", "greek-yogurt", "protein-shake", "turkey-sandwich"],
-    expandedMeals: ["Lunch"],
+    entries: {},
+    health: {},
+    favorites: [],
+    recentFoodIds: [],
+    expandedMeals: [],
   };
 }
 
@@ -318,6 +316,7 @@ function App() {
   const [selectedMealName, setSelectedMealName] = useState<MealName>("Lunch");
   const [notice, setNotice] = useState("");
   const [pageScrolled, setPageScrolled] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [data, setData] = useState<AppData | null>(() => (account ? normalizeData(readJson(dataKey(account.id), makeDefaultData())) : null));
   const activeTabRef = useRef<TabKey>(activeTab);
   const returnTabRef = useRef<TabKey>("log");
@@ -557,80 +556,86 @@ function App() {
   return (
     <main className="stage">
       <section className={pageScrolled ? "phone page-scrolled" : "phone"} aria-label="Intake app">
-        <div
-          className={scrollPageClassName}
-          key={activeTab}
-          onScroll={(event) => {
-            const nextScrolled = event.currentTarget.scrollTop > 8;
-            setPageScrolled((current) => (current === nextScrolled ? current : nextScrolled));
-          }}
-        >
-          {activeTab === "me" ? (
-            <MePage account={account} data={data} onLogout={logout} onReset={resetDemoData} onUpdate={updateData} />
-          ) : null}
-          {activeTab === "log" ? (
-            <LogPage
-              data={data}
-              health={healthForDay}
-              meals={mealsForDay}
-              selectedDate={selectedDate}
-              onAddFood={(meal) => navigateTab("add", meal)}
-              onAddMeal={addMeal}
-              onDateChange={setSelectedDate}
-              onDeleteFood={deleteFood}
-              onDeleteMeal={deleteMeal}
-              onMoveFood={moveMealFood}
-              onReorderMeal={reorderMeals}
-              onToggleMeal={(mealName) =>
-                updateData((current) => {
-                  const next = structuredClone(current) as AppData;
-                  next.expandedMeals = next.expandedMeals.includes(mealName)
-                    ? []
-                    : [mealName];
-                  return next;
-                })
-              }
-              onUpdateFood={updateMealFood}
-            />
-          ) : null}
-          {activeTab === "bank" ? (
-            <BankPage
-              activeFilter={bankFilter}
-              data={data}
-              onAddFood={addFoodToMeal}
-              onToggleFavorite={toggleFavorite}
-              search={bankSearch}
-            />
-          ) : null}
-          {activeTab === "add" ? (
-            <AddPage
-              allFoods={data.foods}
-              currentMeal={selectedMealName}
-              meals={mealsForDay}
-              onAddFood={addFoodToMeal}
-              onClose={() => navigateTab(returnTabRef.current === "add" ? "log" : returnTabRef.current)}
-              onDeleteFood={deleteFood}
-              onMealChange={setSelectedMealName}
-              onUpdateFood={updateMealFood}
-              recentFoodIds={data.recentFoodIds}
-            />
-          ) : null}
-        </div>
+        {showAdmin ? (
+          <AdminPage onClose={() => setShowAdmin(false)} />
+        ) : (
+          <>
+            <div
+              className={scrollPageClassName}
+              key={activeTab}
+              onScroll={(event) => {
+                const nextScrolled = event.currentTarget.scrollTop > 8;
+                setPageScrolled((current) => (current === nextScrolled ? current : nextScrolled));
+              }}
+            >
+              {activeTab === "me" ? (
+                <MePage account={account} data={data} onLogout={logout} onReset={resetDemoData} onUpdate={updateData} onShowAdmin={() => setShowAdmin(true)} />
+              ) : null}
+              {activeTab === "log" ? (
+                <LogPage
+                  data={data}
+                  health={healthForDay}
+                  meals={mealsForDay}
+                  selectedDate={selectedDate}
+                  onAddFood={(meal) => navigateTab("add", meal)}
+                  onAddMeal={addMeal}
+                  onDateChange={setSelectedDate}
+                  onDeleteFood={deleteFood}
+                  onDeleteMeal={deleteMeal}
+                  onMoveFood={moveMealFood}
+                  onReorderMeal={reorderMeals}
+                  onToggleMeal={(mealName) =>
+                    updateData((current) => {
+                      const next = structuredClone(current) as AppData;
+                      next.expandedMeals = next.expandedMeals.includes(mealName)
+                        ? []
+                        : [mealName];
+                      return next;
+                    })
+                  }
+                  onUpdateFood={updateMealFood}
+                />
+              ) : null}
+              {activeTab === "bank" ? (
+                <BankPage
+                  activeFilter={bankFilter}
+                  data={data}
+                  onAddFood={addFoodToMeal}
+                  onToggleFavorite={toggleFavorite}
+                  search={bankSearch}
+                />
+              ) : null}
+              {activeTab === "add" ? (
+                <AddPage
+                  allFoods={data.foods}
+                  currentMeal={selectedMealName}
+                  meals={mealsForDay}
+                  onAddFood={addFoodToMeal}
+                  onClose={() => navigateTab(returnTabRef.current === "add" ? "log" : returnTabRef.current)}
+                  onDeleteFood={deleteFood}
+                  onMealChange={setSelectedMealName}
+                  onUpdateFood={updateMealFood}
+                  recentFoodIds={data.recentFoodIds}
+                />
+              ) : null}
+            </div>
 
-        {activeTab === "bank" ? (
-          <BankControls activeFilter={bankFilter} onFilterChange={setBankFilter} search={bankSearch} onSearchChange={setBankSearch} />
-        ) : null}
+            {activeTab === "bank" ? (
+              <BankControls activeFilter={bankFilter} onFilterChange={setBankFilter} search={bankSearch} onSearchChange={setBankSearch} />
+            ) : null}
 
-        <nav className={activeTab === "add" ? "tabbar hidden" : "tabbar"} aria-label="Prototype tabs">
-          <div className="tab-cluster">
-            <TabButton active={activeTab === "bank"} icon={<Search size={20} />} label="Bank" onClick={() => navigateTab("bank")} />
-            <TabButton active={activeTab === "me"} icon={<UserRound size={20} />} label="Me" onClick={() => navigateTab("me")} />
-            <TabButton active={activeTab === "log"} icon={<Activity size={20} />} label="Log" onClick={() => navigateTab("log")} />
-          </div>
-          <button className={activeTab === "add" ? "add-tab active" : "add-tab"} type="button" aria-label="Record meal" onClick={() => navigateTab("add", selectedMealName)}>
-            <Plus size={29} />
-          </button>
-        </nav>
+            <nav className={activeTab === "add" ? "tabbar hidden" : "tabbar"} aria-label="Prototype tabs">
+              <div className="tab-cluster">
+                <TabButton active={activeTab === "bank"} icon={<Search size={20} />} label="Bank" onClick={() => navigateTab("bank")} />
+                <TabButton active={activeTab === "me"} icon={<UserRound size={20} />} label="Me" onClick={() => navigateTab("me")} />
+                <TabButton active={activeTab === "log"} icon={<Activity size={20} />} label="Log" onClick={() => navigateTab("log")} />
+              </div>
+              <button className={activeTab === "add" ? "add-tab active" : "add-tab"} type="button" aria-label="Record meal" onClick={() => navigateTab("add", selectedMealName)}>
+                <Plus size={29} />
+              </button>
+            </nav>
+          </>
+        )}
         {notice ? <Toast message={notice} /> : null}
       </section>
     </main>
@@ -1303,7 +1308,7 @@ function FoodMiniList({ title, items, onAdd }: { title: string; items: FoodItem[
   return <div className="food-mini-group"><p>{title}</p><div className="food-mini-list">{items.length ? items.map((food) => <button className="food-mini-row" key={food.id} onClick={() => onAdd(food)} type="button"><span className="food-thumb mini">{food.emoji}</span><span><strong>{food.name}</strong><small>{food.brand} · {food.serving}</small></span><b>{food.kcal}</b></button>) : <div className="empty-state small">No foods found.</div>}</div></div>;
 }
 
-function MePage({ account, data, onLogout, onReset, onUpdate }: { account: Account; data: AppData; onLogout: () => void; onReset: () => void; onUpdate: (recipe: (current: AppData) => AppData) => void }) {
+function MePage({ account, data, onLogout, onReset, onUpdate, onShowAdmin }: { account: Account; data: AppData; onLogout: () => void; onReset: () => void; onUpdate: (recipe: (current: AppData) => AppData) => void; onShowAdmin?: () => void }) {
   const syncedProfile: Profile = { name: "Tao", weight: 78.4, height: 178, age: 34, activity: "Moderate" };
   const bodyStatusLabel = data.profileSource === "synced" ? "Synced" : "Custom";
   const goalStatusLabel = data.goalsSource === "synced" ? "Plan synced" : "Custom";
@@ -1358,7 +1363,7 @@ function MePage({ account, data, onLogout, onReset, onUpdate }: { account: Accou
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Plan settings</h2><SourceBadge source="synced" label="Presets" /></div><div className="segmented-list">{planOptions.map((plan) => <button className={draftGoals.plan === plan ? "filter-chip active" : "filter-chip"} key={plan} onClick={() => updatePlan(plan)} type="button">{plan}</button>)}</div></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Body data</h2><div className="title-actions"><SourceBadge source={data.profileSource} label={bodyStatusLabel} />{bodyEditing ? <button className="reset-action" aria-label="Reset body data" onClick={resetBodyDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (bodyEditing ? saveBody() : setBodyEditing(true))} type="button">{bodyEditing ? "Save" : "Edit"}</button></div></div><div className="settings-list"><NumberSetting editing={bodyEditing} label="Weight" source={data.profileSource} unit="kg" value={draftProfile.weight} onChange={(weight) => updateProfile({ weight })} /><NumberSetting editing={bodyEditing} label="Height" source={data.profileSource} unit="cm" value={draftProfile.height} onChange={(height) => updateProfile({ height })} /><NumberSetting editing={bodyEditing} label="Age" source={data.profileSource} unit="years" value={draftProfile.age} onChange={(age) => updateProfile({ age })} /><ActivitySetting editing={bodyEditing} source={data.profileSource} value={draftProfile.activity} onChange={(activity) => updateProfile({ activity })} /></div></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Goal summary</h2><div className="title-actions"><SourceBadge source={data.goalsSource} label={goalStatusLabel} />{goalEditing ? <button className="reset-action" aria-label="Reset goal" onClick={resetGoalDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (goalEditing ? saveGoal() : setGoalEditing(true))} type="button">{goalEditing ? "Save" : "Edit"}</button></div></div><div className="summary-grid"><SummaryTile label="Current" value={draftGoals.currentWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, currentWeight: Number(v) || 0 })} /><SummaryTile label="Target" value={draftGoals.targetWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, targetWeight: Number(v) || 0 })} /><SummaryTile label="Daily" value={draftGoals.dailyKcal.toString()} unit="kcal" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, dailyKcal: Number(v) || 0 })} /><SummaryTile label="Protein" value={draftGoals.protein.toString()} unit="g" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, protein: Number(v) || 0 })} /></div></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} /></div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} />{authApi.usesServerAuth() && onShowAdmin ? <ActionRow icon={<SlidersHorizontal size={17} />} title="Admin dashboard" detail="Manage registered users" onClick={onShowAdmin} /> : null}</div></section>
       <button className="danger-action" onClick={onLogout} type="button"><X size={18} /><span><strong>Log out</strong><small>Keep local data on this device</small></span></button>
     </>
   );
@@ -1386,6 +1391,77 @@ function SettingsRow({ icon, title, detail }: { icon: React.ReactNode; title: st
 
 function ActionRow({ icon, title, detail, onClick }: { icon: React.ReactNode; title: string; detail: string; onClick: () => void }) {
   return <button className="settings-row" onClick={onClick} type="button"><span className="settings-icon">{icon}</span><span><strong>{title}</strong><small>{detail}</small></span><ChevronRight size={16} /></button>;
+}
+
+function AdminPage({ onClose }: { onClose: () => void }) {
+  const [stats, setStats] = useState<{ totalUsers: number; todayNew: number; activeSessions: number } | null>(null);
+  const [users, setUsers] = useState<{ id: string; email: string; createdAt: string; sessionCount: number }[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    Promise.all([authApi.adminStats(), authApi.adminUsers()]).then(([s, u]) => {
+      if (!s || !u) {
+        setError("Admin access denied. Check VITE_ADMIN_API_KEY and server connection.");
+      } else {
+        setStats(s);
+        setUsers(u);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm("Delete this user and all their sessions? This cannot be undone.")) return;
+    const ok = await authApi.adminDeleteUser(userId);
+    if (ok) {
+      setUsers((prev) => prev?.filter((u) => u.id !== userId) ?? null);
+      setStats((prev) => prev ? { ...prev, totalUsers: prev.totalUsers - 1 } : null);
+    } else {
+      alert("Delete failed.");
+    }
+  };
+
+  return (
+    <div className="scroll-page admin-page">
+      <header className="admin-header">
+        <button className="admin-back" onClick={onClose} type="button"><ChevronRight size={20} style={{ transform: "rotate(180deg)" }} /></button>
+        <h1>Admin Dashboard</h1>
+        <span />
+      </header>
+      {loading ? (
+        <p className="admin-loading">Loading…</p>
+      ) : error ? (
+        <p className="admin-error">{error}</p>
+      ) : (
+        <>
+          <section className="glass-card content-card">
+            <div className="card-title-row compact"><h2>Overview</h2></div>
+            <div className="summary-grid">
+              <SummaryTile label="Total Users" value={String(stats!.totalUsers)} unit="" />
+              <SummaryTile label="Today New" value={String(stats!.todayNew)} unit="" />
+              <SummaryTile label="Active Sessions" value={String(stats!.activeSessions)} unit="" />
+            </div>
+          </section>
+          <section className="glass-card content-card">
+            <div className="card-title-row compact"><h2>Users</h2></div>
+            <div className="admin-user-list">
+              {users!.map((u) => (
+                <div className="admin-user-row" key={u.id}>
+                  <div className="admin-user-info">
+                    <strong>{u.email}</strong>
+                    <small>{new Date(u.createdAt).toLocaleString()} · {u.sessionCount} sessions</small>
+                  </div>
+                  <button className="admin-delete-btn" onClick={() => handleDelete(u.id)} type="button">Delete</button>
+                </div>
+              ))}
+              {users!.length === 0 ? <p className="admin-empty">No users registered yet.</p> : null}
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  );
 }
 
 function Toast({ message }: { message: string }) {
