@@ -1363,7 +1363,7 @@ function MePage({ account, data, onLogout, onReset, onUpdate, onShowAdmin }: { a
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Plan settings</h2><SourceBadge source="synced" label="Presets" /></div><div className="segmented-list">{planOptions.map((plan) => <button className={draftGoals.plan === plan ? "filter-chip active" : "filter-chip"} key={plan} onClick={() => updatePlan(plan)} type="button">{plan}</button>)}</div></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Body data</h2><div className="title-actions"><SourceBadge source={data.profileSource} label={bodyStatusLabel} />{bodyEditing ? <button className="reset-action" aria-label="Reset body data" onClick={resetBodyDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (bodyEditing ? saveBody() : setBodyEditing(true))} type="button">{bodyEditing ? "Save" : "Edit"}</button></div></div><div className="settings-list"><NumberSetting editing={bodyEditing} label="Weight" source={data.profileSource} unit="kg" value={draftProfile.weight} onChange={(weight) => updateProfile({ weight })} /><NumberSetting editing={bodyEditing} label="Height" source={data.profileSource} unit="cm" value={draftProfile.height} onChange={(height) => updateProfile({ height })} /><NumberSetting editing={bodyEditing} label="Age" source={data.profileSource} unit="years" value={draftProfile.age} onChange={(age) => updateProfile({ age })} /><ActivitySetting editing={bodyEditing} source={data.profileSource} value={draftProfile.activity} onChange={(activity) => updateProfile({ activity })} /></div></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Goal summary</h2><div className="title-actions"><SourceBadge source={data.goalsSource} label={goalStatusLabel} />{goalEditing ? <button className="reset-action" aria-label="Reset goal" onClick={resetGoalDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (goalEditing ? saveGoal() : setGoalEditing(true))} type="button">{goalEditing ? "Save" : "Edit"}</button></div></div><div className="summary-grid"><SummaryTile label="Current" value={draftGoals.currentWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, currentWeight: Number(v) || 0 })} /><SummaryTile label="Target" value={draftGoals.targetWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, targetWeight: Number(v) || 0 })} /><SummaryTile label="Daily" value={draftGoals.dailyKcal.toString()} unit="kcal" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, dailyKcal: Number(v) || 0 })} /><SummaryTile label="Protein" value={draftGoals.protein.toString()} unit="g" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, protein: Number(v) || 0 })} /></div></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} />{authApi.usesServerAuth() && onShowAdmin ? <ActionRow icon={<SlidersHorizontal size={17} />} title="Admin dashboard" detail="Manage registered users" onClick={onShowAdmin} /> : null}</div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} />{onShowAdmin ? <ActionRow icon={<SlidersHorizontal size={17} />} title="Admin dashboard" detail="Manage registered users" onClick={onShowAdmin} /> : null}</div></section>
       <button className="danger-action" onClick={onLogout} type="button"><X size={18} /><span><strong>Log out</strong><small>Keep local data on this device</small></span></button>
     </>
   );
@@ -1394,32 +1394,55 @@ function ActionRow({ icon, title, detail, onClick }: { icon: React.ReactNode; ti
 }
 
 function AdminPage({ onClose }: { onClose: () => void }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(authApi.isAdmin());
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
   const [stats, setStats] = useState<{ totalUsers: number; todayNew: number; activeSessions: number } | null>(null);
   const [users, setUsers] = useState<{ id: string; email: string; createdAt: string; sessionCount: number }[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    Promise.all([authApi.adminStats(), authApi.adminUsers()]).then(([s, u]) => {
-      if (!s || !u) {
-        setError("Admin access denied. Check VITE_ADMIN_API_KEY and server connection.");
-      } else {
-        setStats(s);
-        setUsers(u);
-      }
-      setLoading(false);
-    });
-  }, []);
+    if (isLoggedIn) {
+      const s = authApi.adminStats();
+      const u = authApi.adminUsers();
+      setStats(s);
+      setUsers(u);
+    }
+  }, [isLoggedIn]);
 
-  const handleDelete = async (userId: string) => {
-    if (!window.confirm("Delete this user and all their sessions? This cannot be undone.")) return;
-    const ok = await authApi.adminDeleteUser(userId);
+  const handleLogin = () => {
+    if (username !== "taobe") {
+      setLoginError("Invalid username.");
+      return;
+    }
+    if (authApi.adminLogin(password)) {
+      setIsLoggedIn(true);
+      setLoginError("");
+    } else {
+      setLoginError("Wrong password.");
+    }
+  };
+
+  const handleLogout = () => {
+    authApi.adminLogout();
+    setIsLoggedIn(false);
+  };
+
+  const handleDelete = (userId: string) => {
+    if (!window.confirm("Delete this user and all their local data? This cannot be undone.")) return;
+    const ok = authApi.adminDeleteUser(userId);
     if (ok) {
-      setUsers((prev) => prev?.filter((u) => u.id !== userId) ?? null);
-      setStats((prev) => prev ? { ...prev, totalUsers: prev.totalUsers - 1 } : null);
+      const s = authApi.adminStats();
+      const u = authApi.adminUsers();
+      setStats(s);
+      setUsers(u);
     } else {
       alert("Delete failed.");
     }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleLogin();
   };
 
   return (
@@ -1427,26 +1450,45 @@ function AdminPage({ onClose }: { onClose: () => void }) {
       <header className="admin-header">
         <button className="admin-back" onClick={onClose} type="button"><ChevronRight size={20} style={{ transform: "rotate(180deg)" }} /></button>
         <h1>Admin Dashboard</h1>
-        <span />
+        {isLoggedIn ? <button className="admin-back" onClick={handleLogout} type="button">Logout</button> : <span />}
       </header>
-      {loading ? (
-        <p className="admin-loading">Loading…</p>
-      ) : error ? (
-        <p className="admin-error">{error}</p>
+      {!isLoggedIn ? (
+        <section className="glass-card content-card" style={{ marginTop: 40 }}>
+          <div className="card-title-row compact"><h2>Admin Login</h2></div>
+          <div className="admin-login-form">
+            <input
+              className="admin-login-input"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <input
+              className="admin-login-input"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            {loginError ? <p className="admin-error">{loginError}</p> : null}
+            <button className="admin-login-btn" onClick={handleLogin} type="button">Login</button>
+          </div>
+        </section>
       ) : (
         <>
           <section className="glass-card content-card">
             <div className="card-title-row compact"><h2>Overview</h2></div>
             <div className="summary-grid">
-              <SummaryTile label="Total Users" value={String(stats!.totalUsers)} unit="" />
-              <SummaryTile label="Today New" value={String(stats!.todayNew)} unit="" />
-              <SummaryTile label="Active Sessions" value={String(stats!.activeSessions)} unit="" />
+              <SummaryTile label="Total Users" value={String(stats?.totalUsers ?? 0)} unit="" />
+              <SummaryTile label="Today New" value={String(stats?.todayNew ?? 0)} unit="" />
+              <SummaryTile label="Active Sessions" value={String(stats?.activeSessions ?? 0)} unit="" />
             </div>
           </section>
           <section className="glass-card content-card">
             <div className="card-title-row compact"><h2>Users</h2></div>
             <div className="admin-user-list">
-              {users!.map((u) => (
+              {users?.map((u) => (
                 <div className="admin-user-row" key={u.id}>
                   <div className="admin-user-info">
                     <strong>{u.email}</strong>
@@ -1455,7 +1497,7 @@ function AdminPage({ onClose }: { onClose: () => void }) {
                   <button className="admin-delete-btn" onClick={() => handleDelete(u.id)} type="button">Delete</button>
                 </div>
               ))}
-              {users!.length === 0 ? <p className="admin-empty">No users registered yet.</p> : null}
+              {(!users || users.length === 0) ? <p className="admin-empty">No users registered yet.</p> : null}
             </div>
           </section>
         </>
