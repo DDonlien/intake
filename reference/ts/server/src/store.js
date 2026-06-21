@@ -83,3 +83,38 @@ export function saveSessions(sessions) {
     } catch {}
   }
 }
+
+const MAX_LOGS = 1000;
+
+export async function loadLogs() {
+  if (kv) {
+    try {
+      return (await kv.get("logs")) || [];
+    } catch {
+      return [];
+    }
+  }
+  try {
+    return JSON.parse(readFileSync(join(DATA_DIR, "logs.json"), "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+export async function saveLogs(logs) {
+  if (kv) {
+    kv.set("logs", logs).catch(() => {});
+  } else {
+    try {
+      mkdirSync(DATA_DIR, { recursive: true });
+      writeFileSync(join(DATA_DIR, "logs.json"), JSON.stringify(logs, null, 2), "utf-8");
+    } catch {}
+  }
+}
+
+export async function appendLog(log) {
+  const logs = await loadLogs();
+  logs.push(log);
+  if (logs.length > MAX_LOGS) logs.splice(0, logs.length - MAX_LOGS);
+  await saveLogs(logs);
+}

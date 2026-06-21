@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { register, login, verify, logout, cleanupExpiredSessions } from "./auth.js";
-import { loadUsers, saveUsers, loadSessions, saveSessions } from "./store.js";
+import { loadUsers, saveUsers, loadSessions, saveSessions, loadLogs, appendLog } from "./store.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3699;
@@ -11,10 +11,6 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 const AUTH_RATE_LIMIT_WINDOW_MS = Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
 const AUTH_RATE_LIMIT_MAX = Number(process.env.AUTH_RATE_LIMIT_MAX) || 30;
 const authAttempts = new Map();
-
-// Request logs (in-memory, up to 1000 entries)
-const requestLogs = [];
-const MAX_LOGS = 1000;
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "16kb" }));
@@ -31,7 +27,7 @@ app.use(
   }),
 );
 
-// Request logging middleware
+// Request logging middleware (async, persists to KV)
 app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
@@ -43,8 +39,7 @@ app.use((req, res, next) => {
       ip: req.ip || req.socket.remoteAddress,
       timestamp: new Date().toISOString(),
     };
-    requestLogs.push(log);
-    if (requestLogs.length > MAX_LOGS) requestLogs.shift();
+    appendLog(log).catch(() => {});
   });
   next();
 });
@@ -153,8 +148,9 @@ app.get("/api/admin/stats", requireAdmin, (req, res) => {
   res.json({ totalUsers, todayNew, activeSessions });
 });
 
-app.get("/api/admin/logs", requireAdmin, (req, res) => {
+app.get("/api/admin/logs", requireAdmin, async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 100);
+  const requestLogs = await loadLogs();
   const recentLogs = requestLogs.slice(-limit);
   const stats = {
     totalRequests: requestLogs.length,
