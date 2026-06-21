@@ -1400,13 +1400,22 @@ function AdminPage({ onClose }: { onClose: () => void }) {
   const [loginError, setLoginError] = useState("");
   const [stats, setStats] = useState<{ totalUsers: number; todayNew: number; activeSessions: number } | null>(null);
   const [users, setUsers] = useState<{ id: string; email: string; createdAt: string; sessionCount: number }[] | null>(null);
+  const [logs, setLogs] = useState<{ method: string; path: string; status: number; duration: number; timestamp: string }[] | null>(null);
+  const [logStats, setLogStats] = useState<{ totalRequests: number; byMethod: Record<string, number>; byPath: Record<string, number>; byStatus: Record<string, number> } | null>(null);
+
+  const loadData = async () => {
+    const [s, u, l] = await Promise.all([authApi.adminStats(), authApi.adminUsers(), authApi.adminLogs()]);
+    setStats(s);
+    setUsers(u);
+    if (l) {
+      setLogs(l.logs);
+      setLogStats(l.stats);
+    }
+  };
 
   useEffect(() => {
     if (isLoggedIn) {
-      Promise.all([authApi.adminStats(), authApi.adminUsers()]).then(([s, u]) => {
-        setStats(s);
-        setUsers(u);
-      });
+      loadData();
     }
   }, [isLoggedIn]);
 
@@ -1432,9 +1441,7 @@ function AdminPage({ onClose }: { onClose: () => void }) {
     if (!window.confirm("Delete this user and all their local data? This cannot be undone.")) return;
     const ok = await authApi.adminDeleteUser(userId);
     if (ok) {
-      const [s, u] = await Promise.all([authApi.adminStats(), authApi.adminUsers()]);
-      setStats(s);
-      setUsers(u);
+      loadData();
     } else {
       alert("Delete failed.");
     }
@@ -1482,6 +1489,28 @@ function AdminPage({ onClose }: { onClose: () => void }) {
               <SummaryTile label="Total Users" value={String(stats?.totalUsers ?? 0)} unit="" />
               <SummaryTile label="Today New" value={String(stats?.todayNew ?? 0)} unit="" />
               <SummaryTile label="Active Sessions" value={String(stats?.activeSessions ?? 0)} unit="" />
+            </div>
+          </section>
+          <section className="glass-card content-card">
+            <div className="card-title-row compact"><h2>API Calls</h2></div>
+            <div className="summary-grid">
+              <SummaryTile label="Total Requests" value={String(logStats?.totalRequests ?? 0)} unit="" />
+              <SummaryTile label="Health Checks" value={String(logStats?.byPath?.["/api/health"] ?? 0)} unit="" />
+              <SummaryTile label="Errors (4xx/5xx)" value={String(
+                Object.entries(logStats?.byStatus ?? {}).filter(([k]) => k.startsWith("4") || k.startsWith("5")).reduce((a, [, v]) => a + v, 0)
+              )} unit="" />
+            </div>
+            <div className="admin-log-list">
+              {logs?.slice(0, 20).map((log, i) => (
+                <div className="admin-log-row" key={i}>
+                  <span className={`admin-log-status ${String(log.status).startsWith("2") ? "ok" : String(log.status).startsWith("4") || String(log.status).startsWith("5") ? "err" : "warn"}`}>{log.status}</span>
+                  <span className="admin-log-method">{log.method}</span>
+                  <span className="admin-log-path">{log.path}</span>
+                  <span className="admin-log-dur">{log.duration}ms</span>
+                  <span className="admin-log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                </div>
+              ))}
+              {(!logs || logs.length === 0) ? <p className="admin-empty">No API calls yet.</p> : null}
             </div>
           </section>
           <section className="glass-card content-card">

@@ -12,6 +12,10 @@ const AUTH_RATE_LIMIT_WINDOW_MS = Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) 
 const AUTH_RATE_LIMIT_MAX = Number(process.env.AUTH_RATE_LIMIT_MAX) || 30;
 const authAttempts = new Map();
 
+// Request logs (in-memory, up to 1000 entries)
+const requestLogs = [];
+const MAX_LOGS = 1000;
+
 app.disable("x-powered-by");
 app.use(express.json({ limit: "16kb" }));
 app.use(
@@ -26,6 +30,24 @@ app.use(
     credentials: true,
   }),
 );
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const log = {
+      method: req.method,
+      path: req.path,
+      status: res.statusCode,
+      duration: Date.now() - start,
+      ip: req.ip || req.socket.remoteAddress,
+      timestamp: new Date().toISOString(),
+    };
+    requestLogs.push(log);
+    if (requestLogs.length > MAX_LOGS) requestLogs.shift();
+  });
+  next();
+});
 
 function getAuthFields(req) {
   const body = req.body && typeof req.body === "object" ? req.body : {};
@@ -129,6 +151,23 @@ app.get("/api/admin/stats", requireAdmin, (req, res) => {
   const activeSessions = Object.values(sessions).filter((s) => !isSessionExpired(s)).length;
 
   res.json({ totalUsers, todayNew, activeSessions });
+});
+
+app.get("/api/admin/logs", requireAdmin, (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 50, 100);
+  const recentLogs = requestLogs.slice(-limit);
+  const stats = {
+    totalRequests: requestLogs.length,
+    byMethod: {},
+    byPath: {},
+    byStatus: {},
+  };
+  for (const log of requestLogs) {
+    stats.byMethod[log.method] = (stats.byMethod[log.method] || 0) + 1;
+    stats.byPath[log.path] = (stats.byPath[log.path] || 0) + 1;
+    stats.byStatus[String(log.status)] = (stats.byStatus[String(log.status)] || 0) + 1;
+  }
+  res.json({ logs: recentLogs, stats });
 });
 
 app.delete("/api/admin/users/:id", requireAdmin, (req, res) => {

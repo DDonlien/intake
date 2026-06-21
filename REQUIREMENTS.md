@@ -571,9 +571,9 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
 ### CI-A：Vercel 自动部署
 
 - [ ] [0.2.0-CI-A-000] 建立推送自动部署到 Vercel #ops #P0.2 #phase-0-2
-  - [ ] [0.2.0-CI-A-001] 推送代码后自动部署 TS 应用前端到 app.intake.ddonlien.com
-  - [ ] [0.2.0-CI-A-002] 推送代码后自动部署后端服务到 admin.intake.ddonlien.com
-  - [ ] [0.2.0-CI-A-003] 推送代码后自动部署 TS 介绍页到 intake.ddonlien.com
+  - [ ] [0.2.0-CI-A-001] 推送代码后自动部署 TS 应用前端到 intake.ddonlien.com/app
+  - [ ] [0.2.0-CI-A-002] 推送代码后自动部署后端服务到 intake.ddonlien.com/admin
+  - [ ] [0.2.0-CI-A-003] 推送代码后自动部署 TS 介绍页到 intake.ddonlien.com/api
 
 ### ARCH-A：代码与数据隔离
 

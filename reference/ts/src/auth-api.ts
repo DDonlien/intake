@@ -208,6 +208,17 @@ export async function adminDeleteUser(userId: string): Promise<boolean> {
   }
 }
 
+export async function adminLogs(): Promise<{ logs: { method: string; path: string; status: number; duration: number; timestamp: string }[]; stats: { totalRequests: number; byMethod: Record<string, number>; byPath: Record<string, number>; byStatus: Record<string, number> } } | null> {
+  if (!AUTH_API || !ADMIN_API_KEY) return null;
+  try {
+    const res = await fetch(authUrl("/api/admin/logs"), { headers: { "x-admin-key": ADMIN_API_KEY } });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function authLogout(account: Account | null) {
   const session = getStoredSession();
   if (session.serverToken) {
