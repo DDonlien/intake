@@ -22,3 +22,4 @@ agent-template/.git/
 DerivedData/
 build/
 .swiftpm/
+.vercel

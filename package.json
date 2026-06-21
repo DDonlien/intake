@@ -1,0 +1,15 @@
+{
+  "name": "intake-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "cd reference/ts && npm install && npm run build"
+  },
+  "dependencies": {
+    "@vercel/kv": "^3.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "uuid": "^11.1.0"
+  }
+}

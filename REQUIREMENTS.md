@@ -568,6 +568,20 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
     - [ ] [0.2.0-SEC-A-015] Bank 食物数据来自构建嵌入的 CSV
     - [x] [0.2.0-SEC-A-016] 断网后已登录账户仍可读取本地业务数据
 
+### CI-A：Vercel 自动部署
+
+- [ ] [0.2.0-CI-A-000] 建立推送自动部署到 Vercel #ops #P0.2 #phase-0-2
+  - [ ] [0.2.0-CI-A-001] 推送代码后自动部署 TS 应用前端到 app.intake.ddonlien.com
+  - [ ] [0.2.0-CI-A-002] 推送代码后自动部署后端服务到 admin.intake.ddonlien.com
+  - [ ] [0.2.0-CI-A-003] 推送代码后自动部署 TS 介绍页到 intake.ddonlien.com
+
+### ARCH-A：代码与数据隔离
+
+- [ ] [0.2.0-ARCH-A-000] 建立代码与数据隔离约束 #arch #P0.2 #phase-0-2
+  - [ ] [0.2.0-ARCH-A-001] 食品库数据与代码部署隔离，推送不覆盖生产食品库
+  - [ ] [0.2.0-ARCH-A-002] 用户注册数据与代码部署隔离，推送不覆盖用户账户数据
+  - [ ] [0.2.0-ARCH-A-003] 用户本地使用数据（LocalStorage）保持代码兼容性，代码推送不导致数据丢失
+
 ## Phase - v0.3.0 - iOS Swift App
 
 阶段 0.3.0 的目标是把已验证的产品、交互和数据能力迁移并实现为 iOS Swift / SwiftUI App，包含 HealthKit、SwiftData、原生界面、记录流程、订阅权限与隐私边界。

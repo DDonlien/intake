@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "cd reference/ts && npm install && npm run build",
+  "outputDirectory": "reference/ts/dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
