@@ -1,44 +1,85 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-const DATA_DIR = process.env.INTAKE_DATA_DIR || "./data";
+// Try to load Vercel KV
+let kv = null;
+try {
+  const { createClient } = await import("@vercel/kv");
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    kv = createClient({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN,
+    });
+  }
+} catch {
+  // KV not available
+}
+
+// Vercel serverless functions can only write to /tmp
+const DATA_DIR = process.env.INTAKE_DATA_DIR || (process.env.VERCEL ? "/tmp" : "./data");
 const USERS_FILE = join(DATA_DIR, "users.json");
 const SESSIONS_FILE = join(DATA_DIR, "sessions.json");
 
-function ensureDataDir() {
-  if (!existsSync(DATA_DIR)) {
-    mkdirSync(DATA_DIR, { recursive: true });
+// In-memory cache (preloaded from KV or file)
+let usersCache = [];
+let sessionsCache = {};
+
+async function preload() {
+  if (kv) {
+    try {
+      usersCache = (await kv.get("users")) || [];
+    } catch {
+      usersCache = [];
+    }
+    try {
+      sessionsCache = (await kv.get("sessions")) || {};
+    } catch {
+      sessionsCache = {};
+    }
+  } else {
+    try {
+      usersCache = JSON.parse(readFileSync(USERS_FILE, "utf-8"));
+    } catch {
+      usersCache = [];
+    }
+    try {
+      sessionsCache = JSON.parse(readFileSync(SESSIONS_FILE, "utf-8"));
+    } catch {
+      sessionsCache = {};
+    }
   }
 }
 
-function readJson(path, fallback) {
-  try {
-    const raw = readFileSync(path, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJson(path, data) {
-  ensureDataDir();
-  const tmpPath = `${path}.${process.pid}.tmp`;
-  writeFileSync(tmpPath, JSON.stringify(data, null, 2), "utf-8");
-  renameSync(tmpPath, path);
-}
+await preload();
 
 export function loadUsers() {
-  return readJson(USERS_FILE, []);
+  return usersCache;
 }
 
 export function saveUsers(users) {
-  writeJson(USERS_FILE, users);
+  usersCache = users;
+  if (kv) {
+    kv.set("users", users).catch(() => {});
+  } else {
+    try {
+      mkdirSync(DATA_DIR, { recursive: true });
+      writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+    } catch {}
+  }
 }
 
 export function loadSessions() {
-  return readJson(SESSIONS_FILE, {});
+  return sessionsCache;
 }
 
 export function saveSessions(sessions) {
-  writeJson(SESSIONS_FILE, sessions);
+  sessionsCache = sessions;
+  if (kv) {
+    kv.set("sessions", sessions).catch(() => {});
+  } else {
+    try {
+      mkdirSync(DATA_DIR, { recursive: true });
+      writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2), "utf-8");
+    } catch {}
+  }
 }
