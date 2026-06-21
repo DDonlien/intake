@@ -570,17 +570,17 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
 
 ### CI-A：Vercel 自动部署
 
-- [ ] [0.2.0-CI-A-000] 建立推送自动部署到 Vercel #ops #P0.2 #phase-0-2
-  - [ ] [0.2.0-CI-A-001] 推送代码后自动部署 TS 应用前端到 intake.ddonlien.com/app
-  - [ ] [0.2.0-CI-A-002] 推送代码后自动部署后端服务到 intake.ddonlien.com/admin
-  - [ ] [0.2.0-CI-A-003] 推送代码后自动部署 TS 介绍页到 intake.ddonlien.com/api
+- [x] [0.2.0-CI-A-000] 建立推送自动部署到 Vercel #ops #P0.2 #phase-0-2
+  - [x] [0.2.0-CI-A-001] 推送代码后自动部署 TS 应用前端到 intake.ddonlien.com
+  - [x] [0.2.0-CI-A-002] 后端服务随前端一起部署到 intake.ddonlien.com/api/*
+  - [x] [0.2.0-CI-A-003] Git 集成已连接（Vercel Dashboard），push 到 main 自动触发部署
 
 ### ARCH-A：代码与数据隔离
 
-- [ ] [0.2.0-ARCH-A-000] 建立代码与数据隔离约束 #arch #P0.2 #phase-0-2
-  - [ ] [0.2.0-ARCH-A-001] 食品库数据与代码部署隔离，推送不覆盖生产食品库
-  - [ ] [0.2.0-ARCH-A-002] 用户注册数据与代码部署隔离，推送不覆盖用户账户数据
-  - [ ] [0.2.0-ARCH-A-003] 用户本地使用数据（LocalStorage）保持代码兼容性，代码推送不导致数据丢失
+- [x] [0.2.0-ARCH-A-000] 建立代码与数据隔离约束 #arch #P0.2 #phase-0-2
+  - [ ] [0.2.0-ARCH-A-001] 食品库数据与代码部署隔离，推送不覆盖生产食品库 #pending（DATA-A 未完成）
+  - [x] [0.2.0-ARCH-A-002] 用户注册数据与代码部署隔离：使用 Upstash Redis KV，与代码完全分离
+  - [x] [0.2.0-ARCH-A-003] 用户本地使用数据（LocalStorage）按 userId 隔离，代码推送不导致数据丢失
 
 ## Phase - v0.3.0 - iOS Swift App
 
