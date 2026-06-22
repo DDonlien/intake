@@ -1,14 +1,16 @@
 import { showToast } from '../utils/toast';
 import { CameraService } from '../utils/camera';
+import { DataStore } from '../utils/dataStore';
 import type { DateData, MealData, PageName, FilterType } from '../types';
 
 export class App {
   private currentPage: PageName = 'progress';
-  private activeMeal: string | null = 'lunch';
-  private selectedDateIndex = 5;
+  private activeMeal: string | null = null;
+  private selectedDateIndex = 0;
   private autoDetect = true;
   private sheetExpanded = false;
   private camera = new CameraService();
+  private store = new DataStore();
 
   private dateData: DateData[] = [
     { day: '周日', date: '5月18', kcal: 1585, deficit: 'pos', eaten: 1585, target: 2000, left: 415, active: 320, rest: 1380, steps: '7,230', workouts: '0', protein: '112/120', carb: '195/250', fat: '55/70', proteinPct: 93, carbPct: 78, fatPct: 79 },
@@ -52,6 +54,22 @@ export class App {
     this.startClock();
   }
 
+  private hasData(): boolean {
+    return this.store.hasData();
+  }
+
+  private getDates(): DateData[] {
+    return this.store.getDates();
+  }
+
+  private getMeals(): Record<string, MealData> {
+    return this.store.getMeals();
+  }
+
+  private getUser() {
+    return this.store.getUser();
+  }
+
   private renderShell(): string {
     return `
       <div class="statusbar"><span id="clock">11:19</span><div class="sys"><span class="dots">••••</span><span>⌁</span><span class="battery"></span></div></div>
@@ -74,41 +92,106 @@ export class App {
   }
 
   private renderMePage(): string {
+    const user = this.getUser();
+    const hasData = this.hasData();
+    const name = hasData ? user.name || '未命名' : '新用户';
+    const status = hasData ? '减脂计划中' : '欢迎来到 Intake';
+    const badge = hasData ? '<div class="badge">Plus</div>' : '';
     return `
       <main class="page hidden" data-page="me">
         <div class="stack">
           <section class="glass card profile-hero">
             <div class="avatar">🙂</div>
-            <div><h2 class="h2">Alex</h2><p class="caption">减脂计划中</p></div>
-            <div class="badge">Plus</div>
+            <div><h2 class="h2">${name}</h2><p class="caption">${status}</p></div>
+            ${badge}
           </section>
-          <section class="glass card">
-            <div class="section-header"><h3 class="h3">目标摘要</h3><span class="edit-btn" data-action="edit-goals">编辑</span></div>
-            <div class="goal-grid">
-              <div class="goal-item" data-action="goal-type"><div class="label">目标</div><div class="big">减脂</div><div class="sub">高蛋白</div></div>
-              <div class="goal-item" data-action="goal-current"><div class="label">当前体重</div><div class="big">68.2</div><div class="sub">kg</div></div>
-              <div class="goal-item" data-action="goal-target"><div class="label">目标体重</div><div class="big">60.0</div><div class="sub">kg</div></div>
-              <div class="goal-item" data-action="goal-speed"><div class="label">目标速度</div><div class="big">每周 0.5</div><div class="sub">kg</div></div>
-            </div>
-          </section>
-          <section class="glass card">
-            <div class="section-header"><h3 class="h3">计划</h3><span class="edit-btn" data-action="edit-plan">调整</span></div>
-            <div class="plan-grid">
-              <div class="plan-item" data-action="plan-kcal"><div class="label">每日平均热量</div><div class="big">2,000</div><div class="sub">kcal</div></div>
-              <div class="plan-item" data-action="plan-deficit"><div class="label">每日缺口目标</div><div class="big">500</div><div class="sub">kcal</div></div>
-              <div class="plan-item" data-action="plan-strategy"><div class="label">饮食策略</div><div class="big">高蛋白</div><div class="sub">均衡碳脂</div></div>
-            </div>
-          </section>
+          ${hasData ? this.renderMeGoals() : this.renderMeEmpty()}
+          ${hasData ? this.renderMePlan() : ''}
           <section class="glass card list-row" data-action="health-data">
-            <div class="row gap-3"><div class="icon">♥</div><div><h3 class="h3">健康数据</h3><p class="caption"><span class="green">已连接</span> · Apple 健康</p></div></div>
+            <div class="row gap-3"><div class="icon">♥</div><div><h3 class="h3">健康数据</h3><p class="caption">${user.healthConnected ? '<span class="green">已连接</span>' : '<span class="muted">未连接</span>'} · Apple 健康</p></div></div>
             <span class="chev">›</span>
           </section>
+          ${hasData ? `<section class="glass card list-row" data-action="clear-data">
+            <div class="row gap-3"><div class="icon" style="color:var(--red);background:rgba(248,92,106,.12)">⚠</div><div><h3 class="h3" style="color:var(--red)">清空个人数据</h3><p class="caption">重置所有记录和目标</p></div></div>
+            <span class="chev" style="color:var(--red)">›</span>
+          </section>` : ''}
+          ${!hasData ? `<section class="glass card center" style="padding:var(--s-6);gap:var(--s-3)">
+            <p class="caption text-center">你还没有设置任何目标<br>点击下方按钮开始使用</p>
+            <button class="edit-btn" style="padding:var(--s-3) var(--s-5);border-radius:var(--r-sm);background:var(--purple-soft);margin-top:var(--s-2)" data-action="load-demo">加载演示数据</button>
+          </section>` : ''}
         </div>
       </main>
     `;
   }
 
+  private renderMeGoals(): string {
+    const user = this.getUser();
+    return `
+      <section class="glass card">
+        <div class="section-header"><h3 class="h3">目标摘要</h3><span class="edit-btn" data-action="edit-goals">编辑</span></div>
+        <div class="goal-grid">
+          <div class="goal-item" data-action="goal-type"><div class="label">目标</div><div class="big">${user.goal || '--'}</div><div class="sub">${user.subGoal || '--'}</div></div>
+          <div class="goal-item" data-action="goal-current"><div class="label">当前体重</div><div class="big">${user.currentWeight || '--'}</div><div class="sub">kg</div></div>
+          <div class="goal-item" data-action="goal-target"><div class="label">目标体重</div><div class="big">${user.targetWeight || '--'}</div><div class="sub">kg</div></div>
+          <div class="goal-item" data-action="goal-speed"><div class="label">目标速度</div><div class="big">${user.speed || '--'}</div><div class="sub">kg</div></div>
+        </div>
+      </section>
+    `;
+  }
+
+  private renderMeEmpty(): string {
+    return `
+      <section class="glass card">
+        <div class="section-header"><h3 class="h3">目标摘要</h3><span class="edit-btn" data-action="edit-goals">设置</span></div>
+        <div class="goal-grid">
+          <div class="goal-item" data-action="goal-type"><div class="label">目标</div><div class="big">--</div><div class="sub">--</div></div>
+          <div class="goal-item" data-action="goal-current"><div class="label">当前体重</div><div class="big">--</div><div class="sub">kg</div></div>
+          <div class="goal-item" data-action="goal-target"><div class="label">目标体重</div><div class="big">--</div><div class="sub">kg</div></div>
+          <div class="goal-item" data-action="goal-speed"><div class="label">目标速度</div><div class="big">--</div><div class="sub">kg</div></div>
+        </div>
+      </section>
+    `;
+  }
+
+  private renderMePlan(): string {
+    const user = this.getUser();
+    return `
+      <section class="glass card">
+        <div class="section-header"><h3 class="h3">计划</h3><span class="edit-btn" data-action="edit-plan">调整</span></div>
+        <div class="plan-grid">
+          <div class="plan-item" data-action="plan-kcal"><div class="label">每日平均热量</div><div class="big">${user.dailyKcal || '--'}</div><div class="sub">kcal</div></div>
+          <div class="plan-item" data-action="plan-deficit"><div class="label">每日缺口目标</div><div class="big">${user.deficitTarget || '--'}</div><div class="sub">kcal</div></div>
+          <div class="plan-item" data-action="plan-strategy"><div class="label">饮食策略</div><div class="big">${user.strategy || '--'}</div><div class="sub">${user.strategySub || '--'}</div></div>
+        </div>
+      </section>
+    `;
+  }
+
   private renderProgressPage(): string {
+    const hasData = this.hasData();
+    const dates = this.getDates();
+    const todayDate = dates.length > 0 ? dates[dates.length - 1] : null;
+    const eaten = todayDate ? todayDate.eaten.toLocaleString() : '--';
+    const deficit = todayDate ? (todayDate.target - todayDate.eaten > 0 ? todayDate.target - todayDate.eaten : todayDate.eaten - todayDate.target).toLocaleString() : '--';
+    const left = todayDate ? todayDate.left.toLocaleString() : '--';
+    const target = todayDate ? todayDate.target.toLocaleString() + ' kcal' : '-- kcal';
+    const totalBurn = todayDate ? (todayDate.active + todayDate.rest).toLocaleString() + ' kcal' : '-- kcal';
+    const bonus = todayDate ? '+' + todayDate.active + ' kcal' : '-- kcal';
+    const bonusVal = todayDate ? '+' + todayDate.active : '--';
+    const proteinLabel = todayDate ? todayDate.protein + 'g' : '-- / --g';
+    const proteinPct = todayDate ? todayDate.proteinPct + '%' : '--%';
+    const proteinBarW = todayDate ? todayDate.proteinPct + '%' : '0%';
+    const carbLabel = todayDate ? todayDate.carb + 'g' : '-- / --g';
+    const carbPct = todayDate ? todayDate.carbPct + '%' : '--%';
+    const carbBarW = todayDate ? todayDate.carbPct + '%' : '0%';
+    const fatLabel = todayDate ? todayDate.fat + 'g' : '-- / --g';
+    const fatPct = todayDate ? todayDate.fatPct + '%' : '--%';
+    const fatBarW = todayDate ? todayDate.fatPct + '%' : '0%';
+    const activeEnergy = todayDate ? todayDate.active + ' kcal' : '-- kcal';
+    const restEnergy = todayDate ? todayDate.rest + ' kcal' : '-- kcal';
+    const steps = todayDate ? todayDate.steps : '--';
+    const workouts = todayDate ? todayDate.workouts + ' 次运动' : '0 次运动';
+    const user = this.getUser();
     return `
       <main class="page" data-page="progress">
         <div class="stack">
@@ -116,7 +199,7 @@ export class App {
             <div class="date-scroll" id="dateScroll"></div>
           </section>
           <section class="glass card">
-            <div class="energy-top"><h3 class="h3">能量环</h3><div class="caption"><span class="green value" id="bonusLabel">+210</span> 运动加成</div></div>
+            <div class="energy-top"><h3 class="h3">能量环</h3><div class="caption"><span class="green value" id="bonusLabel">${bonusVal}</span> 运动加成</div></div>
             <div class="ring-wrap">
               <svg viewBox="0 0 240 240" aria-hidden="true">
                 <defs>
@@ -129,46 +212,43 @@ export class App {
                 <circle cx="120" cy="120" r="92" fill="none" stroke="url(#bonusGrad)" stroke-linecap="round" stroke-width="16" stroke-dasharray="55.98 578.05" stroke-dashoffset="-522.07" transform="rotate(-90 120 120)" />
               </svg>
               <div class="ring-center">
-                <div class="mini">已摄入</div><div class="eaten" id="eatenKcal">1,624</div><div class="mini">kcal</div>
-                <div class="mini">剩余预算</div><div class="number purple" id="deficitKcal">376</div>
-                <div class="mini">还能吃</div><div class="number green" id="leftKcal">586</div>
+                <div class="mini">已摄入</div><div class="eaten" id="eatenKcal">${eaten}</div><div class="mini">kcal</div>
+                <div class="mini">剩余预算</div><div class="number purple" id="deficitKcal">${deficit}</div>
+                <div class="mini">还能吃</div><div class="number green" id="leftKcal">${left}</div>
               </div>
             </div>
             <div class="ring-stats">
-              <div class="ring-stat"><div class="label">目标</div><div class="num" id="targetKcal">2,000 kcal</div></div>
-              <div class="ring-stat"><div class="label">总消耗</div><div class="num" id="totalBurn">2,210 kcal</div></div>
-              <div class="ring-stat"><div class="label">运动加成</div><div class="num" id="bonusKcal">+210 kcal</div></div>
+              <div class="ring-stat"><div class="label">目标</div><div class="num" id="targetKcal">${target}</div></div>
+              <div class="ring-stat"><div class="label">总消耗</div><div class="num" id="totalBurn">${totalBurn}</div></div>
+              <div class="ring-stat"><div class="label">运动加成</div><div class="num" id="bonusKcal">${bonus}</div></div>
             </div>
           </section>
           <section class="glass card">
             <div class="section-header"><h3 class="h3">进度</h3><span class="caption">今日目标</span></div>
             <div class="progress-grid">
-              <div class="macro-row"><div class="icon small">P</div><div><div class="row between"><strong>蛋白质</strong><span class="caption" id="proteinLabel">102 / 120g</span></div><div class="bar"><span id="proteinBar" style="width:85%"></span></div></div><span class="caption" id="proteinPct">85%</span></div>
-              <div class="macro-row"><div class="icon small">C</div><div><div class="row between"><strong>碳水</strong><span class="caption" id="carbLabel">179 / 250g</span></div><div class="bar"><span id="carbBar" style="width:72%"></span></div></div><span class="caption" id="carbPct">72%</span></div>
-              <div class="macro-row"><div class="icon small">F</div><div><div class="row between"><strong>脂肪</strong><span class="caption" id="fatLabel">58 / 70g</span></div><div class="bar"><span id="fatBar" style="width:83%"></span></div></div><span class="caption" id="fatPct">83%</span></div>
+              <div class="macro-row"><div class="icon small">P</div><div><div class="row between"><strong>蛋白质</strong><span class="caption" id="proteinLabel">${proteinLabel}</span></div><div class="bar"><span id="proteinBar" style="width:${proteinBarW}"></span></div></div><span class="caption" id="proteinPct">${proteinPct}</span></div>
+              <div class="macro-row"><div class="icon small">C</div><div><div class="row between"><strong>碳水</strong><span class="caption" id="carbLabel">${carbLabel}</span></div><div class="bar"><span id="carbBar" style="width:${carbBarW}"></span></div></div><span class="caption" id="carbPct">${carbPct}</span></div>
+              <div class="macro-row"><div class="icon small">F</div><div><div class="row between"><strong>脂肪</strong><span class="caption" id="fatLabel">${fatLabel}</span></div><div class="bar"><span id="fatBar" style="width:${fatBarW}"></span></div></div><span class="caption" id="fatPct">${fatPct}</span></div>
             </div>
           </section>
           <section class="glass card">
             <div class="section-header"><h3 class="h3">健康同步</h3><span class="caption" id="syncTime">今天 7:32</span></div>
             <div class="sync-grid">
-              <div class="sync-item" data-action="active-detail"><span class="caption">活动能量</span><strong id="activeEnergy">410 kcal</strong></div>
-              <div class="sync-item" data-action="rest-detail"><span class="caption">静息能量</span><strong id="restEnergy">1,380 kcal</strong></div>
-              <div class="sync-item" data-action="steps-detail"><span class="caption">步数 / 运动</span><strong id="steps">8,642</strong><span class="caption" id="workouts">1 次运动</span></div>
-              <div class="sync-item" data-action="health-connect"><span class="caption">Apple 健康</span><strong class="green">已连接</strong></div>
+              <div class="sync-item" data-action="active-detail"><span class="caption">活动能量</span><strong id="activeEnergy">${activeEnergy}</strong></div>
+              <div class="sync-item" data-action="rest-detail"><span class="caption">静息能量</span><strong id="restEnergy">${restEnergy}</strong></div>
+              <div class="sync-item" data-action="steps-detail"><span class="caption">步数 / 运动</span><strong id="steps">${steps}</strong><span class="caption" id="workouts">${workouts}</span></div>
+              <div class="sync-item" data-action="health-connect"><span class="caption">Apple 健康</span><strong class="${user.healthConnected ? 'green' : 'muted'}">${user.healthConnected ? '已连接' : '未连接'}</strong></div>
             </div>
           </section>
           <section>
             <div class="meal-strip" id="mealStrip">
-              <div class="meal-mini" data-meal="breakfast"><div class="meal-pic">🥣</div><strong>早餐</strong><p class="caption">412 kcal</p></div>
-              <div class="meal-mini active" data-meal="lunch"><div class="meal-pic">🥗</div><strong>午餐</strong><p class="caption">687 kcal</p></div>
-              <div class="meal-mini" data-meal="dinner"><div class="meal-pic">🍣</div><strong>晚餐</strong><p class="caption">403 kcal</p></div>
-              <div class="meal-mini" data-meal="snack"><div class="meal-pic">🍎</div><strong>加餐</strong><p class="caption">122 kcal</p></div>
+              <div class="meal-mini" data-meal="breakfast"><div class="meal-pic">🥣</div><strong>早餐</strong><p class="caption">-- kcal</p></div>
+              <div class="meal-mini" data-meal="lunch"><div class="meal-pic">🥗</div><strong>午餐</strong><p class="caption">-- kcal</p></div>
+              <div class="meal-mini" data-meal="dinner"><div class="meal-pic">🍣</div><strong>晚餐</strong><p class="caption">-- kcal</p></div>
+              <div class="meal-mini" data-meal="snack"><div class="meal-pic">🍎</div><strong>加餐</strong><p class="caption">-- kcal</p></div>
             </div>
-            <div class="glass meal-expanded open" id="mealExpanded">
-              <div class="caption meal-meta">12:45 · 687 kcal</div>
-              <div class="dish-row"><div class="dish-thumb">🥗</div><div><strong>烤鸡谷物碗</strong><p class="caption">1 碗 · 自制</p></div><strong>360 kcal</strong></div>
-              <div class="dish-row"><div class="dish-thumb">🥬</div><div><strong>藜麦沙拉</strong><p class="caption">1 杯 · 自制</p></div><strong>180 kcal</strong></div>
-              <div class="dish-row"><div class="dish-thumb">🥛</div><div><strong>希腊酸奶</strong><p class="caption">FAGE · 1 杯</p></div><strong>120 kcal</strong></div>
+            <div class="glass meal-expanded" id="mealExpanded">
+              <div class="caption meal-meta">还没有记录</div>
             </div>
           </section>
         </div>
@@ -315,6 +395,36 @@ export class App {
         case 'search-food': showToast('搜索食物'); break;
         case 'view-recent': showToast('查看全部最近食物'); break;
         case 'add-recent': showToast(`添加 ${actionEl.dataset.food}`); break;
+        case 'clear-data': {
+          if (confirm('确定要清空所有个人数据吗？此操作不可撤销。')) {
+            this.store.clearAll();
+            this.activeMeal = null;
+            this.selectedDateIndex = 0;
+            showToast('个人数据已清空');
+            // Re-render the app
+            this.root.innerHTML = this.renderShell();
+            this.bindNavigation();
+            this.initProgressPage();
+            this.initBankPage();
+            this.initAddPage();
+            this.startClock();
+          }
+          break;
+        }
+        case 'load-demo': {
+          this.store.loadSampleData();
+          this.activeMeal = 'lunch';
+          this.selectedDateIndex = 5;
+          showToast('已加载演示数据');
+          // Re-render
+          this.root.innerHTML = this.renderShell();
+          this.bindNavigation();
+          this.initProgressPage();
+          this.initBankPage();
+          this.initAddPage();
+          this.startClock();
+          break;
+        }
       }
     });
   }
@@ -351,7 +461,11 @@ export class App {
 
   private initProgressPage(): void {
     this.renderDateScroll();
-    this.selectDate(this.selectedDateIndex);
+    const dates = this.getDates();
+    if (dates.length > 0) {
+      this.selectedDateIndex = dates.length - 1;
+      this.selectDate(this.selectedDateIndex);
+    }
 
     const mealStrip = this.root.querySelector<HTMLElement>('#mealStrip');
     if (mealStrip) {
@@ -369,8 +483,18 @@ export class App {
     const scroll = this.root.querySelector<HTMLElement>('#dateScroll');
     if (!scroll) return;
     scroll.innerHTML = '';
-    for (let i = this.dateData.length - 1; i >= 0; i--) {
-      const d = this.dateData[i];
+    const dates = this.getDates();
+    if (dates.length === 0) {
+      // Empty state: just show today
+      const el = document.createElement('div');
+      el.className = 'date-item active';
+      el.innerHTML = '<strong>今天</strong><span class="caption">--</span><span class="kcal">--</span><div class="balance-dot pos"></div>';
+      el.addEventListener('click', () => showToast('今天还没有记录'));
+      scroll.appendChild(el);
+      return;
+    }
+    for (let i = dates.length - 1; i >= 0; i--) {
+      const d = dates[i];
       const active = i === this.selectedDateIndex ? 'active' : '';
       const dotClass = d.deficit === 'pos' ? 'pos' : 'neg';
       const el = document.createElement('div');
@@ -389,7 +513,9 @@ export class App {
   private selectDate(index: number): void {
     this.selectedDateIndex = index;
     this.renderDateScroll();
-    const d = this.dateData[index];
+    const dates = this.getDates();
+    const d = dates[index];
+    if (!d) return;
 
     const setText = (id: string, text: string) => {
       const el = this.root.querySelector<HTMLElement>(id);
@@ -448,8 +574,13 @@ export class App {
     const mEl = strip.querySelector<HTMLElement>(`[data-meal="${meal}"]`);
     if (mEl) mEl.classList.add('active');
 
-    const data = this.mealData[meal];
-    if (!data) return;
+    const meals = this.getMeals();
+    const data = meals[meal];
+    if (!data) {
+      expanded.innerHTML = '<div class="caption meal-meta">还没有记录</div>';
+      expanded.classList.add('open');
+      return;
+    }
     expanded.innerHTML = `<div class="caption meal-meta">${data.time} · ${data.kcal} kcal</div>` +
       data.items.map(item =>
         `<div class="dish-row" data-action="edit-dish" data-dish="${item.name}">` +

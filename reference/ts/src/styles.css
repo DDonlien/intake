@@ -2826,3 +2826,27 @@ h2 {
   color: var(--muted);
   font-size: 10px;
 }
+
+/* === iOS Safari auto-zoom guard =========================================
+   iOS Safari zooms the entire page when an input/select/textarea's computed
+   font-size is below 16px (Apple's accessibility design assumption that
+   small input text is hard to tap on phones). There is no CSS property to
+   disable this behavior — it is hard-coded against computed font-size.
+
+   This rule forces every form control to ≥ 16px so Safari skips the zoom.
+   `.summary-value-input` is intentionally larger for visual emphasis and
+   excluded via :not(). Placeholder density is restored below.
+======================================================================== */
+input:not(.summary-value-input),
+textarea:not(.summary-value-input),
+select {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Placeholder uses the same :not() guard so its specificity matches the
+   base rule above and keeps visual density at 14px regardless of source order. */
+input:not(.summary-value-input)::placeholder,
+textarea:not(.summary-value-input)::placeholder {
+  font-size: 14px;
+}
