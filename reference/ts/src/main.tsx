@@ -1538,4 +1538,149 @@ function Toast({ message }: { message: string }) {
   return <div className="toast">{message}</div>;
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+function LandingPage() {
+  return (
+    <div className="scroll-page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '32px', textAlign: 'center' }}>
+      <div style={{ fontSize: '64px', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.03em' }}>Intake</div>
+      <p style={{ fontSize: '18px', color: 'var(--muted)', marginBottom: '40px', maxWidth: '320px' }}>AI-powered nutrition budget for everyday meals.</p>
+      <a href="/app" className="admin-login-btn" style={{ display: 'inline-block', textDecoration: 'none', width: '200px', marginBottom: '12px' }}>Start App</a>
+      <a href="/admin" className="admin-back" style={{ display: 'inline-block', textDecoration: 'none', width: '200px', height: '44px', borderRadius: '14px', fontWeight: 700, fontSize: '15px', color: 'var(--ink)' }}>Admin</a>
+    </div>
+  );
+}
+
+function AdminDashboard() {
+  const [isLoggedIn, setIsLoggedIn] = useState(authApi.isAdmin());
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [stats, setStats] = useState<{ totalUsers: number; todayNew: number; activeSessions: number } | null>(null);
+  const [users, setUsers] = useState<{ id: string; email: string; createdAt: string; sessionCount: number }[] | null>(null);
+  const [logs, setLogs] = useState<{ method: string; path: string; status: number; duration: number; timestamp: string }[] | null>(null);
+  const [logStats, setLogStats] = useState<{ totalRequests: number; byMethod: Record<string, number>; byPath: Record<string, number>; byStatus: Record<string, number> } | null>(null);
+
+  const loadData = async () => {
+    const [s, u, l] = await Promise.all([authApi.adminStats(), authApi.adminUsers(), authApi.adminLogs()]);
+    setStats(s);
+    setUsers(u);
+    if (l) {
+      setLogs(l.logs);
+      setLogStats(l.stats);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      loadData();
+    }
+  }, [isLoggedIn]);
+
+  const handleLogin = () => {
+    if (username !== "taobe") {
+      setLoginError("Invalid username.");
+      return;
+    }
+    if (authApi.adminLogin(password)) {
+      setIsLoggedIn(true);
+      setLoginError("");
+    } else {
+      setLoginError("Wrong password.");
+    }
+  };
+
+  const handleLogout = () => {
+    authApi.adminLogout();
+    setIsLoggedIn(false);
+  };
+
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm("Delete this user and all their local data? This cannot be undone.")) return;
+    const ok = await authApi.adminDeleteUser(userId);
+    if (ok) {
+      loadData();
+    } else {
+      alert("Delete failed.");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleLogin();
+  };
+
+  return (
+    <div className="scroll-page admin-page">
+      <header className="admin-header">
+        <a href="/" className="admin-back" style={{ textDecoration: 'none', display: 'grid', placeItems: 'center' }}><ChevronRight size={20} style={{ transform: "rotate(180deg)" }} /></a>
+        <h1>Admin Dashboard</h1>
+        {isLoggedIn ? <button className="admin-back" onClick={handleLogout} type="button">Logout</button> : <span />}
+      </header>
+      {!isLoggedIn ? (
+        <section className="glass-card content-card" style={{ marginTop: 40 }}>
+          <div className="card-title-row compact"><h2>Admin Login</h2></div>
+          <div className="admin-login-form">
+            <input className="admin-login-input" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={handleKeyDown} />
+            <input className="admin-login-input" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
+            {loginError ? <p className="admin-error">{loginError}</p> : null}
+            <button className="admin-login-btn" onClick={handleLogin} type="button">Login</button>
+          </div>
+        </section>
+      ) : (
+        <>
+          <section className="glass-card content-card">
+            <div className="card-title-row compact"><h2>Overview</h2></div>
+            <div className="summary-grid">
+              <SummaryTile label="Total Users" value={String(stats?.totalUsers ?? 0)} unit="" />
+              <SummaryTile label="Today New" value={String(stats?.todayNew ?? 0)} unit="" />
+              <SummaryTile label="Active Sessions" value={String(stats?.activeSessions ?? 0)} unit="" />
+            </div>
+          </section>
+          <section className="glass-card content-card">
+            <div className="card-title-row compact"><h2>API Calls</h2></div>
+            <div className="summary-grid">
+              <SummaryTile label="Total Requests" value={String(logStats?.totalRequests ?? 0)} unit="" />
+              <SummaryTile label="Health Checks" value={String(logStats?.byPath?.["/api/health"] ?? 0)} unit="" />
+              <SummaryTile label="Errors (4xx/5xx)" value={String(Object.entries(logStats?.byStatus ?? {}).filter(([k]) => k.startsWith("4") || k.startsWith("5")).reduce((a, [, v]) => a + v, 0))} unit="" />
+            </div>
+            <div className="admin-log-list">
+              {logs?.slice(0, 20).map((log, i) => (
+                <div className="admin-log-row" key={i}>
+                  <span className={`admin-log-status ${String(log.status).startsWith("2") ? "ok" : String(log.status).startsWith("4") || String(log.status).startsWith("5") ? "err" : "warn"}`}>{log.status}</span>
+                  <span className="admin-log-method">{log.method}</span>
+                  <span className="admin-log-path">{log.path}</span>
+                  <span className="admin-log-dur">{log.duration}ms</span>
+                  <span className="admin-log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                </div>
+              ))}
+              {(!logs || logs.length === 0) ? <p className="admin-empty">No API calls yet.</p> : null}
+            </div>
+          </section>
+          <section className="glass-card content-card">
+            <div className="card-title-row compact"><h2>Users</h2></div>
+            <div className="admin-user-list">
+              {users?.map((u) => (
+                <div className="admin-user-row" key={u.id}>
+                  <div className="admin-user-info">
+                    <strong>{u.email}</strong>
+                    <small>{new Date(u.createdAt).toLocaleString()} · {u.sessionCount} sessions</small>
+                  </div>
+                  <button className="admin-delete-btn" onClick={() => handleDelete(u.id)} type="button">Delete</button>
+                </div>
+              ))}
+              {(!users || users.length === 0) ? <p className="admin-empty">No users registered yet.</p> : null}
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Router() {
+  const path = window.location.pathname;
+  if (path === "/" || path === "/index.html") return <LandingPage />;
+  if (path.startsWith("/app")) return <App />;
+  if (path.startsWith("/admin")) return <AdminDashboard />;
+  return <LandingPage />;
+}
+
+createRoot(document.getElementById("root")!).render(<Router />);
