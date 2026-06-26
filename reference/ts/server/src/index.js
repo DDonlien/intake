@@ -13,7 +13,7 @@ const AUTH_RATE_LIMIT_MAX = Number(process.env.AUTH_RATE_LIMIT_MAX) || 30;
 const authAttempts = new Map();
 
 app.disable("x-powered-by");
-app.use(express.json({ limit: "16kb" }));
+app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
     origin(origin, callback) {
@@ -83,6 +83,83 @@ function requireAdmin(req, res, next) {
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", service: "intake-auth" });
+});
+
+// POST /api/scan — Gemini Vision food recognition
+app.post("/api/scan", async (req, res) => {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_API_KEY) {
+    return res.status(503).json({ error: "AI scan not configured (missing GEMINI_API_KEY)." });
+  }
+
+  const { image, mimeType } = req.body ?? {};
+  if (typeof image !== "string" || !image) {
+    return res.status(400).json({ error: "Missing image field (base64 string required)." });
+  }
+  const safeMimeType = typeof mimeType === "string" && mimeType.startsWith("image/") ? mimeType : "image/jpeg";
+
+  const prompt = `You are a nutrition AI. Look at this meal photo and identify each distinct food item visible.
+Return a JSON array (no markdown fences, no extra text) where each element has exactly these fields:
+- foodId: a short kebab-case identifier (e.g. "grilled-chicken")
+- name: human-readable name (e.g. "Grilled Chicken")
+- emoji: one food emoji
+- detail: brief ingredient note (e.g. "Chicken breast, seasoned")
+- servingUnit: unit for one serving (e.g. "piece", "cup", "bowl")
+- kcalPerServing: estimated calories per one serving (integer)
+
+Return at most 4 items. If no food is visible, return an empty array [].`;
+
+  try {
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: safeMimeType, data: image } },
+            ],
+          }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 512 },
+        }),
+      }
+    );
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      console.error("[scan] Gemini error", geminiRes.status, errBody);
+      return res.status(502).json({ error: "AI recognition failed." });
+    }
+
+    const geminiBody = await geminiRes.json();
+    const text = geminiBody?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    // Strip any accidental markdown fences
+    const cleaned = text.replace(/```[\s\S]*?```/g, (m) => m.slice(m.indexOf("\n") + 1, m.lastIndexOf("```"))).trim();
+    let foods;
+    try {
+      foods = JSON.parse(cleaned);
+      if (!Array.isArray(foods)) foods = [];
+    } catch {
+      foods = [];
+    }
+
+    // Sanitise fields
+    const result = foods.slice(0, 4).map((item) => ({
+      foodId: String(item.foodId ?? "unknown").slice(0, 64),
+      name: String(item.name ?? "Unknown").slice(0, 80),
+      emoji: String(item.emoji ?? "🍽️").slice(0, 8),
+      detail: String(item.detail ?? "").slice(0, 120),
+      servingUnit: String(item.servingUnit ?? "serving").slice(0, 32),
+      kcalPerServing: Math.max(0, Math.min(5000, Number(item.kcalPerServing) || 0)),
+    }));
+
+    return res.json({ foods: result });
+  } catch (err) {
+    console.error("[scan] unexpected error", err);
+    return res.status(500).json({ error: "Unexpected error during scan." });
+  }
 });
 
 app.post("/api/auth/register", rateLimitAuth, (req, res) => {

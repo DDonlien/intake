@@ -108,11 +108,21 @@ const primaryMealNames = ["Breakfast", "Lunch", "Dinner"] as const;
 const mealNames: MealName[] = [...primaryMealNames, "Snack"];
 const bankFilters = ["All", "Foods", "Meals", "Brands", "Custom", "Recent", "Favorites"];
 const planOptions: PlanType[] = ["减脂", "减重", "维持", "增肌"];
-const detectedChoices = [
-  { foodId: "chicken-bowl", name: "Chicken avocado bowl", emoji: "🥗", detail: "Chicken, oats, avocado", servingUnit: "bowl", kcalPerServing: 360 },
-  { foodId: "grilled-chicken-bowl", name: "Grilled chicken bowl", emoji: "🍗", detail: "Rice, greens, chicken", servingUnit: "bowl", kcalPerServing: 420 },
-  { foodId: "oat-salad", name: "Oat salad", emoji: "🥬", detail: "Oats, greens, yogurt", servingUnit: "cup", kcalPerServing: 180 },
-];
+type DetectedChoice = { foodId: string; name: string; emoji: string; detail: string; servingUnit: string; kcalPerServing: number };
+
+const AUTH_API = (import.meta.env.VITE_AUTH_API_URL as string | undefined)?.replace(/\/+$/, "");
+
+async function scanImage(base64: string, mimeType: string): Promise<DetectedChoice[]> {
+  if (!AUTH_API) return [];
+  const res = await fetch(`${AUTH_API}/api/scan`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ image: base64, mimeType }),
+  });
+  if (!res.ok) return [];
+  const body = await res.json();
+  return Array.isArray(body.foods) ? body.foods : [];
+}
 
 const seedFoods: FoodItem[] = [
   { id: "greek-yogurt", name: "Greek Yogurt", emoji: "🥛", brand: "Fage", serving: "170g cup", kcal: 130, protein: 18, carbs: 8, fat: 3, tag: "Food" },
@@ -1202,6 +1212,17 @@ function AddPage({ allFoods, currentMeal, meals, onAddFood, onClose, onDeleteFoo
   const [candidateServings, setCandidateServings] = useState<Record<string, number>>({});
   const [expandedMealItem, setExpandedMealItem] = useState("new-0");
   const [query, setQuery] = useState("");
+
+  // Camera state
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null); // data URL
+  const [detectedChoices, setDetectedChoices] = useState<DetectedChoice[]>([]);
+
   const dragStartRef = useRef({ y: 0, height: sheetHeights.peek, level: "peek" as SheetLevel });
   const dragMovedRef = useRef(false);
   const sheetHeightRef = useRef(sheetHeights.peek);
@@ -1223,14 +1244,102 @@ function AddPage({ allFoods, currentMeal, meals, onAddFood, onClose, onDeleteFoo
   const hasUnsavedChanges = hasEditedCandidates || query.trim().length > 0;
   const currentMealLabel = currentMeal === "Snack" ? "New Snack" : currentMeal;
 
+  // Start camera on mount, stop on unmount
+  useEffect(() => {
+    let cancelled = false;
+    setCameraError(null);
+    setCameraReady(false);
+    navigator.mediaDevices
+      ?.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false })
+      .then((stream) => {
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+          setCameraReady(true);
+        }
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setCameraError(err.name === "NotAllowedError" ? "Camera permission denied" : "Camera unavailable");
+      });
+    return () => {
+      cancelled = true;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    };
+  }, []);
+
+  const processImageBase64 = async (base64: string, mimeType: string) => {
+    setScanning(true);
+    setDetectedChoices([]);
+    try {
+      const results = await scanImage(base64, mimeType);
+      setDetectedChoices(results);
+      if (results.length > 0) setSheetToLevel("mid");
+    } catch {
+      // ignore scan errors – user can still manually add food
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const takePhoto = () => {
+    const video = videoRef.current;
+    if (!video || !cameraReady) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    setCapturedImage(dataUrl);
+    const base64 = dataUrl.split(",")[1];
+    processImageBase64(base64, "image/jpeg");
+  };
+
+  const retakePhoto = () => {
+    setCapturedImage(null);
+    setDetectedChoices([]);
+    setCandidateServings({});
+    setSheetToLevel("peek");
+  };
+
+  const handlePhotoLibrary = () => photoInputRef.current?.click();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setCapturedImage(dataUrl);
+      const base64 = dataUrl.split(",")[1];
+      processImageBase64(base64, file.type || "image/jpeg");
+    };
+    reader.readAsDataURL(file);
+    // reset so the same file can be re-selected
+    event.target.value = "";
+  };
+
   const closeWithUnsavedCheck = () => {
     if (!hasUnsavedChanges || window.confirm("Discard unsaved food edits?")) onClose();
   };
 
   const setCandidateServing = (key: string, next: number) => setCandidateServings((current) => ({ ...current, [key]: Math.max(0.25, Math.min(5, next)) }));
-  const saveCandidate = (choice: (typeof detectedChoices)[number], key: string) => {
-    const food = allFoods.find((item) => item.id === choice.foodId);
-    if (!food) return;
+  const saveCandidate = (choice: DetectedChoice, key: string) => {
+    // Try to match against the food library; fall back to a synthetic entry
+    const food = allFoods.find((item) => item.id === choice.foodId) ?? {
+      id: choice.foodId,
+      name: choice.name,
+      emoji: choice.emoji,
+      brand: "AI Scan",
+      serving: `1 ${choice.servingUnit}`,
+      kcal: choice.kcalPerServing,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      tag: "Custom" as const,
+    };
     onAddFood(food, currentMeal, candidateServings[key] ?? 1, "scan");
     setCandidateServings((current) => ({ ...current, [key]: 1 }));
     setExpandedMealItem("");
@@ -1272,11 +1381,69 @@ function AddPage({ allFoods, currentMeal, meals, onAddFood, onClose, onDeleteFoo
 
   return (
     <section className="add-camera-screen" aria-label="Record meal camera">
-      <div className="add-top-controls"><button className="camera-close" aria-label="Close" onClick={closeWithUnsavedCheck} type="button"><X size={24} /></button><button className="auto-pill">AI Rec<span /></button></div>
-      <div className="camera-preview"><div className="scan-ring" /></div>
-      <div className={cameraActionsHidden ? "camera-actions hidden" : "camera-actions"} style={{ "--camera-actions-bottom": `${cameraActionsBottom}px` } as React.CSSProperties}>
-        <button className="camera-side-action" aria-label="Open photo library"><ImagePlus size={22} /></button><button className="shutter" aria-label="Take photo"><Camera size={26} /></button><button className="camera-side-action" aria-label="Voice input"><Mic size={22} /></button>
+      <div className="add-top-controls">
+        <button className="camera-close" aria-label="Close" onClick={closeWithUnsavedCheck} type="button"><X size={24} /></button>
+        <button className="auto-pill">AI Rec<span /></button>
       </div>
+
+      {/* Camera preview: show live video or captured still */}
+      <div className="camera-preview">
+        {capturedImage ? (
+          <img src={capturedImage} alt="Captured meal" className="camera-captured-img" />
+        ) : (
+          <video
+            ref={videoRef}
+            className="camera-video"
+            autoPlay
+            playsInline
+            muted
+            aria-hidden
+          />
+        )}
+        {cameraError && !capturedImage && (
+          <div className="camera-error-overlay">
+            <Camera size={32} style={{ opacity: 0.4 }} />
+            <span>{cameraError}</span>
+          </div>
+        )}
+        {scanning && (
+          <div className="camera-scanning-overlay">
+            <div className="camera-scanning-spinner" />
+            <span>Analysing…</span>
+          </div>
+        )}
+        {!capturedImage && <div className="scan-ring" />}
+      </div>
+
+      {/* Hidden file input for photo library */}
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        capture={undefined}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+        aria-hidden
+      />
+
+      <div className={cameraActionsHidden ? "camera-actions hidden" : "camera-actions"} style={{ "--camera-actions-bottom": `${cameraActionsBottom}px` } as React.CSSProperties}>
+        {capturedImage ? (
+          <button className="camera-side-action" aria-label="Retake photo" onClick={retakePhoto} type="button"><RotateCcw size={22} /></button>
+        ) : (
+          <button className="camera-side-action" aria-label="Open photo library" onClick={handlePhotoLibrary} type="button"><ImagePlus size={22} /></button>
+        )}
+        <button
+          className={scanning ? "shutter shutter-busy" : "shutter"}
+          aria-label="Take photo"
+          onClick={capturedImage ? undefined : takePhoto}
+          disabled={scanning || (!cameraReady && !capturedImage)}
+          type="button"
+        >
+          {scanning ? <div className="shutter-spinner" /> : <Camera size={26} />}
+        </button>
+        <button className="camera-side-action" aria-label="Voice input" type="button"><Mic size={22} /></button>
+      </div>
+
       <section className={`result-sheet ${sheetLevel !== "peek" ? "content-visible" : ""} ${sheetLevel === "expanded" ? "expanded" : ""} ${sheetDragging ? "dragging" : ""}`} style={{ "--sheet-height": `${sheetHeight}px` } as React.CSSProperties}>
         <button className="sheet-handle" aria-label={sheetLevel === "expanded" ? "Collapse detected foods" : "Expand detected foods"} aria-valuemax={sheetHeights.expanded} aria-valuemin={sheetHeights.peek} aria-valuenow={Math.round(sheetHeight)} onClick={() => !dragMovedRef.current && setSheetToLevel(sheetLevel === "expanded" ? "peek" : "expanded")} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); dragStartRef.current = { y: event.clientY, height: sheetHeight, level: sheetLevel }; dragMovedRef.current = false; setSheetDragging(true); }} onPointerUp={finishSheetDrag} role="slider" type="button" />
         <label className="sheet-meal-pill">
