@@ -1119,7 +1119,10 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
 
 - [ ] [0.3.0-API-C-000] 实现拍照与 AI 记录流程 #feature #P1 #phase-4（原 ID：PHOTO-A-000）（原 ID：0.6.0-API-B-000）
   - Multica 同步：TB-31（d3fd530c-fc67-4673-994e-3f6085c26f59），状态 todo，负责人 Antigravity，版本 tag `v0.3.0`。
-  - [ ] [0.3.0-API-C-001] 用户可以在 Record 页面拍照 #phase-4（原 ID：PHOTO-A-001）（原 ID：0.6.0-API-B-001）
+  - [x] [0.3.0-API-C-001] 用户可以在 Record 页面拍照 #phase-4（原 ID：PHOTO-A-001）（原 ID：0.6.0-API-B-001）
+    - 实现：`Intake/Components/CameraCaptureSheet.swift` 封装 `UIImagePickerController(sourceType: .camera)` 为 `UIViewControllerRepresentable`；RecordView 通过 `fullScreenCover` 弹出，权限通过 `AVCaptureDevice.requestAccess(for: .video)` 走 async 流程，被拒时弹 alert 引导去 Settings；Info.plist 加 `NSCameraUsageDescription` / `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription` / `NSMicrophoneUsageDescription`（2026-06-26 接入）
+  - [x] [0.3.0-API-C-002] 用户可以只拍照不识别 #phase-4（原 ID：PHOTO-A-002）（原 ID：0.6.0-API-B-002）
+    - 实现：拍完或选完图后直接显示在 camera area 右上角带 retake 按钮，**不**自动触发 AI 识别，符合"用户确认才入账"原则
   - [ ] [0.3.0-API-C-002] 用户可以只拍照不识别 #phase-4（原 ID：PHOTO-A-002）（原 ID：0.6.0-API-B-002）
   - [ ] [0.3.0-API-C-003] 用户可以关闭自动填充 #phase-4（原 ID：PHOTO-A-003）（原 ID：0.6.0-API-B-003）
   - [ ] [0.3.0-API-C-004] 免费版拍照后进入手动选择食物流程 #phase-4（原 ID：PHOTO-A-004）（原 ID：0.6.0-API-B-004）

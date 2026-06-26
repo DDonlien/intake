@@ -14,6 +14,7 @@
 		000000000000000000000022 /* BankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000016 /* BankView.swift */; };
 		000000000000000000000023 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000017 /* RecordView.swift */; };
 		000000000000000000000024 /* DataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000018 /* DataModels.swift */; };
+		000000000000000000000028 /* CameraCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001D /* CameraCaptureSheet.swift */; };
 		000000000000000000000026 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001A /* Assets.xcassets */; };
 		000000000000000000000027 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001B /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -30,6 +31,7 @@
 		00000000000000000000001A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		00000000000000000000001B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		00000000000000000000001C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		00000000000000000000001D /* CameraCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Components/CameraCaptureSheet.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 				000000000000000000000016 /* BankView.swift */,
 				000000000000000000000017 /* RecordView.swift */,
 				000000000000000000000018 /* DataModels.swift */,
+				00000000000000000000001D /* CameraCaptureSheet.swift */,
 				00000000000000000000001A /* Assets.xcassets */,
 				00000000000000000000001C /* Info.plist */,
 				00000000000000000000000F /* Preview Content */,
@@ -151,6 +154,7 @@
 				000000000000000000000022 /* BankView.swift in Sources */,
 				000000000000000000000023 /* RecordView.swift in Sources */,
 				000000000000000000000024 /* DataModels.swift in Sources */,
+				000000000000000000000028 /* CameraCaptureSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

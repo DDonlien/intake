@@ -22,6 +22,14 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Intake uses the camera to capture your meals for food logging.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Intake uses your photo library so you can pick existing meal photos to log.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Intake can save captured meal photos back to your photo library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Intake uses the microphone so you can dictate meal entries by voice.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
