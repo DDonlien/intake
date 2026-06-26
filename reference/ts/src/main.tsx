@@ -87,6 +87,7 @@ type Profile = {
 };
 type HealthDay = { active: number; exercise: number; steps: number };
 type AppData = {
+  accountId: string;
   profile: Profile;
   goals: Goals;
   profileSource: DataSource;
@@ -224,37 +225,58 @@ function isPlanGoal(goals: Goals, profile: Profile) {
   return goals.currentWeight === preset.currentWeight && goals.targetWeight === preset.targetWeight && goals.dailyKcal === preset.dailyKcal && goals.protein === preset.protein;
 }
 
-function normalizeData(raw: AppData): AppData {
-  const profile = raw.profile ?? { name: "Tao", weight: 78.4, height: 178, age: 34, activity: "Moderate" };
-  const plan = normalizePlan(raw.goals?.plan);
-  const profileSource: DataSource = raw.profileSource === "edited" ? "edited" : "synced";
-  const goalsSource: DataSource = raw.goalsSource === "edited" ? "edited" : "synced";
-  const planGoals = goalsForPlan(plan, profile);
-  const goals = goalsSource === "edited" && raw.goals ? { ...planGoals, ...raw.goals, plan } : planGoals;
-  const entries = Object.fromEntries(Object.entries(raw.entries ?? {}).map(([key, meals]) => [key, normalizeMealNames(meals)]));
-  const expandedMeals = (raw.expandedMeals ?? []).map((name) => (name === "Snack" ? "Snack 1" : name)).slice(-1);
+function normalizeData(raw: (Partial<AppData> & { accountId?: string }) | null, accountId: string): AppData {
+  const data = raw ?? {};
+  const profile = data.profile ?? { name: "", weight: 0, height: 0, age: 0, activity: "Moderate" };
+  const plan = normalizePlan(data.goals?.plan);
+  const profileSource: DataSource = data.profileSource === "edited" ? "edited" : "synced";
+  const goalsSource: DataSource = data.goalsSource === "edited" ? "edited" : "synced";
+  const isEmptyProfile = profile.name === "" && profile.weight === 0 && profile.height === 0 && profile.age === 0;
+  const planGoals = isEmptyProfile ? { currentWeight: 0, targetWeight: 0, dailyKcal: 0, protein: 0, carbs: 0, fat: 0, plan } : goalsForPlan(plan, profile);
+  const goals = goalsSource === "edited" && data.goals && !isEmptyProfile ? { ...planGoals, ...data.goals, plan } : planGoals;
+  const entries = Object.fromEntries(Object.entries(data.entries ?? {}).map(([key, meals]) => [key, normalizeMealNames(meals)]));
+  const expandedMeals = (data.expandedMeals ?? []).map((name) => (name === "Snack" ? "Snack 1" : name)).slice(-1);
   return {
+    accountId,
     profile,
     goals,
     profileSource,
     goalsSource,
-    foods: raw.foods ?? seedFoods,
+    foods: data.foods ?? [],
     entries,
-    health: raw.health ?? {},
-    favorites: raw.favorites ?? [],
-    recentFoodIds: raw.recentFoodIds ?? [],
+    health: data.health ?? {},
+    favorites: data.favorites ?? [],
+    recentFoodIds: data.recentFoodIds ?? [],
     expandedMeals,
   };
 }
 
-function makeDefaultData(): AppData {
+function makeDefaultData(accountId: string): AppData {
   const profile: Profile = { name: "Tao", weight: 78.4, height: 178, age: 34, activity: "Moderate" };
   return {
+    accountId,
     profile,
     goals: goalsForPlan("减脂", profile),
     profileSource: "synced",
     goalsSource: "synced",
     foods: seedFoods,
+    entries: {},
+    health: {},
+    favorites: [],
+    recentFoodIds: [],
+    expandedMeals: [],
+  };
+}
+
+function makeEmptyData(accountId: string): AppData {
+  const profile: Profile = { name: "", weight: 0, height: 0, age: 0, activity: "Moderate" };
+  return {
+    accountId,
+    profile,
+    goals: { currentWeight: 0, targetWeight: 0, dailyKcal: 0, protein: 0, carbs: 0, fat: 0, plan: "维持" },
+    profileSource: "edited",
+    goalsSource: "edited",
+    foods: [],
     entries: {},
     health: {},
     favorites: [],
@@ -317,7 +339,7 @@ function App() {
   const [notice, setNotice] = useState("");
   const [pageScrolled, setPageScrolled] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [data, setData] = useState<AppData | null>(() => (account ? normalizeData(readJson(dataKey(account.id), makeDefaultData())) : null));
+  const [data, setData] = useState<AppData | null>(() => (account ? normalizeData(readJson(dataKey(account.id), null), account.id) : null));
   const activeTabRef = useRef<TabKey>(activeTab);
   const returnTabRef = useRef<TabKey>("log");
 
@@ -338,13 +360,23 @@ function App() {
   useEffect(() => {
     if (!account) return;
     const stored = readJson<AppData | null>(dataKey(account.id), null);
-    const next = normalizeData(stored ?? makeDefaultData());
+    // Migration: if stored data has no accountId (legacy), stamp current accountId and keep it.
+    // If stored data has accountId but it doesn't match current account, treat as foreign — start empty.
+    let owned: AppData | null = null;
+    if (stored) {
+      if (!stored.accountId) {
+        owned = { ...stored, accountId: account.id };
+      } else if (stored.accountId === account.id) {
+        owned = stored;
+      }
+    }
+    const next = normalizeData(owned, account.id);
     setData(next);
     writeJson(dataKey(account.id), next);
   }, [account]);
 
   useEffect(() => {
-    if (account && data) writeJson(dataKey(account.id), data);
+    if (account && data) writeJson(dataKey(account.id), { ...data, accountId: account.id });
   }, [account, data]);
 
   useEffect(() => {
@@ -532,10 +564,26 @@ function App() {
 
   const resetDemoData = () => {
     if (!account || !window.confirm("Reset local demo data on this device?")) return;
-    const next = makeDefaultData();
+    const next = makeDefaultData(account.id);
     setData(next);
     writeJson(dataKey(account.id), next);
     showNotice("Demo data reset.");
+  };
+
+  const loadDemoData = () => {
+    if (!account || !window.confirm("Load sample demo data for this account?")) return;
+    const next = makeDefaultData(account.id);
+    setData(next);
+    writeJson(dataKey(account.id), next);
+    showNotice("Demo data loaded.");
+  };
+
+  const clearLocalData = () => {
+    if (!account || !window.confirm("Delete all local data for this account? Meals, goals, profile, food library and favorites will be removed. This cannot be undone.")) return;
+    const next = makeEmptyData(account.id);
+    setData(next);
+    writeJson(dataKey(account.id), next);
+    showNotice("Local data cleared.");
   };
 
   if (!account || !data) {
@@ -569,7 +617,7 @@ function App() {
               }}
             >
               {activeTab === "me" ? (
-                <MePage account={account} data={data} onLogout={logout} onReset={resetDemoData} onUpdate={updateData} onShowAdmin={() => setShowAdmin(true)} />
+                <MePage account={account} data={data} onLogout={logout} onReset={resetDemoData} onLoadDemo={loadDemoData} onClear={clearLocalData} onUpdate={updateData} onShowAdmin={() => setShowAdmin(true)} />
               ) : null}
               {activeTab === "log" ? (
                 <LogPage
@@ -1308,7 +1356,7 @@ function FoodMiniList({ title, items, onAdd }: { title: string; items: FoodItem[
   return <div className="food-mini-group"><p>{title}</p><div className="food-mini-list">{items.length ? items.map((food) => <button className="food-mini-row" key={food.id} onClick={() => onAdd(food)} type="button"><span className="food-thumb mini">{food.emoji}</span><span><strong>{food.name}</strong><small>{food.brand} · {food.serving}</small></span><b>{food.kcal}</b></button>) : <div className="empty-state small">No foods found.</div>}</div></div>;
 }
 
-function MePage({ account, data, onLogout, onReset, onUpdate, onShowAdmin }: { account: Account; data: AppData; onLogout: () => void; onReset: () => void; onUpdate: (recipe: (current: AppData) => AppData) => void; onShowAdmin?: () => void }) {
+function MePage({ account, data, onLogout, onReset, onLoadDemo, onClear, onUpdate, onShowAdmin }: { account: Account; data: AppData; onLogout: () => void; onReset: () => void; onLoadDemo: () => void; onClear: () => void; onUpdate: (recipe: (current: AppData) => AppData) => void; onShowAdmin?: () => void }) {
   const syncedProfile: Profile = { name: "Tao", weight: 78.4, height: 178, age: 34, activity: "Moderate" };
   const bodyStatusLabel = data.profileSource === "synced" ? "Synced" : "Custom";
   const goalStatusLabel = data.goalsSource === "synced" ? "Plan synced" : "Custom";
@@ -1359,11 +1407,11 @@ function MePage({ account, data, onLogout, onReset, onUpdate, onShowAdmin }: { a
   };
   return (
     <>
-      <section className="glass-card profile-card"><div className="avatar">T</div><div className="profile-copy"><h2>{data.profile.name}</h2><p>{data.goals.plan} · {data.goalsSource === "synced" ? "Plan synced" : "Goal edited"}</p><small>{account.email}</small></div><span className="status-chip">Signed in</span></section>
+      <section className="glass-card profile-card"><div className="avatar">{(data.profile.name || account.email).charAt(0).toUpperCase()}</div><div className="profile-copy"><h2>{data.profile.name || account.email}</h2><p>{data.goals.plan} · {data.goalsSource === "synced" ? "Plan synced" : "Goal edited"}</p><small className="account-email">Signed in as {account.email}</small></div><span className="status-chip">Signed in</span></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Plan settings</h2><SourceBadge source="synced" label="Presets" /></div><div className="segmented-list">{planOptions.map((plan) => <button className={draftGoals.plan === plan ? "filter-chip active" : "filter-chip"} key={plan} onClick={() => updatePlan(plan)} type="button">{plan}</button>)}</div></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Body data</h2><div className="title-actions"><SourceBadge source={data.profileSource} label={bodyStatusLabel} />{bodyEditing ? <button className="reset-action" aria-label="Reset body data" onClick={resetBodyDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (bodyEditing ? saveBody() : setBodyEditing(true))} type="button">{bodyEditing ? "Save" : "Edit"}</button></div></div><div className="settings-list"><NumberSetting editing={bodyEditing} label="Weight" source={data.profileSource} unit="kg" value={draftProfile.weight} onChange={(weight) => updateProfile({ weight })} /><NumberSetting editing={bodyEditing} label="Height" source={data.profileSource} unit="cm" value={draftProfile.height} onChange={(height) => updateProfile({ height })} /><NumberSetting editing={bodyEditing} label="Age" source={data.profileSource} unit="years" value={draftProfile.age} onChange={(age) => updateProfile({ age })} /><ActivitySetting editing={bodyEditing} source={data.profileSource} value={draftProfile.activity} onChange={(activity) => updateProfile({ activity })} /></div></section>
       <section className="glass-card content-card"><div className="card-title-row compact"><h2>Goal summary</h2><div className="title-actions"><SourceBadge source={data.goalsSource} label={goalStatusLabel} />{goalEditing ? <button className="reset-action" aria-label="Reset goal" onClick={resetGoalDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (goalEditing ? saveGoal() : setGoalEditing(true))} type="button">{goalEditing ? "Save" : "Edit"}</button></div></div><div className="summary-grid"><SummaryTile label="Current" value={draftGoals.currentWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, currentWeight: Number(v) || 0 })} /><SummaryTile label="Target" value={draftGoals.targetWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, targetWeight: Number(v) || 0 })} /><SummaryTile label="Daily" value={draftGoals.dailyKcal.toString()} unit="kcal" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, dailyKcal: Number(v) || 0 })} /><SummaryTile label="Protein" value={draftGoals.protein.toString()} unit="g" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, protein: Number(v) || 0 })} /></div></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} />{onShowAdmin ? <ActionRow icon={<SlidersHorizontal size={17} />} title="Admin dashboard" detail="Manage registered users" onClick={onShowAdmin} /> : null}</div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Load demo data" detail="Populate sample meals, goals, and food library" onClick={onLoadDemo} /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} /><DangerActionRow icon={<Trash2 size={17} />} title="Clear local data" detail="Delete all meals, goals, profile and food library" onClick={onClear} />{onShowAdmin ? <ActionRow icon={<SlidersHorizontal size={17} />} title="Admin dashboard" detail="Manage registered users" onClick={onShowAdmin} /> : null}</div></section>
       <button className="danger-action" onClick={onLogout} type="button"><X size={18} /><span><strong>Log out</strong><small>Keep local data on this device</small></span></button>
     </>
   );
@@ -1391,6 +1439,10 @@ function SettingsRow({ icon, title, detail }: { icon: React.ReactNode; title: st
 
 function ActionRow({ icon, title, detail, onClick }: { icon: React.ReactNode; title: string; detail: string; onClick: () => void }) {
   return <button className="settings-row" onClick={onClick} type="button"><span className="settings-icon">{icon}</span><span><strong>{title}</strong><small>{detail}</small></span><ChevronRight size={16} /></button>;
+}
+
+function DangerActionRow({ icon, title, detail, onClick }: { icon: React.ReactNode; title: string; detail: string; onClick: () => void }) {
+  return <button className="settings-row danger-action-row" onClick={onClick} type="button"><span className="settings-icon danger">{icon}</span><span><strong>{title}</strong><small>{detail}</small></span><ChevronRight size={16} className="danger" /></button>;
 }
 
 function AdminPage({ onClose }: { onClose: () => void }) {

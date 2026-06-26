@@ -493,13 +493,21 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
   - [ ] [0.2.0-DB-B-016] 首次登录初始化真实本地数据 #phase-0-2（原 ID：REAL-DATA-003）（原 ID：0.2.0-DB-A-016）
     - [x] [0.2.0-DB-B-017] 新账户首次登录时创建默认 Profile（原 ID：0.2.0-DB-A-017）
     - [x] [0.2.0-DB-B-018] 新账户首次登录时创建默认 Goal（原 ID：0.2.0-DB-A-018）
-    - [ ] [0.2.0-DB-B-019] 新账户首次登录时创建空饮食历史或明确的示例导入选择（原 ID：0.2.0-DB-A-019）
+    - [x] [0.2.0-DB-B-019] 新账户首次登录时创建空饮食历史或明确的示例导入选择（原 ID：0.2.0-DB-A-019）
+      - 实现：新账户从 `makeEmptyData` 启动（profile/goals 全零，foods/entries/favorites 都空），不再注入默认 demo；MePage Settings 新增 "Load demo data" 主动加载示例数据。
     - [x] [0.2.0-DB-B-020] 默认数据结构与后续 SwiftData 迁移保持字段可映射（原 ID：0.2.0-DB-A-020）
+    - [x] [0.2.0-DB-B-033] AppData 携带 accountId 字段并校验 #phase-0-2（原 ID：新增）
+      - 实现：`AppData.accountId` 字段；保存时强制 stamp 当前 `account.id`；加载时若发现 `accountId` 与当前账号不匹配则视为外来数据并初始化为空；老数据（无 `accountId` 字段）首次加载时自动 stamp 当前账号并保留内容。
+    - [x] [0.2.0-DB-B-034] 登录态可视化 #phase-0-2（原 ID：新增）
+      - 实现：MePage 顶部 profile-card 用蓝色 pill 显示 "Signed in as <email>"，avatar fallback 用 email 首字母，profile.name 为空时也用 email 显示。
+    - [x] [0.2.0-DB-B-035] 服务端邮箱密码校验 #phase-0-2（原 ID：REAL-AUTH 关联）
+      - 验证：`POST /api/auth/login` 对未注册邮箱返回 401 `Email not found`，对错误密码返回 401 `Wrong password`，对重复注册返回 400 `This email is already registered`。
   - [ ] [0.2.0-DB-B-021] 本地数据版本化与迁移 #phase-0-2（原 ID：REAL-DATA-004）（原 ID：0.2.0-DB-A-021）
     - [ ] [0.2.0-DB-B-022] LocalStorage 数据包含 schemaVersion（原 ID：0.2.0-DB-A-022）
     - [ ] [0.2.0-DB-B-023] 读取旧版本数据时执行迁移（原 ID：0.2.0-DB-A-023）
     - [ ] [0.2.0-DB-B-024] 迁移失败时给出可恢复提示（原 ID：0.2.0-DB-A-024）
-    - [ ] [0.2.0-DB-B-025] 提供清除当前账户本地数据的入口（原 ID：0.2.0-DB-A-025）
+    - [x] [0.2.0-DB-B-025] 提供清除当前账户本地数据的入口（原 ID：0.2.0-DB-A-025）
+      - 实现：`main.tsx` 新增 `clearLocalData` 函数 + `makeEmptyData` 工厂 + MePage 新增"Clear local data"红色按钮（与"Reset demo data"区分）；点击后真正清空 profile/goals/entries/health/foods/favorites/recentFoodIds。
     - [x] [0.2.0-DB-B-026] 提供重置当前账户 demo / seed 数据的入口（原 ID：0.2.0-DB-A-026）
   - [ ] [0.2.0-DB-B-027] 本地数据可靠性约束 #phase-0-2（原 ID：REAL-DATA-005）（原 ID：0.2.0-DB-A-027）
     - [ ] [0.2.0-DB-B-028] 写入 LocalStorage 前校验关键字段（原 ID：0.2.0-DB-A-028）
@@ -581,6 +589,8 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
   - [ ] [0.2.0-ARCH-A-001] 食品库数据与代码部署隔离，推送不覆盖生产食品库 #pending（DATA-A 未完成）
   - [x] [0.2.0-ARCH-A-002] 用户注册数据与代码部署隔离：使用 Upstash Redis KV，与代码完全分离
   - [x] [0.2.0-ARCH-A-003] 用户本地使用数据（LocalStorage）按 userId 隔离，代码推送不导致数据丢失
+    - 实现：每个账户数据写入 `intake.data.${userId}.v1` 键，按 userId 隔离；不同账号即使共享 localStorage 也不会互相读取数据（已用 Playwright 多账号场景验证）
+    - 强化：AppData 包含 `accountId` 字段，保存时强制 stamp 当前账号；加载时若 `accountId` 不匹配则视为外来数据并重置为空，避免手动修改 localStorage 导致的跨账号读串（2026-06-26 加固）
 
 ## Phase - v0.3.0 - iOS Swift App
 
