@@ -482,7 +482,8 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
     - [x] [0.2.0-DB-B-005] 个人资料保存在 LocalStorage（原 ID：0.2.0-DB-A-005）
     - [x] [0.2.0-DB-B-006] 收藏保存在 LocalStorage（原 ID：0.2.0-DB-A-006）
     - [x] [0.2.0-DB-B-007] 最近使用保存在 LocalStorage（原 ID：0.2.0-DB-A-007）
-    - [ ] [0.2.0-DB-B-008] 页面偏好保存在 LocalStorage（原 ID：0.2.0-DB-A-008）
+    - [x] [0.2.0-DB-B-008] 页面偏好保存在 LocalStorage（原 ID：0.2.0-DB-A-008）
+      - 实现：Me 页语言偏好保存到 `intake.language.v1`，刷新后保留英文/中文选择。
     - [x] [0.2.0-DB-B-009] 本阶段不把业务数据上传到认证服务或其他远端（原 ID：0.2.0-DB-A-009）
   - [x] [0.2.0-DB-B-010] 按登录账户隔离本地数据 #phase-0-2（原 ID：REAL-DATA-002）（原 ID：0.2.0-DB-A-010）
     - [x] [0.2.0-DB-B-011] 每个账户使用稳定 userId 作为 LocalStorage 命名空间（原 ID：0.2.0-DB-A-011）
@@ -508,13 +509,23 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。产品通过 Apple 
     - [ ] [0.2.0-DB-B-024] 迁移失败时给出可恢复提示（原 ID：0.2.0-DB-A-024）
     - [x] [0.2.0-DB-B-025] 提供清除当前账户本地数据的入口（原 ID：0.2.0-DB-A-025）
       - 实现：`main.tsx` 新增 `clearLocalData` 函数 + `makeEmptyData` 工厂 + MePage 新增"Clear local data"红色按钮（与"Reset demo data"区分）；点击后真正清空 profile/goals/entries/health/foods/favorites/recentFoodIds。
-    - [x] [0.2.0-DB-B-026] 提供重置当前账户 demo / seed 数据的入口（原 ID：0.2.0-DB-A-026）
+    - [x] [0.2.0-DB-B-026] 提供重置当前账户 demo / seed 数据的入口（原 ID：0.2.0-DB-A-026） #cut
+      - 变更：2026-06-28 根据用户要求从 Me 页 Settings 移除 `Reset demo data`，保留 `Load demo data` 与 `Clear local data`。
   - [ ] [0.2.0-DB-B-027] 本地数据可靠性约束 #phase-0-2（原 ID：REAL-DATA-005）（原 ID：0.2.0-DB-A-027）
     - [ ] [0.2.0-DB-B-028] 写入 LocalStorage 前校验关键字段（原 ID：0.2.0-DB-A-028）
     - [ ] [0.2.0-DB-B-029] LocalStorage 容量不足时提示用户（原 ID：0.2.0-DB-A-029）
     - [x] [0.2.0-DB-B-030] JSON 解析失败时不导致应用白屏（原 ID：0.2.0-DB-A-030）
     - [x] [0.2.0-DB-B-031] 关键数据变更后立即持久化（原 ID：0.2.0-DB-A-031）
     - [x] [0.2.0-DB-B-032] 刷新页面后保留当前账户的饮食、目标、收藏和历史（原 ID：0.2.0-DB-A-032）
+
+### UX-B：TS Web Me 页设置体验
+
+- [x] [0.2.0-UX-B-000] 精简 Me 页 Settings 与语言切换 #feature #P0.2 #phase-0-2
+  - [x] [0.2.0-UX-B-001] Me 页 Settings 移除 Privacy、Demo boundaries、Reset demo data、Admin dashboard
+  - [x] [0.2.0-UX-B-002] Me 页 Settings 保留 Load demo data 与 Clear local data
+  - [x] [0.2.0-UX-B-003] Me 页提供英文/中文切换按钮
+  - [x] [0.2.0-UX-B-004] 切换中文后 Me 页主要文案显示中文
+  - [x] [0.2.0-UX-B-005] 语言选择持久化到 LocalStorage
 
 ### DATA-A：食物数据库 CSV 资产
 

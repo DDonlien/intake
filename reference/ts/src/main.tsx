@@ -30,6 +30,7 @@ import * as authApi from "./auth-api";
 
 type TabKey = "me" | "log" | "bank" | "add";
 type AuthMode = "login" | "register";
+type Language = "en" | "zh";
 type MealName = string;
 type PlanType = "减脂" | "减重" | "维持" | "增肌";
 type FoodTag = "Food" | "Meal" | "Brand" | "Custom";
@@ -102,6 +103,7 @@ type AppData = {
 
 const ACCOUNTS_KEY = "intake.accounts.v1";
 const SESSION_KEY = "intake.session.v1";
+const LANGUAGE_KEY = "intake.language.v1";
 const dataKey = (userId: string) => `intake.data.${userId}.v1`;
 
 const primaryMealNames = ["Breakfast", "Lunch", "Dinner"] as const;
@@ -109,6 +111,130 @@ const mealNames: MealName[] = [...primaryMealNames, "Snack"];
 const bankFilters = ["All", "Foods", "Meals", "Brands", "Custom", "Recent", "Favorites"];
 const planOptions: PlanType[] = ["减脂", "减重", "维持", "增肌"];
 type DetectedChoice = { foodId: string; name: string; emoji: string; detail: string; servingUnit: string; kcalPerServing: number };
+
+type MeCopy = {
+  signedIn: string;
+  signedInAs: (email: string) => string;
+  goalEdited: string;
+  planSettings: string;
+  presets: string;
+  bodyData: string;
+  goalSummary: string;
+  settings: string;
+  save: string;
+  edit: string;
+  synced: string;
+  custom: string;
+  planSynced: string;
+  weight: string;
+  height: string;
+  age: string;
+  activity: string;
+  activityDetail: string;
+  current: string;
+  target: string;
+  daily: string;
+  protein: string;
+  loadDemoData: string;
+  loadDemoDetail: string;
+  clearLocalData: string;
+  clearLocalDetail: string;
+  logOut: string;
+  logOutDetail: string;
+  resetBodyLabel: string;
+  resetGoalLabel: string;
+  goalValueLabel: (label: string) => string;
+  customGoalSaved: string;
+  goalStillPreset: string;
+  planStartsToday: string;
+  currentChanged: (from: number, to: number) => string;
+  targetChanged: (from: number, to: number) => string;
+  dailyChanged: (from: number, to: number) => string;
+  proteinChanged: (from: number, to: number) => string;
+};
+
+const meCopy: Record<Language, MeCopy> = {
+  en: {
+    signedIn: "Signed in",
+    signedInAs: (email) => `Signed in as ${email}`,
+    goalEdited: "Goal edited",
+    planSettings: "Plan settings",
+    presets: "Presets",
+    bodyData: "Body data",
+    goalSummary: "Goal summary",
+    settings: "Settings",
+    save: "Save",
+    edit: "Edit",
+    synced: "Synced",
+    custom: "Custom",
+    planSynced: "Plan synced",
+    weight: "Weight",
+    height: "Height",
+    age: "Age",
+    activity: "Activity",
+    activityDetail: "daily level",
+    current: "Current",
+    target: "Target",
+    daily: "Daily",
+    protein: "Protein",
+    loadDemoData: "Load demo data",
+    loadDemoDetail: "Populate sample meals, goals, and food library",
+    clearLocalData: "Clear local data",
+    clearLocalDetail: "Delete all meals, goals, profile and food library",
+    logOut: "Log out",
+    logOutDetail: "Keep local data on this device",
+    resetBodyLabel: "Reset body data",
+    resetGoalLabel: "Reset goal",
+    goalValueLabel: (label) => `${label} goal value`,
+    customGoalSaved: "Custom goals saved:",
+    goalStillPreset: "Saved. Goals still match the current plan preset.",
+    planStartsToday: "This starts today. Previous records will not change.",
+    currentChanged: (from, to) => `Current: ${from} -> ${to} kg`,
+    targetChanged: (from, to) => `Target: ${from} -> ${to} kg`,
+    dailyChanged: (from, to) => `Daily: ${from} -> ${to} kcal`,
+    proteinChanged: (from, to) => `Protein: ${from} -> ${to} g`,
+  },
+  zh: {
+    signedIn: "已登录",
+    signedInAs: (email) => `当前账号：${email}`,
+    goalEdited: "目标已自定义",
+    planSettings: "计划设置",
+    presets: "预设",
+    bodyData: "身体数据",
+    goalSummary: "目标摘要",
+    settings: "设置",
+    save: "保存",
+    edit: "编辑",
+    synced: "已同步",
+    custom: "自定义",
+    planSynced: "计划同步",
+    weight: "体重",
+    height: "身高",
+    age: "年龄",
+    activity: "活动量",
+    activityDetail: "日常水平",
+    current: "当前",
+    target: "目标",
+    daily: "每日",
+    protein: "蛋白质",
+    loadDemoData: "载入示例数据",
+    loadDemoDetail: "填充示例餐食、目标和食物库",
+    clearLocalData: "清除本地数据",
+    clearLocalDetail: "删除餐食、目标、个人资料和食物库",
+    logOut: "退出登录",
+    logOutDetail: "保留此设备上的本地数据",
+    resetBodyLabel: "重置身体数据",
+    resetGoalLabel: "重置目标",
+    goalValueLabel: (label) => `${label}目标值`,
+    customGoalSaved: "已保存自定义目标：",
+    goalStillPreset: "已保存。目标仍匹配当前计划预设。",
+    planStartsToday: "从今天开始生效，之前的数据不会变动。",
+    currentChanged: (from, to) => `当前：${from} -> ${to} kg`,
+    targetChanged: (from, to) => `目标：${from} -> ${to} kg`,
+    dailyChanged: (from, to) => `每日：${from} -> ${to} kcal`,
+    proteinChanged: (from, to) => `蛋白质：${from} -> ${to} g`,
+  },
+};
 
 const AUTH_API = (import.meta.env.VITE_AUTH_API_URL as string | undefined)?.replace(/\/+$/, "");
 
@@ -349,6 +475,7 @@ function App() {
   const [notice, setNotice] = useState("");
   const [pageScrolled, setPageScrolled] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [language, setLanguage] = useState<Language>(() => readJson<Language>(LANGUAGE_KEY, "en"));
   const [data, setData] = useState<AppData | null>(() => (account ? normalizeData(readJson(dataKey(account.id), null), account.id) : null));
   const activeTabRef = useRef<TabKey>(activeTab);
   const returnTabRef = useRef<TabKey>("log");
@@ -572,12 +699,9 @@ function App() {
     setActiveTab("log");
   };
 
-  const resetDemoData = () => {
-    if (!account || !window.confirm("Reset local demo data on this device?")) return;
-    const next = makeDefaultData(account.id);
-    setData(next);
-    writeJson(dataKey(account.id), next);
-    showNotice("Demo data reset.");
+  const setAppLanguage = (nextLanguage: Language) => {
+    setLanguage(nextLanguage);
+    writeJson(LANGUAGE_KEY, nextLanguage);
   };
 
   const loadDemoData = () => {
@@ -627,7 +751,7 @@ function App() {
               }}
             >
               {activeTab === "me" ? (
-                <MePage account={account} data={data} onLogout={logout} onReset={resetDemoData} onLoadDemo={loadDemoData} onClear={clearLocalData} onUpdate={updateData} onShowAdmin={() => setShowAdmin(true)} />
+                <MePage account={account} data={data} language={language} onLanguageChange={setAppLanguage} onLogout={logout} onLoadDemo={loadDemoData} onClear={clearLocalData} onUpdate={updateData} />
               ) : null}
               {activeTab === "log" ? (
                 <LogPage
@@ -1523,10 +1647,11 @@ function FoodMiniList({ title, items, onAdd }: { title: string; items: FoodItem[
   return <div className="food-mini-group"><p>{title}</p><div className="food-mini-list">{items.length ? items.map((food) => <button className="food-mini-row" key={food.id} onClick={() => onAdd(food)} type="button"><span className="food-thumb mini">{food.emoji}</span><span><strong>{food.name}</strong><small>{food.brand} · {food.serving}</small></span><b>{food.kcal}</b></button>) : <div className="empty-state small">No foods found.</div>}</div></div>;
 }
 
-function MePage({ account, data, onLogout, onReset, onLoadDemo, onClear, onUpdate, onShowAdmin }: { account: Account; data: AppData; onLogout: () => void; onReset: () => void; onLoadDemo: () => void; onClear: () => void; onUpdate: (recipe: (current: AppData) => AppData) => void; onShowAdmin?: () => void }) {
+function MePage({ account, data, language, onLanguageChange, onLogout, onLoadDemo, onClear, onUpdate }: { account: Account; data: AppData; language: Language; onLanguageChange: (language: Language) => void; onLogout: () => void; onLoadDemo: () => void; onClear: () => void; onUpdate: (recipe: (current: AppData) => AppData) => void }) {
   const syncedProfile: Profile = { name: "Tao", weight: 78.4, height: 178, age: 34, activity: "Moderate" };
-  const bodyStatusLabel = data.profileSource === "synced" ? "Synced" : "Custom";
-  const goalStatusLabel = data.goalsSource === "synced" ? "Plan synced" : "Custom";
+  const copy = meCopy[language];
+  const bodyStatusLabel = data.profileSource === "synced" ? copy.synced : copy.custom;
+  const goalStatusLabel = data.goalsSource === "synced" ? copy.planSynced : copy.custom;
   const [bodyEditing, setBodyEditing] = useState(false);
   const [goalEditing, setGoalEditing] = useState(false);
   const [draftGoals, setDraftGoals] = useState(data.goals);
@@ -1553,18 +1678,18 @@ function MePage({ account, data, onLogout, onReset, onLoadDemo, onClear, onUpdat
     const profile = { ...draftProfile, weight: draftGoals.currentWeight };
     const preset = goalsForPlan(draftGoals.plan, profile);
     const changed = [
-      draftGoals.currentWeight !== preset.currentWeight ? `Current: ${preset.currentWeight} -> ${draftGoals.currentWeight} kg` : "",
-      draftGoals.targetWeight !== preset.targetWeight ? `Target: ${preset.targetWeight} -> ${draftGoals.targetWeight} kg` : "",
-      draftGoals.dailyKcal !== preset.dailyKcal ? `Daily: ${preset.dailyKcal} -> ${draftGoals.dailyKcal} kcal` : "",
-      draftGoals.protein !== preset.protein ? `Protein: ${preset.protein} -> ${draftGoals.protein} g` : "",
+      draftGoals.currentWeight !== preset.currentWeight ? copy.currentChanged(preset.currentWeight, draftGoals.currentWeight) : "",
+      draftGoals.targetWeight !== preset.targetWeight ? copy.targetChanged(preset.targetWeight, draftGoals.targetWeight) : "",
+      draftGoals.dailyKcal !== preset.dailyKcal ? copy.dailyChanged(preset.dailyKcal, draftGoals.dailyKcal) : "",
+      draftGoals.protein !== preset.protein ? copy.proteinChanged(preset.protein, draftGoals.protein) : "",
     ].filter(Boolean);
     onUpdate((current) => ({ ...current, goals: draftGoals, goalsSource: isPlanGoal(draftGoals, profile) ? "synced" : "edited", profile }));
     setGoalEditing(false);
-    window.alert(changed.length ? `已保存自定义目标：\n${changed.join("\n")}` : "已保存。目标仍匹配当前计划预设。");
+    window.alert(changed.length ? `${copy.customGoalSaved}\n${changed.join("\n")}` : copy.goalStillPreset);
   };
   const updatePlan = (plan: PlanType) => {
     if (plan === draftGoals.plan) return;
-    window.alert("从今天开始生效，之前的数据不会变动。");
+    window.alert(copy.planStartsToday);
     const nextGoals = goalsForPlan(plan, draftProfile);
     setDraftGoals(nextGoals);
     onUpdate((current) => ({ ...current, goals: goalsForPlan(plan, current.profile), goalsSource: "synced" }));
@@ -1574,12 +1699,12 @@ function MePage({ account, data, onLogout, onReset, onLoadDemo, onClear, onUpdat
   };
   return (
     <>
-      <section className="glass-card profile-card"><div className="avatar">{(data.profile.name || account.email).charAt(0).toUpperCase()}</div><div className="profile-copy"><h2>{data.profile.name || account.email}</h2><p>{data.goals.plan} · {data.goalsSource === "synced" ? "Plan synced" : "Goal edited"}</p><small className="account-email">Signed in as {account.email}</small></div><span className="status-chip">Signed in</span></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Plan settings</h2><SourceBadge source="synced" label="Presets" /></div><div className="segmented-list">{planOptions.map((plan) => <button className={draftGoals.plan === plan ? "filter-chip active" : "filter-chip"} key={plan} onClick={() => updatePlan(plan)} type="button">{plan}</button>)}</div></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Body data</h2><div className="title-actions"><SourceBadge source={data.profileSource} label={bodyStatusLabel} />{bodyEditing ? <button className="reset-action" aria-label="Reset body data" onClick={resetBodyDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (bodyEditing ? saveBody() : setBodyEditing(true))} type="button">{bodyEditing ? "Save" : "Edit"}</button></div></div><div className="settings-list"><NumberSetting editing={bodyEditing} label="Weight" source={data.profileSource} unit="kg" value={draftProfile.weight} onChange={(weight) => updateProfile({ weight })} /><NumberSetting editing={bodyEditing} label="Height" source={data.profileSource} unit="cm" value={draftProfile.height} onChange={(height) => updateProfile({ height })} /><NumberSetting editing={bodyEditing} label="Age" source={data.profileSource} unit="years" value={draftProfile.age} onChange={(age) => updateProfile({ age })} /><ActivitySetting editing={bodyEditing} source={data.profileSource} value={draftProfile.activity} onChange={(activity) => updateProfile({ activity })} /></div></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Goal summary</h2><div className="title-actions"><SourceBadge source={data.goalsSource} label={goalStatusLabel} />{goalEditing ? <button className="reset-action" aria-label="Reset goal" onClick={resetGoalDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (goalEditing ? saveGoal() : setGoalEditing(true))} type="button">{goalEditing ? "Save" : "Edit"}</button></div></div><div className="summary-grid"><SummaryTile label="Current" value={draftGoals.currentWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, currentWeight: Number(v) || 0 })} /><SummaryTile label="Target" value={draftGoals.targetWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, targetWeight: Number(v) || 0 })} /><SummaryTile label="Daily" value={draftGoals.dailyKcal.toString()} unit="kcal" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, dailyKcal: Number(v) || 0 })} /><SummaryTile label="Protein" value={draftGoals.protein.toString()} unit="g" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, protein: Number(v) || 0 })} /></div></section>
-      <section className="glass-card content-card"><div className="card-title-row compact"><h2>Settings</h2></div><div className="settings-list"><SettingsRow icon={<Lock size={17} />} title="Privacy" detail="Email is for sign-in; meals, goals, and mock Health stay here, not on NAS" /><SettingsRow icon={<Camera size={17} />} title="Demo boundaries" detail="Camera, Health, voice, and barcode are mock for P0.1" /><ActionRow icon={<SlidersHorizontal size={17} />} title="Load demo data" detail="Populate sample meals, goals, and food library" onClick={onLoadDemo} /><ActionRow icon={<SlidersHorizontal size={17} />} title="Reset demo data" detail="Restore default local records" onClick={onReset} /><DangerActionRow icon={<Trash2 size={17} />} title="Clear local data" detail="Delete all meals, goals, profile and food library" onClick={onClear} />{onShowAdmin ? <ActionRow icon={<SlidersHorizontal size={17} />} title="Admin dashboard" detail="Manage registered users" onClick={onShowAdmin} /> : null}</div></section>
-      <button className="danger-action" onClick={onLogout} type="button"><X size={18} /><span><strong>Log out</strong><small>Keep local data on this device</small></span></button>
+      <section className="glass-card profile-card"><div className="avatar">{(data.profile.name || account.email).charAt(0).toUpperCase()}</div><div className="profile-copy"><h2>{data.profile.name || account.email}</h2><p>{data.goals.plan} · {data.goalsSource === "synced" ? copy.planSynced : copy.goalEdited}</p><small className="account-email">{copy.signedInAs(account.email)}</small></div><div className="profile-actions"><LanguageToggle language={language} onChange={onLanguageChange} /><span className="status-chip">{copy.signedIn}</span></div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>{copy.planSettings}</h2><SourceBadge source="synced" label={copy.presets} /></div><div className="segmented-list">{planOptions.map((plan) => <button className={draftGoals.plan === plan ? "filter-chip active" : "filter-chip"} key={plan} onClick={() => updatePlan(plan)} type="button">{plan}</button>)}</div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>{copy.bodyData}</h2><div className="title-actions"><SourceBadge source={data.profileSource} label={bodyStatusLabel} />{bodyEditing ? <button className="reset-action" aria-label={copy.resetBodyLabel} onClick={resetBodyDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (bodyEditing ? saveBody() : setBodyEditing(true))} type="button">{bodyEditing ? copy.save : copy.edit}</button></div></div><div className="settings-list"><NumberSetting editing={bodyEditing} label={copy.weight} source={data.profileSource} unit="kg" value={draftProfile.weight} onChange={(weight) => updateProfile({ weight })} /><NumberSetting editing={bodyEditing} label={copy.height} source={data.profileSource} unit="cm" value={draftProfile.height} onChange={(height) => updateProfile({ height })} /><NumberSetting editing={bodyEditing} label={copy.age} source={data.profileSource} unit="years" value={draftProfile.age} onChange={(age) => updateProfile({ age })} /><ActivitySetting editing={bodyEditing} label={copy.activity} detail={copy.activityDetail} source={data.profileSource} value={draftProfile.activity} onChange={(activity) => updateProfile({ activity })} /></div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>{copy.goalSummary}</h2><div className="title-actions"><SourceBadge source={data.goalsSource} label={goalStatusLabel} />{goalEditing ? <button className="reset-action" aria-label={copy.resetGoalLabel} onClick={resetGoalDraft} type="button"><RotateCcw size={14} /></button> : null}<button className="link-button" onClick={() => (goalEditing ? saveGoal() : setGoalEditing(true))} type="button">{goalEditing ? copy.save : copy.edit}</button></div></div><div className="summary-grid"><SummaryTile label={copy.current} value={draftGoals.currentWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, currentWeight: Number(v) || 0 })} ariaLabel={copy.goalValueLabel(copy.current)} /><SummaryTile label={copy.target} value={draftGoals.targetWeight.toString()} unit="kg" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, targetWeight: Number(v) || 0 })} ariaLabel={copy.goalValueLabel(copy.target)} /><SummaryTile label={copy.daily} value={draftGoals.dailyKcal.toString()} unit="kcal" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, dailyKcal: Number(v) || 0 })} ariaLabel={copy.goalValueLabel(copy.daily)} /><SummaryTile label={copy.protein} value={draftGoals.protein.toString()} unit="g" editing={goalEditing} onChange={(v) => setDraftGoals({ ...draftGoals, protein: Number(v) || 0 })} ariaLabel={copy.goalValueLabel(copy.protein)} /></div></section>
+      <section className="glass-card content-card"><div className="card-title-row compact"><h2>{copy.settings}</h2></div><div className="settings-list"><ActionRow icon={<SlidersHorizontal size={17} />} title={copy.loadDemoData} detail={copy.loadDemoDetail} onClick={onLoadDemo} /><DangerActionRow icon={<Trash2 size={17} />} title={copy.clearLocalData} detail={copy.clearLocalDetail} onClick={onClear} /></div></section>
+      <button className="danger-action" onClick={onLogout} type="button"><X size={18} /><span><strong>{copy.logOut}</strong><small>{copy.logOutDetail}</small></span></button>
     </>
   );
 }
@@ -1588,16 +1713,20 @@ function SourceBadge({ source, label }: { source: DataSource; label: string }) {
   return <span className={`source-badge ${source}`}>{label}</span>;
 }
 
-function SummaryTile({ label, value, unit, editing = false, onChange }: { label: string; value: string; unit: string; editing?: boolean; onChange?: (value: string) => void }) {
-  return <div className="summary-tile"><span>{label}</span>{editing ? <input aria-label={`${label} goal value`} className="summary-value-input" inputMode="decimal" value={value} onChange={(event) => onChange?.(event.target.value)} /> : <strong>{Number(value).toLocaleString("en-US")}</strong>}<small>{unit}</small></div>;
+function SummaryTile({ label, value, unit, editing = false, onChange, ariaLabel }: { label: string; value: string; unit: string; editing?: boolean; onChange?: (value: string) => void; ariaLabel?: string }) {
+  return <div className="summary-tile"><span>{label}</span>{editing ? <input aria-label={ariaLabel ?? `${label} goal value`} className="summary-value-input" inputMode="decimal" value={value} onChange={(event) => onChange?.(event.target.value)} /> : <strong>{Number(value).toLocaleString("en-US")}</strong>}<small>{unit}</small></div>;
 }
 
 function NumberSetting({ editing, label, source, unit, value, onChange }: { editing: boolean; label: string; source: DataSource; unit: string; value: number; onChange: (value: number) => void }) {
   return <label className={`settings-row editable-row ${source}${editing ? " editing" : ""}`}><span className="settings-icon"><Activity size={17} /></span><span><strong>{label}</strong><small>{unit}</small></span>{editing ? <input inputMode="decimal" value={value} onChange={(event) => onChange(Number(event.target.value) || 0)} /> : <span className="setting-plain-value">{value}</span>}</label>;
 }
 
-function ActivitySetting({ editing, source, value, onChange }: { editing: boolean; source: DataSource; value: Profile["activity"]; onChange: (value: Profile["activity"]) => void }) {
-  return <label className={`settings-row editable-row ${source}${editing ? " editing" : ""}`}><span className="settings-icon"><Timer size={17} /></span><span><strong>Activity</strong><small>daily level</small></span>{editing ? <select value={value} onChange={(event) => onChange(event.target.value as Profile["activity"])}><option>Low</option><option>Moderate</option><option>High</option></select> : <span className="setting-plain-value">{value}</span>}</label>;
+function ActivitySetting({ editing, label, detail, source, value, onChange }: { editing: boolean; label: string; detail: string; source: DataSource; value: Profile["activity"]; onChange: (value: Profile["activity"]) => void }) {
+  return <label className={`settings-row editable-row ${source}${editing ? " editing" : ""}`}><span className="settings-icon"><Timer size={17} /></span><span><strong>{label}</strong><small>{detail}</small></span>{editing ? <select value={value} onChange={(event) => onChange(event.target.value as Profile["activity"])}><option>Low</option><option>Moderate</option><option>High</option></select> : <span className="setting-plain-value">{value}</span>}</label>;
+}
+
+function LanguageToggle({ language, onChange }: { language: Language; onChange: (language: Language) => void }) {
+  return <div className="language-toggle" aria-label="Language"><button className={language === "en" ? "active" : ""} onClick={() => onChange("en")} type="button">EN</button><button className={language === "zh" ? "active" : ""} onClick={() => onChange("zh")} type="button">中文</button></div>;
 }
 
 function SettingsRow({ icon, title, detail }: { icon: React.ReactNode; title: string; detail: string }) {
