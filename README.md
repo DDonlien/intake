@@ -78,9 +78,9 @@ Intake 是一款 iOS 饮食摄入与实时热量预算 App。通过 Apple 健康
 ## 文档入口
 
 - Agent 协作规范：`AGENTS.md`
-- 需求与验收追踪：`REQUIREMENTS.md`
+- 需求与验收追踪：`issue/issue-0.0.1-PM-A-000-PM-product-versioncontrolid.md`
 - 视觉规范：`DESIGN.md`
-- 执行日志：`agent-log/`
+- 执行日志：`issue/README.md`
 
 ## 快速开始
 
