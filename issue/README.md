@@ -1,79 +1,79 @@
 # Issue 入口
 
-本目录是当前工作副本的任务、检查与交接入口。旧需求的状态、ID 与来源保留在对应 Issue；历史 Comments 不自动更新当前完成度。`versioncontrolid` 保持待定义占位。
+本目录是当前工作副本的任务、检查与交接入口。旧需求的状态、ID 与来源保留在对应 Issue；历史 Comments 不自动更新当前完成度。实际实施版本只在核实后填写；尚无提交或未核实则省略文件名后缀，并在 property 说明。
 
-- [Issue 模板](issue-issueid-issuetype-issuename-versioncontrolid.md)
-- [本轮迁移记录](issue-DOC-migration-20261023-DOC-migrate-project-workflow-versioncontrolid.md)
+- [Issue 模板](issue_template.md)
+- [本轮迁移记录](issue_%E8%BF%81%E7%A7%BB%E9%A1%B9%E7%9B%AE%E4%BB%BB%E5%8A%A1%E4%B8%8E%E5%8D%8F%E4%BD%9C%E8%AE%B0%E5%BD%95_1faab300.md)
 - [旧路径与来源映射](migration-map.json)
 
-- [PM-A：产品定位](issue-0.0.1-PM-A-000-PM-product-versioncontrolid.md) — `0.0.1-PM-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [PM-A：产品定位](issue_%E5%AE%9A%E4%B9%89Intake%E4%BA%A7%E5%93%81%E5%AE%9A%E4%BD%8D%E7%94%A8%E6%88%B7%E9%97%AE%E9%A2%98%E4%B8%8E%E4%BA%A7%E5%93%81%E5%AE%B6%E6%97%8F%E5%85%B3%E7%B3%BB.md) — `0.0.1-PM-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [PM-B：MVP 范围](issue-0.0.1-PM-B-000-PM-mvp-scope-versioncontrolid.md) — `0.0.1-PM-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [PM-B：MVP 范围](issue_%E6%98%8E%E7%A1%AEIntake%E9%A6%96%E7%89%88%E5%81%A5%E5%BA%B7%E6%8E%88%E6%9D%83%E4%B8%8E%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E4%BA%A4%E4%BB%98%E8%8C%83%E5%9B%B4.md) — `0.0.1-PM-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [Phase - v0.1.0 - TS 假页面（验证交互和设计）](issue-migration-6fac46e9b22a-QA-ts-verification-interaction-versioncontrolid.md) — `migration-6fac46e9b22a`；已确认约束 / 状态待核对（原文未单列完成状态）；原路径 `REQUIREMENTS.md`。
+- [Phase - v0.1.0 - TS 假页面（验证交互和设计）](issue_%E8%AE%B0%E5%BD%95TS%E4%BA%A4%E4%BA%92%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%9E%8B%E7%9A%84%E9%98%B6%E6%AE%B5%E8%BE%B9%E7%95%8C.md) — `migration-6fac46e9b22a`；已确认约束 / 状态待核对（原文未单列完成状态）；原路径 `REQUIREMENTS.md`。
 
-- [UI-A：TS 假页面与交互原型](issue-0.1.0-UI-A-000-UI-ts-interaction-versioncontrolid.md) — `0.1.0-UI-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
+- [建立Intake独立TS原型画布页面导航与评审入口](issue_%E5%BB%BA%E7%AB%8BIntake%E7%8B%AC%E7%AB%8BTS%E5%8E%9F%E5%9E%8B%E7%94%BB%E5%B8%83%E9%A1%B5%E9%9D%A2%E5%AF%BC%E8%88%AA%E4%B8%8E%E8%AF%84%E5%AE%A1%E5%85%A5%E5%8F%A3.md)、[重整TS原型Log热量预算日期与餐次卡片](issue_%E9%87%8D%E6%95%B4TS%E5%8E%9F%E5%9E%8BLog%E7%83%AD%E9%87%8F%E9%A2%84%E7%AE%97%E6%97%A5%E6%9C%9F%E4%B8%8E%E9%A4%90%E6%AC%A1%E5%8D%A1%E7%89%87.md)、[实现TS原型Add相机识别编辑与可拖拽结果拉篮](issue_%E5%AE%9E%E7%8E%B0TS%E5%8E%9F%E5%9E%8BAdd%E7%9B%B8%E6%9C%BA%E8%AF%86%E5%88%AB%E7%BC%96%E8%BE%91%E4%B8%8E%E5%8F%AF%E6%8B%96%E6%8B%BD%E7%BB%93%E6%9E%9C%E6%8B%89%E7%AF%AE.md)、[补齐TS原型Bank目录缩略图与底部搜索筛选](issue_%E8%A1%A5%E9%BD%90TS%E5%8E%9F%E5%9E%8BBank%E7%9B%AE%E5%BD%95%E7%BC%A9%E7%95%A5%E5%9B%BE%E4%B8%8E%E5%BA%95%E9%83%A8%E6%90%9C%E7%B4%A2%E7%AD%9B%E9%80%89.md)、[整理TS原型Me个人状态目标编辑与健康同步状态](issue_%E6%95%B4%E7%90%86TS%E5%8E%9F%E5%9E%8BMe%E4%B8%AA%E4%BA%BA%E7%8A%B6%E6%80%81%E7%9B%AE%E6%A0%87%E7%BC%96%E8%BE%91%E4%B8%8E%E5%81%A5%E5%BA%B7%E5%90%8C%E6%AD%A5%E7%8A%B6%E6%80%81.md) — `0.1.0-UI-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
 
-- [FE-A：TS 假页面验证范围](issue-0.1.0-FE-A-000-FE-ts-verification-scope-versioncontrolid.md) — `0.1.0-FE-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [FE-A：TS 假页面验证范围](issue_%E5%BB%BA%E7%AB%8BTS%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E5%BA%94%E7%94%A8%E7%9A%84PWA%E4%B8%8E%E7%9C%9F%E5%AE%9E%E6%89%8B%E6%9C%BA%E4%BD%93%E9%AA%8C%E5%9F%BA%E7%BA%BF.md) — `0.1.0-FE-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [UX-A：TS 假页面用户体验清单](issue-0.1.0-UX-A-000-UX-ts-experience-versioncontrolid.md) — `0.1.0-UX-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [完成TS饮食记录应用邮箱注册登录与退出体验](issue_%E5%AE%8C%E6%88%90TS%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E5%BA%94%E7%94%A8%E9%82%AE%E7%AE%B1%E6%B3%A8%E5%86%8C%E7%99%BB%E5%BD%95%E4%B8%8E%E9%80%80%E5%87%BA%E4%BD%93%E9%AA%8C.md)、[完成TS应用主屏幕安装与手机适配体验](issue_%E5%AE%8C%E6%88%90TS%E5%BA%94%E7%94%A8%E4%B8%BB%E5%B1%8F%E5%B9%95%E5%AE%89%E8%A3%85%E4%B8%8E%E6%89%8B%E6%9C%BA%E9%80%82%E9%85%8D%E4%BD%93%E9%AA%8C.md)、[联动Log日期热量预算宏量营养与餐次管理](issue_%E8%81%94%E5%8A%A8Log%E6%97%A5%E6%9C%9F%E7%83%AD%E9%87%8F%E9%A2%84%E7%AE%97%E5%AE%8F%E9%87%8F%E8%90%A5%E5%85%BB%E4%B8%8E%E9%A4%90%E6%AC%A1%E7%AE%A1%E7%90%86.md)、[完成Add食物识别编辑手动添加与返回流程](issue_%E5%AE%8C%E6%88%90Add%E9%A3%9F%E7%89%A9%E8%AF%86%E5%88%AB%E7%BC%96%E8%BE%91%E6%89%8B%E5%8A%A8%E6%B7%BB%E5%8A%A0%E4%B8%8E%E8%BF%94%E5%9B%9E%E6%B5%81%E7%A8%8B.md)、[完成Bank搜索筛选添加食物与收藏管理](issue_%E5%AE%8C%E6%88%90Bank%E6%90%9C%E7%B4%A2%E7%AD%9B%E9%80%89%E6%B7%BB%E5%8A%A0%E9%A3%9F%E7%89%A9%E4%B8%8E%E6%94%B6%E8%97%8F%E7%AE%A1%E7%90%86.md)、[完成Me目标计划与基础资料编辑体验](issue_%E5%AE%8C%E6%88%90Me%E7%9B%AE%E6%A0%87%E8%AE%A1%E5%88%92%E4%B8%8E%E5%9F%BA%E7%A1%80%E8%B5%84%E6%96%99%E7%BC%96%E8%BE%91%E4%BD%93%E9%AA%8C.md)、[保留TS饮食记录本地数据并隔离登录用户](issue_%E4%BF%9D%E7%95%99TS%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%B9%B6%E9%9A%94%E7%A6%BB%E7%99%BB%E5%BD%95%E7%94%A8%E6%88%B7.md)、[展示TS应用数据存储说明与演示能力边界](issue_%E5%B1%95%E7%A4%BATS%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E8%AF%B4%E6%98%8E%E4%B8%8E%E6%BC%94%E7%A4%BA%E8%83%BD%E5%8A%9B%E8%BE%B9%E7%95%8C.md)、[补齐TS饮食记录原型登录输入识别的异常与空状态](issue_%E8%A1%A5%E9%BD%90TS%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E5%8E%9F%E5%9E%8B%E7%99%BB%E5%BD%95%E8%BE%93%E5%85%A5%E8%AF%86%E5%88%AB%E7%9A%84%E5%BC%82%E5%B8%B8%E4%B8%8E%E7%A9%BA%E7%8A%B6%E6%80%81.md) — `0.1.0-UX-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [QA-A：交互与设计闭环验证](issue-0.1.0-QA-A-000-QA-interaction-verification-versioncontrolid.md) — `0.1.0-QA-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
+- [QA-A：交互与设计闭环验证](issue_%E9%AA%8C%E8%AF%81TS%E5%BA%94%E7%94%A8Log%E6%B7%BB%E5%8A%A0%E9%A3%9F%E7%89%A9%E5%BA%93%E4%B8%8E%E7%9B%AE%E6%A0%87%E8%AE%BE%E7%BD%AE%E7%9A%84%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E9%97%AD%E7%8E%AF.md) — `0.1.0-QA-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
 
-- [Phase - v0.2.0 - 可用的 TS Web 应用（数据、账户体系、注册）](issue-migration-45f33b49e149-API-ts-web-data-account-registration-versioncontrolid.md) — `migration-45f33b49e149`；已确认约束 / 状态待核对（原文未单列完成状态）；原路径 `REQUIREMENTS.md`。
+- [Phase - v0.2.0 - 可用的 TS Web 应用（数据、账户体系、注册）](issue_%E8%AE%B0%E5%BD%95%E5%8F%AF%E7%94%A8TS%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E8%B4%A6%E6%88%B7%E4%B8%8E%E6%B3%A8%E5%86%8C%E7%9A%84%E9%98%B6%E6%AE%B5%E8%BE%B9%E7%95%8C.md) — `migration-45f33b49e149`；已确认约束 / 状态待核对（原文未单列完成状态）；原路径 `REQUIREMENTS.md`。
 
-- [API-A：账户注册、登录与服务器边界](issue-0.2.0-API-A-000-API-account-registration-login-service-versioncontrolid.md) — `0.2.0-API-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [建立轻量邮箱注册登录会话与服务端边界](issue_%E5%BB%BA%E7%AB%8B%E8%BD%BB%E9%87%8F%E9%82%AE%E7%AE%B1%E6%B3%A8%E5%86%8C%E7%99%BB%E5%BD%95%E4%BC%9A%E8%AF%9D%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E8%BE%B9%E7%95%8C.md)、[迁移邮箱认证部署并保留被替代的NAS要求](issue_%E8%BF%81%E7%A7%BB%E9%82%AE%E7%AE%B1%E8%AE%A4%E8%AF%81%E9%83%A8%E7%BD%B2%E5%B9%B6%E4%BF%9D%E7%95%99%E8%A2%AB%E6%9B%BF%E4%BB%A3%E7%9A%84NAS%E8%A6%81%E6%B1%82.md) — `0.2.0-API-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [DB-A：Web 本地状态与持久化](issue-0.2.0-DB-A-000-DB-web-local-state-versioncontrolid.md) — `0.2.0-DB-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
+- [建立TS饮食记录模型本地状态与持久化](issue_%E5%BB%BA%E7%AB%8BTS%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E6%A8%A1%E5%9E%8B%E6%9C%AC%E5%9C%B0%E7%8A%B6%E6%80%81%E4%B8%8E%E6%8C%81%E4%B9%85%E5%8C%96.md)、[验证TS食物记录变化后的营养预算计算](issue_%E9%AA%8C%E8%AF%81TS%E9%A3%9F%E7%89%A9%E8%AE%B0%E5%BD%95%E5%8F%98%E5%8C%96%E5%90%8E%E7%9A%84%E8%90%A5%E5%85%BB%E9%A2%84%E7%AE%97%E8%AE%A1%E7%AE%97.md) — `0.2.0-DB-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
 
-- [QA-A：TS Web App 验收与交付](issue-0.2.0-QA-A-000-QA-ts-web-app-acceptance-versioncontrolid.md) — `0.2.0-QA-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [QA-A：TS Web App 验收与交付](issue_%E9%AA%8C%E6%94%B6TS%E5%BA%94%E7%94%A8%E6%9E%84%E5%BB%BA%E4%B8%BB%E5%B1%8F%E5%B9%95%E4%BD%BF%E7%94%A8%E4%B8%8E%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E5%B9%B6%E5%87%86%E5%A4%87%E8%BF%81%E7%A7%BB.md) — `0.2.0-QA-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [API-B：账户认证与部署边界](issue-0.2.0-API-B-000-API-account-authentication-deployment-versioncontrolid.md) — `0.2.0-API-B-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
+- [API-B：账户认证与部署边界](issue_%E4%BF%9D%E7%95%99%E5%B7%B2%E5%B9%B6%E5%85%A5%E8%BD%BB%E9%87%8F%E8%B4%A6%E6%88%B7%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%9C%9F%E5%AE%9E%E9%82%AE%E7%AE%B1%E8%AE%A4%E8%AF%81%E4%B8%8E%E9%83%A8%E7%BD%B2%E8%AE%B0%E5%BD%95.md) — `0.2.0-API-B-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
 
-- [DB-B：本地业务数据与多用户隔离](issue-0.2.0-DB-B-000-DB-local-data-versioncontrolid.md) — `0.2.0-DB-B-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [DB-B：本地业务数据与多用户隔离](issue_%E5%AE%9E%E7%8E%B0%E6%8C%89%E7%94%A8%E6%88%B7%E9%9A%94%E7%A6%BB%E7%9A%84LocalStorage%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E6%8C%81%E4%B9%85%E5%8C%96.md) — `0.2.0-DB-B-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [DATA-A：食物数据库 CSV 资产](issue-0.2.0-DATA-A-000-DATA-data-database-csv-assets-versioncontrolid.md) — `0.2.0-DATA-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [DATA-A：食物数据库 CSV 资产](issue_%E5%BB%BA%E7%AB%8B%E4%BB%A3%E7%A0%81%E5%BA%93%E7%BB%B4%E6%8A%A4%E7%9A%84%E9%A3%9F%E7%89%A9%E6%95%B0%E6%8D%AE%E5%BA%93CSV%E8%B5%84%E4%BA%A7.md) — `0.2.0-DATA-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [SEC-A：隐私、说明与验收](issue-0.2.0-SEC-A-000-SEC-privacy-acceptance-versioncontrolid.md) — `0.2.0-SEC-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [SEC-A：隐私、说明与验收](issue_%E6%98%8E%E7%A1%AETS%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E6%9C%AC%E5%9C%B0%E4%BC%98%E5%85%88%E9%9A%90%E7%A7%81%E4%B8%8E%E4%B8%8A%E4%BC%A0%E8%BE%B9%E7%95%8C.md) — `0.2.0-SEC-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [CI-A：Vercel 自动部署](issue-0.2.0-CI-A-000-CI-vercel-deployment-versioncontrolid.md) — `0.2.0-CI-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
+- [CI-A：Vercel 自动部署](issue_%E9%85%8D%E7%BD%AE%E6%8E%A8%E9%80%81%E5%90%8E%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Intake%E8%87%B3Vercel.md) — `0.2.0-CI-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
 
-- [ARCH-A：代码与数据隔离](issue-0.2.0-ARCH-A-000-ARCH-data-versioncontrolid.md) — `0.2.0-ARCH-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [ARCH-A：代码与数据隔离](issue_%E9%9A%94%E7%A6%BBIntake%E4%BB%A3%E7%A0%81%E7%BB%B4%E6%8A%A4%E4%B8%8E%E4%B8%9A%E5%8A%A1%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8.md) — `0.2.0-ARCH-A-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [Phase - v0.3.0 - iOS Swift App](issue-migration-a914b66f19d2-SEC-ios-swift-app-versioncontrolid.md) — `migration-a914b66f19d2`；已确认约束 / 状态待核对（原文未单列完成状态）；原路径 `REQUIREMENTS.md`。
+- [Phase - v0.3.0 - iOS Swift App](issue_%E8%AE%B0%E5%BD%95%E5%8E%9F%E7%94%9FiOS%E9%A5%AE%E9%A3%9F%E9%A2%84%E7%AE%97%E5%BA%94%E7%94%A8%E7%9A%84%E9%98%B6%E6%AE%B5%E8%BE%B9%E7%95%8C.md) — `migration-a914b66f19d2`；已确认约束 / 状态待核对（原文未单列完成状态）；原路径 `REQUIREMENTS.md`。
 
-- [API-A：Apple 健康同步](issue-0.3.0-API-A-000-API-apple-sync-versioncontrolid.md) — `0.3.0-API-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [API-A：Apple 健康同步](issue_%E6%8E%A5%E5%85%A5Apple%E5%81%A5%E5%BA%B7%E6%8E%88%E6%9D%83%E8%BA%AB%E4%BD%93%E8%83%BD%E9%87%8F%E4%B8%8E%E8%BF%90%E5%8A%A8%E6%95%B0%E6%8D%AE.md) — `0.3.0-API-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [BE-A：目标与预算计算](issue-0.3.0-BE-A-000-BE-goal-versioncontrolid.md) — `0.3.0-BE-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [BE-A：目标与预算计算](issue_%E5%AE%9E%E7%8E%B0%E9%A5%AE%E9%A3%9F%E7%9B%AE%E6%A0%87%E8%AE%BE%E7%BD%AE%E4%B8%8E%E6%AF%8F%E6%97%A5%E5%AE%9E%E6%97%B6%E7%83%AD%E9%87%8F%E9%A2%84%E7%AE%97%E8%AE%A1%E7%AE%97.md) — `0.3.0-BE-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [DATA-A：食物与营养数据](issue-0.3.0-DATA-A-000-DATA-data-versioncontrolid.md) — `0.3.0-DATA-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [DATA-A：食物与营养数据](issue_%E5%AE%9A%E4%B9%89%E9%A3%9F%E7%89%A9%E5%93%81%E7%89%8C%E9%A4%90%E6%AC%A1%E4%B8%8E%E9%A5%AE%E9%A3%9F%E6%98%8E%E7%BB%86%E7%9A%84%E8%90%A5%E5%85%BB%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B.md) — `0.3.0-DATA-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [DATA-B：搜索与筛选](issue-0.3.0-DATA-B-000-DATA-search-filter-versioncontrolid.md) — `0.3.0-DATA-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [DATA-B：搜索与筛选](issue_%E5%AE%9E%E7%8E%B0%E9%A3%9F%E7%89%A9%E5%B8%B8%E7%94%A8%E9%A4%90%E5%93%81%E7%89%8C%E4%B8%8E%E4%B8%AD%E8%8B%B1%E6%96%87%E5%88%AB%E5%90%8D%E6%90%9C%E7%B4%A2%E7%AD%9B%E9%80%89.md) — `0.3.0-DATA-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [UI-A：App 主界面](issue-0.3.0-UI-A-000-UI-app-interface-versioncontrolid.md) — `0.3.0-UI-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [UI-A：App 主界面](issue_%E5%AE%9E%E7%8E%B0Intake%E5%8E%9F%E7%94%9F%E5%BA%95%E6%A0%8F%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%A1%B5%E9%9D%A2%E5%AF%BC%E8%88%AA.md) — `0.3.0-UI-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [UI-B：Me 页面](issue-0.3.0-UI-B-000-UI-me-versioncontrolid.md) — `0.3.0-UI-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [实现Me个人状态目标摘要与计划编辑](issue_%E5%AE%9E%E7%8E%B0Me%E4%B8%AA%E4%BA%BA%E7%8A%B6%E6%80%81%E7%9B%AE%E6%A0%87%E6%91%98%E8%A6%81%E4%B8%8E%E8%AE%A1%E5%88%92%E7%BC%96%E8%BE%91.md)、[显示Me健康数据授权与逐项同步状态](issue_%E6%98%BE%E7%A4%BAMe%E5%81%A5%E5%BA%B7%E6%95%B0%E6%8D%AE%E6%8E%88%E6%9D%83%E4%B8%8E%E9%80%90%E9%A1%B9%E5%90%8C%E6%AD%A5%E7%8A%B6%E6%80%81.md)、[连接Me历史回顾与收藏入口](issue_%E8%BF%9E%E6%8E%A5Me%E5%8E%86%E5%8F%B2%E5%9B%9E%E9%A1%BE%E4%B8%8E%E6%94%B6%E8%97%8F%E5%85%A5%E5%8F%A3.md)、[实现Me设置入口与偏好菜单](issue_%E5%AE%9E%E7%8E%B0Me%E8%AE%BE%E7%BD%AE%E5%85%A5%E5%8F%A3%E4%B8%8E%E5%81%8F%E5%A5%BD%E8%8F%9C%E5%8D%95.md)、[实现Me订阅设置与付费状态入口](issue_%E5%AE%9E%E7%8E%B0Me%E8%AE%A2%E9%98%85%E8%AE%BE%E7%BD%AE%E4%B8%8E%E4%BB%98%E8%B4%B9%E7%8A%B6%E6%80%81%E5%85%A5%E5%8F%A3.md)、[实现Me隐私与数据管理设置菜单](issue_%E5%AE%9E%E7%8E%B0Me%E9%9A%90%E7%A7%81%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E8%AE%BE%E7%BD%AE%E8%8F%9C%E5%8D%95.md) — `0.3.0-UI-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [UI-C：Log 页面](issue-0.3.0-UI-C-000-UI-log-versioncontrolid.md) — `0.3.0-UI-C-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [实现Log日期切换热量预算与营养进度概览](issue_%E5%AE%9E%E7%8E%B0Log%E6%97%A5%E6%9C%9F%E5%88%87%E6%8D%A2%E7%83%AD%E9%87%8F%E9%A2%84%E7%AE%97%E4%B8%8E%E8%90%A5%E5%85%BB%E8%BF%9B%E5%BA%A6%E6%A6%82%E8%A7%88.md)、[在Log提供语音输入记录入口](issue_%E5%9C%A8Log%E6%8F%90%E4%BE%9B%E8%AF%AD%E9%9F%B3%E8%BE%93%E5%85%A5%E8%AE%B0%E5%BD%95%E5%85%A5%E5%8F%A3.md)、[展示Log健康数据同步状态与操作入口](issue_%E5%B1%95%E7%A4%BALog%E5%81%A5%E5%BA%B7%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E7%8A%B6%E6%80%81%E4%B8%8E%E6%93%8D%E4%BD%9C%E5%85%A5%E5%8F%A3.md)、[实现Log餐次列表的收起展开与食物明细操作](issue_%E5%AE%9E%E7%8E%B0Log%E9%A4%90%E6%AC%A1%E5%88%97%E8%A1%A8%E7%9A%84%E6%94%B6%E8%B5%B7%E5%B1%95%E5%BC%80%E4%B8%8E%E9%A3%9F%E7%89%A9%E6%98%8E%E7%BB%86%E6%93%8D%E4%BD%9C.md)、[提供Log营养趋势与历史回顾入口](issue_%E6%8F%90%E4%BE%9BLog%E8%90%A5%E5%85%BB%E8%B6%8B%E5%8A%BF%E4%B8%8E%E5%8E%86%E5%8F%B2%E5%9B%9E%E9%A1%BE%E5%85%A5%E5%8F%A3.md) — `0.3.0-UI-C-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [UI-D：Record 页面](issue-0.3.0-UI-D-000-UI-record-versioncontrolid.md) — `0.3.0-UI-D-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [实现Record相机语音与可拖拽输入区域](issue_%E5%AE%9E%E7%8E%B0Record%E7%9B%B8%E6%9C%BA%E8%AF%AD%E9%9F%B3%E4%B8%8E%E5%8F%AF%E6%8B%96%E6%8B%BD%E8%BE%93%E5%85%A5%E5%8C%BA%E5%9F%9F.md)、[在Record选择近期收藏食物并确认餐次记录](issue_%E5%9C%A8Record%E9%80%89%E6%8B%A9%E8%BF%91%E6%9C%9F%E6%94%B6%E8%97%8F%E9%A3%9F%E7%89%A9%E5%B9%B6%E7%A1%AE%E8%AE%A4%E9%A4%90%E6%AC%A1%E8%AE%B0%E5%BD%95.md) — `0.3.0-UI-D-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [UI-E：Bank 页面](issue-0.3.0-UI-E-000-UI-bank-versioncontrolid.md) — `0.3.0-UI-E-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [实现Bank食物目录搜索筛选与详情查看](issue_%E5%AE%9E%E7%8E%B0Bank%E9%A3%9F%E7%89%A9%E7%9B%AE%E5%BD%95%E6%90%9C%E7%B4%A2%E7%AD%9B%E9%80%89%E4%B8%8E%E8%AF%A6%E6%83%85%E6%9F%A5%E7%9C%8B.md)、[在Bank管理自定义食物](issue_%E5%9C%A8Bank%E7%AE%A1%E7%90%86%E8%87%AA%E5%AE%9A%E4%B9%89%E9%A3%9F%E7%89%A9.md)、[在Bank管理常用收藏餐](issue_%E5%9C%A8Bank%E7%AE%A1%E7%90%86%E5%B8%B8%E7%94%A8%E6%94%B6%E8%97%8F%E9%A4%90.md) — `0.3.0-UI-E-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [UI-F：全局视觉组件](issue-0.3.0-UI-F-000-UI-visual-versioncontrolid.md) — `0.3.0-UI-F-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [实现Intake共用Liquid-Glass卡片与标签组件](issue_%E5%AE%9E%E7%8E%B0Intake%E5%85%B1%E7%94%A8Liquid-Glass%E5%8D%A1%E7%89%87%E4%B8%8E%E6%A0%87%E7%AD%BE%E7%BB%84%E4%BB%B6.md)、[实现底栏加号Record入口按钮](issue_%E5%AE%9E%E7%8E%B0%E5%BA%95%E6%A0%8F%E5%8A%A0%E5%8F%B7Record%E5%85%A5%E5%8F%A3%E6%8C%89%E9%92%AE.md)、[实现Intake共用底部上拉面板](issue_%E5%AE%9E%E7%8E%B0Intake%E5%85%B1%E7%94%A8%E5%BA%95%E9%83%A8%E4%B8%8A%E6%8B%89%E9%9D%A2%E6%9D%BF.md)、[实现统一空状态与错误提示组件](issue_%E5%AE%9E%E7%8E%B0%E7%BB%9F%E4%B8%80%E7%A9%BA%E7%8A%B6%E6%80%81%E4%B8%8E%E9%94%99%E8%AF%AF%E6%8F%90%E7%A4%BA%E7%BB%84%E4%BB%B6.md) — `0.3.0-UI-F-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [FE-A：手动记录](issue-0.3.0-FE-A-000-FE-project-goal-versioncontrolid.md) — `0.3.0-FE-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [FE-A：手动记录](issue_%E4%BB%8ERecord%E6%88%96Bank%E6%89%8B%E5%8A%A8%E9%80%89%E6%8B%A9%E9%A3%9F%E7%89%A9%E4%BB%BD%E9%87%8F%E5%B9%B6%E5%86%99%E5%85%A5%E5%BD%93%E6%97%A5%E9%A4%90%E6%AC%A1.md) — `0.3.0-FE-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [API-B：语音记录](issue-0.3.0-API-B-000-API-project-goal-versioncontrolid.md) — `0.3.0-API-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [API-B：语音记录](issue_%E8%A7%A3%E6%9E%90%E8%AF%AD%E9%9F%B3%E4%B8%BA%E9%A3%9F%E7%89%A9%E4%B8%8E%E9%A4%90%E6%AC%A1%E5%B9%B6%E7%BB%8F%E7%94%A8%E6%88%B7%E7%A1%AE%E8%AE%A4%E5%90%8E%E8%AE%B0%E5%BD%95.md) — `0.3.0-API-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [API-C：拍照与 AI 记录](issue-0.3.0-API-C-000-API-ai-versioncontrolid.md) — `0.3.0-API-C-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
+- [API-C：拍照与 AI 记录](issue_%E5%AE%9E%E7%8E%B0%E6%8B%8D%E7%85%A7%E7%95%99%E6%A1%A3AI%E8%AF%86%E5%88%AB%E4%BB%BD%E9%87%8F%E4%BC%B0%E7%AE%97%E4%B8%8E%E7%A1%AE%E8%AE%A4%E5%85%A5%E8%B4%A6%E6%B5%81%E7%A8%8B.md) — `0.3.0-API-C-000`；进行中（原文同时包含已完成与未完成项）；原路径 `REQUIREMENTS.md`。
 
-- [BE-B：订阅与付费](issue-0.3.0-BE-B-000-BE-subscription-versioncontrolid.md) — `0.3.0-BE-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [BE-B：订阅与付费](issue_%E5%AE%9E%E7%8E%B0%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E5%85%8D%E8%B4%B9%E4%BB%98%E8%B4%B9%E8%BE%B9%E7%95%8C%E4%B8%8E%E8%AE%A2%E9%98%85%E6%81%A2%E5%A4%8D%E7%AE%A1%E7%90%86.md) — `0.3.0-BE-B-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [SEC-A：隐私与数据管理](issue-0.3.0-SEC-A-000-SEC-privacy-data-admin-versioncontrolid.md) — `0.3.0-SEC-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [说明健康照片语音与AI数据用途并遵守授权边界](issue_%E8%AF%B4%E6%98%8E%E5%81%A5%E5%BA%B7%E7%85%A7%E7%89%87%E8%AF%AD%E9%9F%B3%E4%B8%8EAI%E6%95%B0%E6%8D%AE%E7%94%A8%E9%80%94%E5%B9%B6%E9%81%B5%E5%AE%88%E6%8E%88%E6%9D%83%E8%BE%B9%E7%95%8C.md)、[支持饮食数据导出删除与本地状态清除](issue_%E6%94%AF%E6%8C%81%E9%A5%AE%E9%A3%9F%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E5%88%A0%E9%99%A4%E4%B8%8E%E6%9C%AC%E5%9C%B0%E7%8A%B6%E6%80%81%E6%B8%85%E9%99%A4.md) — `0.3.0-SEC-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [UI-G：视觉约束](issue-0.3.0-UI-G-000-UI-visual-versioncontrolid.md) — `0.3.0-UI-G-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [UI-G：视觉约束](issue_%E4%BF%9D%E6%8C%81Intake%E5%8E%9F%E7%94%9F%E7%8E%BB%E7%92%83%E8%A7%86%E8%A7%89%E4%BF%A1%E6%81%AF%E5%AF%86%E5%BA%A6%E4%B8%8E%E8%BE%85%E5%8A%A9%E5%8A%9F%E8%83%BD%E9%80%82%E9%85%8D.md) — `0.3.0-UI-G-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
 
-- [CONTENT-A：文案约束](issue-0.3.0-CONTENT-A-000-CONTENT-project-goal-versioncontrolid.md) — `0.3.0-CONTENT-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
+- [CONTENT-A：文案约束](issue_%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%80%A7%E9%95%BF%E6%9C%9F%E9%A5%AE%E9%A3%9F%E6%96%87%E6%A1%88%E5%B9%B6%E9%81%BF%E5%85%8D%E7%84%A6%E8%99%91%E5%BC%8F%E6%8F%90%E7%A4%BA.md) — `0.3.0-CONTENT-A-000`；已完成（沿用原需求记录；本轮未重新执行产品验收）；原路径 `REQUIREMENTS.md`。
 
-- [QA-A：完成定义](issue-0.3.0-QA-A-000-QA-project-goal-versioncontrolid.md) — `0.3.0-QA-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
+- [QA-A：完成定义](issue_%E8%AE%B0%E5%BD%95%E9%A5%AE%E9%A3%9F%E8%AE%B0%E5%BD%95%E9%A2%84%E7%AE%97%E9%A3%9F%E7%89%A9%E5%BA%93%E4%B8%8E%E4%B8%AA%E4%BA%BA%E8%AE%BE%E7%BD%AE%E7%9A%84%E5%8A%9F%E8%83%BD%E9%AA%8C%E6%94%B6%E6%A0%87%E5%87%86.md) — `0.3.0-QA-A-000`；待处理（原文未完成项保持未勾选）；原路径 `REQUIREMENTS.md`。
